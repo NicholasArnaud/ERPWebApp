@@ -1,0 +1,105 @@
+﻿@model IEnumerable<ERPWebApp.Models.Company.Employee>
+
+<table class="table dt-responsive webkit-nowrap w-100" id="employee-datatable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MiddleName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Position)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Department)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CompanyEmail)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PersonalEmail)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.JobStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IncomePerHour)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmployeeReferenceNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifyDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifyBy)
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MiddleName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Position)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Department.DepartmentName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CompanyEmail)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PersonalEmail)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.JobStatus)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IncomePerHour)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EmployeeReferenceNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ModifyDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ModifyBy)
+                </td>
+                <td class="table-action">
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager))
+                    {
+                        <a class="action-icon" asp-action="Edit" asp-route-id="@item.EmployeeId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                    }
+                    <a class="action-icon" asp-action="Details" asp-route-id="@item.EmployeeId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager))
+                    {
+                        <a class="action-icon" asp-action="Delete" asp-route-id="@item.EmployeeId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

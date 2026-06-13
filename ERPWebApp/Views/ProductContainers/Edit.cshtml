@@ -1,0 +1,375 @@
+﻿@model ERPWebApp.Models.Inventory.ProductContainer
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+    input:checked + .slider {
+        background-color: #536de6;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #536de6;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+</style>
+<h1>Edit</h1>
+
+<h4>Container</h4>
+<hr />
+<div class="card">
+    <div id="my-create-modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Create Mapping</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="create-id" type="hidden" />
+                    <div class="form-group p-1">
+                        <label class="control-label"> Select a Product</label>
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required" data-placeholder="Choose ..." id="selector-pid" name="selector-pid" asp-items="ViewBag.ProductList">
+                            <option value="">Select a Product</option>
+                        </select>
+                    </div>
+                    <div class="form-group p-1">
+                        <label class="control-label">Select a Vendor</label>
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" data-placeholder="Choose ..." id="selector-vid" name="selector-vid" asp-items="ViewBag.VendorList">
+                            <option value="">Select a Vendor</option>
+                        </select>
+                    </div>
+                    <div class="form-group p-1">
+                        <label class="control-label">Cost</label>
+                        <form id="form-create-cost">
+                            <input id="create-cost" value="" name="createcost" min="0" required="required" placeholder="000.00" type="number" class="form-control" />
+                        </form>
+                    </div>
+                    <div class="form-group p-1">
+                        <label class="control-label">Lead Time</label>
+                        <form id="form-lead-time">
+                            <input placeholder="000" id="create-lead-time" required="required" name="createleadtime" type="number" min="0" value="" class="form-control" />
+                        </form>
+                    </div>
+                    <div>
+                        <label class="form-group p-1">Primary Vendor</label>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="custom-switch-2">
+                        <span class="slider round"></span>
+                    </label>
+                    <div class="modal-footer">
+                        <a id="error-message" style="color:pink"></a>
+                        <!--change buttons to coordinate to a post action where ProductVendorMapping values are changed based on inputs-->
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-hidden="true">Cancel</button>
+                        <input id="create-btn" type="button" onclick="ValidateForm()" value="Save" class="btn btn-primary" />
+                    </div>
+
+                </div>
+
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+<div class="row">
+    @if (ViewData["errormessage"] != null)
+    {
+        <div id="error-message" class="row">
+            <div class="alert alert-warning" role="alert">
+                <i class="dripicons-warning mr-2"></i>@ViewData["errormessage"]<i class="dripicons-warning mr-2"></i>
+            </div>
+        </div>
+    }
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ContainerId" />
+            <div class="form-group p-1">
+                <label asp-for="ProductVendorMappingId" class="control-label">Product Vendor Mapping</label>
+                <select asp-for="ProductVendorMappingId" id="selector" class="form-control select2" data-toggle="select2" asp-items="ViewBag.Products"></select>
+                <span asp-validation-for="ProductVendorMappingId" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="ContainerQuantity" class="control-label">Items Per Container</label>
+                <input type="number" pattern="\d+" placeholder="0" min="0" asp-for="ContainerQuantity" class="form-control" />
+                <span asp-validation-for="ContainerQuantity" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="ContainerCost" class="control-label"></label>
+                <input type="number" pattern="[0-9]+(\.[0-9][0-9]?)?" placeholder="000.00" min="0" asp-for="ContainerCost" class="form-control" />
+                <span asp-validation-for="ContainerCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="Length" class="control-label"></label>
+                <input pattern="[0-9]+(\.[0-9][0-9]?)?" placeholder="000.00" min="0" type="number" asp-for="Length" class="form-control" />
+                <span asp-validation-for="Length" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="Width" class="control-label"></label>
+                <input pattern="[0-9]+(\.[0-9][0-9]?)?" placeholder="000.00" min="0" type="number" pattern="\d+" asp-for="Width" class="form-control" />
+                <span asp-validation-for="Width" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="Height" class="control-label"></label>
+                <input pattern="[0-9]+(\.[0-9][0-9]?)?" placeholder="000.00" min="0" type="number" pattern="\d+" asp-for="Height" class="form-control" />
+                <span asp-validation-for="Height" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="ContainerDiminsions" class="control-label"></label>
+                <select asp-for="ContainerDiminsions" asp-items="@Html.GetEnumSelectList<ERPWebApp.Models.Inventory.ContainerDiminsions>()" class="form-control"></select>
+                <span asp-validation-for="ContainerDiminsions" class="text-danger"></span>
+            </div>
+            <div style="display:none" class="form-group p-1">
+                <label class="control-label"></label>
+                <input id="volumep" value=@ViewData["volumeP"] name="volume" class="form-control" />
+                <span class="text-danger"></span>
+            </div>
+            <div style="display:none" class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                </label>
+            </div>
+            <div class="form-group p-2">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+            <div style="display:none" class="form-group p-1">
+                <label class="control-label"></label>
+                <input id="volumepunit" value=@ViewData["volumePUnit"] name="volumeConversion" class="form-control" />
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group p-1">
+            <ul class="nav nav-tabs nav-bordered mb-3">
+                <li class="nav-item">
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.InventoryManager) || this.User.IsInRole(RoleList.ShippingManager))
+                    {
+                        <a onclick="createPVM()" data-bs-toggle="modal" data-bs-target="#my-create-modal">
+                            <span>Create Mapping</span>
+                        </a>
+                    }
+                </li>
+            </ul>
+        </div>
+        <div style="visibility:hidden" class="form-group p-1">
+            <label class="control-label"></label>
+            <select class="form-control"></select>
+            <span class="text-danger"></span>
+        </div>
+        <div style="visibility:hidden" class="form-group p-1">
+            <label class="control-label"></label>
+            <input id="errormessagetext" class="form-control" />
+        </div>
+
+        <div class="form-group p-1">
+            <label asp-for="ProductVendorMappings.Product.Length" class="control-label">Product Length</label>
+            <input id="productlength" pattern="[0-9]+(\.[0-9][0-9]?)?" placeholder="000.00" min="0" type="number" asp-for="ProductVendorMappings.Product.Length" class="form-control" readonly />
+            <span asp-validation-for="ProductVendorMappings.Product.Length" class="text-danger"></span>
+        </div>
+        <div class="form-group p-1">
+            <label asp-for="ProductVendorMappings.Product.Width" class="control-label">Product Width</label>
+            <input id="productwidth" pattern="[0-9]+(\.[0-9][0-9]?)?" placeholder="000.00" min="0" type="number" asp-for="ProductVendorMappings.Product.Width" class="form-control" readonly />
+            <span asp-validation-for="ProductVendorMappings.Product.Width" class="text-danger"></span>
+        </div>
+        <div class="form-group p-1">
+            <label asp-for="ProductVendorMappings.Product.Height" class="control-label">Product Height</label>
+            <input id="productheight" pattern="[0-9]+(\.[0-9][0-9]?)?" placeholder="000.00" min="0" type="number" pattern="\d+" asp-for="ProductVendorMappings.Product.Height" class="form-control" readonly />
+            <span asp-validation-for="ProductVendorMappings.Product.Height" class="text-danger"></span>
+        </div>
+        <div class="form-group p-1">
+            <label asp-for="ProductVendorMappings.Product.DimensionalUnit" class="control-label">Dimensional Unit</label>
+            <input id="productdimu" asp-for="ProductVendorMappings.Product.DimensionalUnit" class="form-control" readonly />
+            <span asp-validation-for="ProductVendorMappings.Product.DimensionalUnit" class="text-danger"></span>
+        </div>
+    </div>
+
+</div>
+
+<div>
+    <a class="p-2" asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+    <script type="text/javascript">
+                        $(document).ready(function () {
+                            var myerrormsg= document.getElementById("selecting-banner");
+                         $("#selector").change (function () {
+                        var selectedproduct = $(this).children("option:selected").val();
+                        console.log(selectedproduct);
+
+                           url = '@Url.Action("GetProductVolume")';
+                            $.getJSON(url, { id: selectedproduct }, function (response) {
+                            $("#productlength").val(response.volumeLength);
+                            $("#productwidth").val(response.volumeWidth);
+                            $("#productheight").val(response.volumeHeight);
+                            $("#productdimu").val(response.diminsionalUnits);
+                            $("#volumep").val(response.volumeProd);
+                            $("#volumepunit").val(response.volumePUnit);
+                        });
+                        });
+                         });
+                                                  function GetVendorsByProductId(_productId) {
+                                var url = '@Url.Action("VendorsByProductId")';
+                                $.getJSON(url, { Id: _productId }).done(function (response) {
+                                    $('#selector-vid').empty();
+                                    var s = "";
+                                    for (var i = 0; i < response.length; i++) {
+                                        s += '<option value="' + response[i].vendorId + '">' + response[i].vendorName + '</option>';
+                                    }
+                                    $('#selector-vid').html(s);
+                                });
+                            }
+                            $('#selector-pid').on("change", function (e) {
+                                GetVendorsByProductId(+$('#selector-pid').val());
+                            });
+                   function CreateThePVM() {
+                            $.ajax({
+                                url: '/ProductVendorMapping/PostCreate',
+                                type: 'POST',
+                                data: { productid: $('#selector-pid').val(), vendorid: $('#selector-vid').val(), cost: $('#create-cost').val(), leadtime: $('#create-lead-time').val(), primaryvendor: $('#custom-switch-2').is(":checked") },
+                                success: function (partialView) {
+                                    $("#my-test").html(partialView);
+                                    $("#my-create-modal").modal('hide');
+                                    console.log("Grabbed PVM Info");
+                                    var url = '@Url.Action("VPMList")';
+                                    $.getJSON(url).done(function (response) {
+                                        $('#selector').empty();
+                                        var s = "";
+                                        for (var i = 0; i < response.length; i++) {
+                                            s += '<option value="' + response[i].productVendorMappingId + '">' + response[i].product.sku + " || " + response[i].vendor.vendorName + '</option>';
+                                        }
+                                        $('#selector').html(s);
+                                    });
+                                },
+                                error: function (data) {
+                                    console.log(data);
+                                }
+                            }).then(function (partialView) {
+                                 callvendorrefresh();
+                            });
+
+                        }
+                        function callvendorrefresh(){
+                                    $.ajax({
+                                url: '/ProductVendorMapping/PostCreateVendor',
+                                type: 'POST',
+                                success: function (partialView) {
+                                    $("#my-vendor-table").html(partialView);
+                                    console.log("Grabbed PVM Info");
+                                    var url = '@Url.Action("VPMVendorList")';
+                                    $.getJSON(url).done(function (response) {
+                                        $('#selector-vendor').empty();
+                                        var s = "";
+                                        for (var i = 0; i < response.length; i++) {
+                                            s += '<option value="' + response[i].vendorId + '">' + response[i].vendorName + '</option>';
+                                        }
+                                        $('#selector-vendor').html(s);
+                                    });
+                                },
+                                error: function (data) {
+                                    console.log(data);
+                                }
+                            }).then(function (partialView) {
+                                resetEditPage();
+                            });
+                        }
+
+                        function resetEditPage(){
+                             $('#selector').val(-1);
+                            $('#selector').change();
+                            $('#create-cost').val('');
+                            $('#create-lead-time').val('');
+                            $('#selector-pid').val('');
+                            $('#selector-pid').change();
+                            $('#selector-vid').val('');
+                            $('#selector-vid').change();
+                            $('#custom-switch-2').prop('checked',false);
+                        }
+
+
+                  function createPVM() {
+                    $('#selector-pid').val();
+                }
+                $('#selector-pid').select2({
+            dropdownParent: $('#my-create-modal')
+        });
+        $('#selector-vid').select2({
+            dropdownParent: $('#my-create-modal')
+        });
+        function ValidateForm() {
+            if ($('#selector-pid').val() == "") {
+                document.getElementById("error-message").innerHTML = "Product not Selected";
+
+            }
+            else if ($('#selector-vid').val() == "") {
+                document.getElementById("error-message").innerHTML = "Vendor not Selected";
+            }
+            else if ($('#create-cost').val() == "" || $('#create-cost').val() < 0) {
+                document.getElementById("error-message").innerHTML = "Cost Not Valid";
+            }
+            else if ($('#create-lead-time').val() == "" || $('#create-lead-time').val() <= 0) {
+                document.getElementById("error-message").innerHTML = "Lead Time Not Valid";
+            }
+            else {
+                document.getElementById("error-message").innerHTML = "";
+                CreateThePVM();
+            }
+        }
+
+    </script>
+    }
+}

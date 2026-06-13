@@ -1,0 +1,62 @@
+﻿@model ERPWebApp.Models.HelpRequestForm
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+<h4>Help Request Form</h4>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="RequestingEmployeeId" class="control-label"></label>
+                    <select asp-for="RequestingEmployeeId" class="form-control select2" data-toggle="select2" asp-items="ViewBag.RequestingEmployeeId"></select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Urgency" class="control-label"></label>
+                    <select asp-for="Urgency" class="form-control select2" data-toggle="select2">
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subject" class="control-label"></label>
+                <input asp-for="Subject" class="form-control" maxlength="50" data-toggle="maxlength" />
+                <span asp-validation-for="Subject" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="5" maxlength="250" data-toggle="maxlength"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <hr />
+            <div class="form-group">
+                <label class="control-label">Who would be helpful in solving your issue?</label>
+                <select asp-for="HelperEmployeeId" class="form-control select2" data-toggle="select2" asp-items="ViewBag.HelperEmployeeId"></select>
+            </div>
+            <div class="form-group pt-2">
+                <p>
+                    ATTENTION! Submitted help tickets are not private.
+                    Please do not submit any personal or sensitive information.
+                    If you have a personal/sensitive issue, speak to someone directly.
+                </p>
+                <input type="submit" value="Submit" class="btn btn-primary" />
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="pt-2">
+    <a asp-action="Index">Cancel</a>
+</div>
+

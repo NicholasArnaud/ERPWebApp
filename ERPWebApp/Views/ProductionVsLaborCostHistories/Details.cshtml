@@ -1,0 +1,85 @@
+﻿@model ERPWebApp.Models.ProductionVsLaborCostHistory
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>ProductionVsLaborCostHistory</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Date)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Date)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ElectroplatingItemCost)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ElectroplatingItemCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.EmbroideryItemCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EmbroideryItemCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.EngravingItemCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EngravingItemCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MetalTotalItemCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MetalTotalItemCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.UVPTotalItemCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.UVPTotalItemCost)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ElectroplatingProdCost)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ElectroplatingProdCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.EmbroideryProdCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EmbroideryProdCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.EngravingProdCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EngravingProdCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MetalTotalProdCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MetalTotalProdCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.UVPTotalProdCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.UVPTotalProdCost)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.ProductionVsLaborCostHistoryId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

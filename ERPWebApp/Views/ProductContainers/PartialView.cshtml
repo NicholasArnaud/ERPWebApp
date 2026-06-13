@@ -1,0 +1,64 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.ProductContainer>
+
+
+<div class="table-responsive">
+    <table class="table dt-responsive webkit-nowrap w-100" id="product-container-datatable">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.ProductVendorMappings.Product.Sku)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ProductVendorMappings.Vendor.VendorName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ProductVendorMappings.Product.Description)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ContainerQuantity)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Length)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Width)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Height)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ContainerDiminsions)
+                </th>
+                <th class="none">
+                    @Html.DisplayNameFor(model => model.ProductVendorMappings.Product.AltItemNumber)
+                </th>
+                <th class="none">
+                    @Html.DisplayNameFor(model => model.ProductVendorMappings.Product.OnOrder)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ContainerCost)
+                </th>
+                <th class="none">
+                    @Html.DisplayNameFor(model => model.ProductVendorMappings.Cost)
+                </th>
+                <th class="none">
+                    Product @Html.DisplayNameFor(model => model.ProductVendorMappings.Product.Length)
+                </th>
+                <th class="none">
+                    Product @Html.DisplayNameFor(model => model.ProductVendorMappings.Product.Width)
+                </th>
+                <th class="none">
+                    Product @Html.DisplayNameFor(model => model.ProductVendorMappings.Product.Height)
+                </th>
+                <th class="none">
+                    Product @Html.DisplayNameFor(model => model.ProductVendorMappings.Product.DimensionalUnit)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ContainerId)
+                </th>
+                <th class="all"><a>Actions</a></th>
+            </tr>
+        </thead>
+
+    </table>
+</div>

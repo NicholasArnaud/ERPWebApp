@@ -1,0 +1,20 @@
+﻿@model IEnumerable<ERPWebApp.Models.Company.Security.AccessCard>
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td>@Html.DisplayFor(modelItem => item.Employee.FullName)</td>
+        <td>@Html.DisplayFor(modelItem => item.Key)</td>
+        <td class="table-action">           
+            @if (this.User.IsInRole(RoleList.Administrator) ||
+           this.User.IsInRole(RoleList.HRManager) ||
+           this.User.IsInRole(RoleList.SecurityManager) ||
+           this.User.IsInRole(RoleList.Developer))
+            {
+                <a class="action-icon" asp-action="Delete" asp-route-id="@item.AccessCardId">
+                    <i class="mdi mdi-24px mdi-delete"></i>
+                </a>
+            }
+        </td>
+    </tr>
+}

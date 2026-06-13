@@ -1,0 +1,103 @@
+﻿@using ERPWebApp.Models;
+@model EmailAlertsViewModel
+
+@{
+    ViewData["Title"] = "Email Alerts Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("Create", new ViewDataDictionary(ViewData) { { "UserEmails", Model.UserEmails }})  
+@await Html.PartialAsync("Edit", new ViewDataDictionary(ViewData) { { "UserEmails", Model.UserEmails }})  
+@await Html.PartialAsync("Delete")  
+@await Html.PartialAsync("StatusToggle")  
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Email Alerts Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Recipient Email</th>
+                        <th>Alert Type</th>  
+                        <th>Frequency</th>  
+                        <th>Scheduled Time</th>
+                        <th>Toggle</th>
+                        <th>Edit</th>
+                        <th>Send</th>  
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.ScheduledEmails != null && Model.ScheduledEmails.Count > 0)
+                    {
+                        int index = 0;
+                        foreach (var email in Model.ScheduledEmails)
+                        {
+<tr data-email-index="@index" data-email-body="@email.Body" data-email-alert-id="@email.EmailAlertId" data-alert-template-id="@email.AlertTemplateId" data-email-recipients="@string.Join(",", email.Recipients)">  
+
+                                <td>@email.Subject</td>
+                                <td>@email.RecipientEmail</td>
+                                <td>@(email.AlertType == AlertType.TimeBased ? "Time" : "Trigger")</td>
+                                <td>@(email.AlertType == AlertType.TriggerBased ? "N/A" : (email.Frequency?.ToString() ?? "N/A"))</td>
+<td data-utc-time="@(email.AlertType == AlertType.TriggerBased ? "N/A" : email.ScheduledTime.ToString("yyyy-MM-ddTHH:mm"))">@((email.AlertType == AlertType.TriggerBased) ? "N/A" : email.ScheduledTime.ToString("MM/dd/yyyy hh:mm tt"))</td>  
+                                <td>  
+                                    <button type="button" class="btn btn-sm status-btn" style="background-color: @(email.IsActive ? "green" : "red");">@(email.IsActive ? "Enabled" : "Disabled")</button>  
+                                </td>  
+                                <td> 
+<button type="button" class="btn btn-primary btn-sm edit-btn" data-email-alert-id="@email.EmailAlertId">     
+                                    Edit  
+                                    </button>  
+                                </td>  
+                                <td>  
+                                    <form asp-action="SendEmailAlertNow" asp-controller="EmailAlerts" method="post">  
+                                    <input type="hidden" name="emailAlertId" value="@email.EmailAlertId" />  
+                                    <button type="submit" class="btn btn-info btn-sm">Send</button>  
+                                    </form>  
+                                </td>  
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm delete-btn">
+                                        X
+                                    </button>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3">No scheduled emails found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <button type="button" class="btn btn-primary" id="createEmailAlert">Create Alert</button>
+        </div>
+    </div>
+</div>
+
+<div id="emailAlertData" style="display:none;"  
+     data-user-emails='@Html.Raw(Json.Serialize(Model.UserEmails))'  
+     data-preset-triggers-data='@Html.Raw(Json.Serialize(Model.AlertTriggerTemplateMappings.Select(mapping => new { id = mapping.AlertTemplateId, text = mapping.TriggerName })))'  
+     data-alert-trigger-template-mappings='@Html.Raw(Json.Serialize(Model.AlertTriggerTemplateMappings))'>  
+</div>  
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+<script>
+
+</script>
+<script src="~/js/pages/email-alerts.min.js"></script>  
+}

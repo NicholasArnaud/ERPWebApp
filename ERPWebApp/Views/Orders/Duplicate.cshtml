@@ -1,0 +1,446 @@
+﻿@using ERPWebApp.Models.Orders
+@model ERPWebApp.Data.DTOModels.DuplicateOrderDTO
+
+@{
+    ViewData["Title"] = "Duplicate";
+}
+
+
+<div class="card">
+
+    <div class="card-header d-flex justify-content-between align-items-center">
+
+        <h5 class="card-title">Duplicate Order</h5>
+
+    </div>
+
+    <div class="card-body">
+        <div asp-validation-summary="All" class="alert alert-danger" role="alert" id="validation-summary" style="display: none;">
+        </div>
+
+        <form asp-controller="Orders" asp-action="DuplicateOrder" method="post" id="duplicate-order-form">
+            <input type="hidden" asp-for="ERPOrderId" />
+
+            <div class="row">
+                <div class="col-md-6 col-sm-12 mb-2">
+                    <label asp-for="OrderNumber" class="form-label">Order Number:</label>
+                    <input asp-for="OrderNumber" type="text" class="form-control" id="dup-order-number-input" />
+                    <span asp-validation-for="OrderNumber" class="text-danger"></span>
+                </div>
+            </div>
+
+            <hr class="hr m-0 mt-2 mb-2" />
+
+            <div class="row">
+                <div class="col-md-6 col-sm-12 mb-2">
+                    <label asp-for="StoreId" class="form-label">Store:</label>
+                    <select class="select2 form-control" data-toggle="select2" asp-for="StoreId" asp-items="ViewBag.Stores">
+                        <option value="">--Select a Store--</option>
+                    </select>
+                    <span asp-validation-for="StoreId" class="text-danger"></span>
+
+                    <input asp-for="StoreName" type="hidden" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 col-sm-12 mb-2">
+                    <label asp-for="CustomerNotes" class="form-label">Customer Notes:</label>
+                    <textarea asp-for="CustomerNotes" class="form-control" rows="5"></textarea>
+                </div>
+
+                <div class="col-md-6 col-sm-12 mb-2">
+                    <label asp-for="InternalNotes" class="form-label">Internal Notes:</label>
+                    <textarea asp-for="InternalNotes" class="form-control" rows="5"></textarea>
+                </div>
+            </div>
+
+            <hr class="hr m-0 mt-2 mb-2" />
+                
+            <div class="row mb-2">
+                <div class="col-md-6 col-sm-12">
+                    <label class="control-label">Add New Product: </label>
+                    <select id="new-order-item" class="form-control">
+                        <option value="">Select a Product</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 col-sm-12 d-flex align-items-end">
+                    <button type="button" id="add-new-product-btn" class="btn btn-dark align-bottom" onclick="AddNewProduct()">
+                        <span id="add-new-product-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                        Add New Item
+                    </button>
+                </div>
+
+                <div class="col-md-12">
+                    <span id="add-new-item-error" class="text-danger" style="display: none;"></span>
+                </div>
+            </div>
+                
+
+            <div class="row" style="overflow-x: auto;">
+                <div class="col-md-12">
+                    <label class="form-label">Products:</label>
+
+                    <table class="table table-centered table-hover" id="product-items-table">
+                        <thead style="text-align: center;">
+                            <tr>
+                                <th data-label="Image">Image</th>
+                                <th>SKU</th>
+                                <th>Design Name</th>
+                                <th>Description</th>
+                                <th>Unit Price</th>
+                                <th>Qty</th>
+                                <th>Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+
+                    <span class="text-danger" id="product-items-table-error" style="display: none;"></span>
+                </div>
+            </div>
+
+            <hr class="hr m-0 mt-3 mb-2" />
+
+            <div class="row">
+                <div class="col-md-6 col-xs-12">
+                    <label asp-for="TagIds" class="control-label">Product Tags:</label>
+
+                    <select class="select2 form-control select2-multiple" data-toggle="select2"
+                            data-placeholder="Choose ..." asp-for="TagIds"
+                            asp-items="ViewBag.OrderTags" multiple="multiple">
+                    </select>
+                </div>
+            </div>
+
+            <hr class="hr m-0 mt-3 mb-2" />
+
+            <div class="row mt-2">
+
+                <div class="col-md-6 col-sm-12">
+                    <div class="accordion" id="from-address-accordion">
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="from-address-accord-head-1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#from-address-accord-collapse-1" aria-expanded="false" aria-controls="from-address-accord-collapse-1">
+                                    Shipping From Address
+                                </button>
+                            </h2>
+                            <div id="from-address-accord-collapse-1" class="accordion-collapse collapse" aria-labelledby="from-address-accord-head-1"
+                                 data-bs-parent="#from-address-accordion">
+                                <div class="accordion-body">
+
+                                    <div class="row">
+
+                                        <div class="col-md-12 mb-2">
+                                            <div class="form-check form-switch">
+                                                <label asp-for="FromResidential" class="form-check-label">Residential</label>
+                                                <input asp-for="FromResidential" type="checkbox" class="form-check-input" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="FromName" class="form-label">Name:</label>
+                                            <input asp-for="FromName" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="FromStreet1" class="form-label">Street 1:</label>
+                                            <input asp-for="FromStreet1" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="FromStreet2" class="form-label">Street 2:</label>
+                                            <input asp-for="FromStreet2" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="FromStreet3" class="form-label">Street 3:</label>
+                                            <input asp-for="FromStreet3" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <label asp-for="FromPostalCode" class="form-label">Postal Code:</label>
+                                            <input asp-for="FromPostalCode" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <label asp-for="FromCity" class="form-label">City:</label>
+                                            <input asp-for="FromCity" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <label asp-for="FromState" class="form-label">State:</label>
+                                            <input asp-for="FromState" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <label asp-for="FromCountry" class="form-label">Country:</label>
+                                            <input asp-for="FromCountry" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="FromPhone" class="form-label">Phone:</label>
+                                            <input asp-for="FromPhone" type="tel" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="FromCompany" class="form-label">Company:</label>
+                                            <input asp-for="FromCompany" type="text" class="form-control" />
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-sm-12">
+                    <div class="accordion" id="to-address-accordion">
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="to-address-accord-head-1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#to-address-accord-collapse-1" aria-expanded="false" aria-controls="to-address-accord-collapse-1">
+                                    Shipping To Address
+                                </button>
+                            </h2>
+                            <div id="to-address-accord-collapse-1" class="accordion-collapse collapse" aria-labelledby="to-address-accord-head-1"
+                                 data-bs-parent="#to-address-accordion">
+                                <div class="accordion-body">
+
+                                    <div class="row">
+
+                                        <div class="col-md-12 mb-2">
+                                            <div class="form-check form-switch">
+                                                <label asp-for="ToResidential" class="form-check-label">Residential</label>
+                                                <input asp-for="ToResidential" type="checkbox" class="form-check-input" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="ToName" class="form-label">Name:</label>
+                                            <input asp-for="ToName" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="ToStreet1" class="form-label">Street 1:</label>
+                                            <input asp-for="ToStreet1" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="ToStreet2" class="form-label">Street 2:</label>
+                                            <input asp-for="ToStreet2" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="ToStreet3" class="form-label">Street 3:</label>
+                                            <input asp-for="ToStreet3" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <label asp-for="ToPostalCode" class="form-label">Postal Code:</label>
+                                            <input asp-for="ToPostalCode" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <label asp-for="ToCity" class="form-label">City:</label>
+                                            <input asp-for="ToCity" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <label asp-for="ToState" class="form-label">State:</label>
+                                            <input asp-for="ToState" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <label asp-for="ToCountry" class="form-label">Country:</label>
+                                            <input asp-for="ToCountry" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="ToPhone" class="form-label">Phone:</label>
+                                            <input asp-for="ToPhone" type="tel" class="form-control" />
+                                        </div>
+                                        <div class="col-md-12 mb-2">
+                                            <label asp-for="ToCompany" class="form-label">Company:</label>
+                                            <input asp-for="ToCompany" type="text" class="form-control" />
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <hr class="hr m-0 mt-3 mb-2" />
+
+            <div class="row">
+
+                <div class="col-md-6 col-xs-12 mb-2">
+                    <label asp-for="DuplicationReason" class="form-label">Duplication Reason:</label>
+                    <select class="select2 form-control select2" data-toggle="select2" asp-for="DuplicationReason"
+                        asp-items="(List<SelectListItem>)Html.GetEnumSelectList<Order.DuplicationReason>()">
+                        <option value="">--Select a Reason--</option>
+                    </select>
+                    <span asp-validation-for="DuplicationReason" class="text-danger"></span>
+                </div>
+
+                @if (Model.OrderStatus == null || new Order.OrderStatus[] { Order.OrderStatus.shipped, Order.OrderStatus.cancelled }.Contains(Model.OrderStatus.Value))
+                {
+                    <div class="col-md-6 col-xs-12 mb-2">
+                        <label asp-for="OrderStatus" class="form-label">Order Status:</label>
+                        <select class="select2 form-control select2" data-toggle="select2" asp-for="OrderStatus" asp-items="ViewBag.OrderStatusList">
+                            <option value="">--Select a Status--</option>
+                        </select>
+                        <span asp-validation-for="OrderStatus" class="text-danger"></span>
+                    </div>
+                }
+
+            </div>
+
+            <hr class="hr m-0 mt-3 mb-2" />
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="accordion" id="advanced-options-accordion">
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="accord-head-1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#accord-collapse-1" aria-expanded="false" aria-controls="accord-collapse-1">
+                                    Advanced Options
+                                </button>
+                            </h2>
+                            <div id="accord-collapse-1" class="accordion-collapse collapse" aria-labelledby="accord-head-1"
+                                 data-bs-parent="#advanced-options-accordion">
+                                <div class="accordion-body">
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-3 col-sm-6 col-xs-12">
+                                            <div class="form-check form-switch">
+                                                <label asp-for="AdvancedOptionsDTO.NonMachinable" class="form-check-label">Non Machinable</label>
+                                                <input asp-for="AdvancedOptionsDTO.NonMachinable" type="checkbox" class="form-check-input" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-sm-6 col-xs-12">
+                                            <div class="form-check form-switch">
+                                                <label asp-for="AdvancedOptionsDTO.SaturdayDelivery" class="form-check-label">Saturday Delivery</label>
+                                                <input asp-for="AdvancedOptionsDTO.SaturdayDelivery" type="checkbox" class="form-check-input" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-sm-6 col-xs-12">
+                                            <div class="form-check form-switch">
+                                                <label asp-for="AdvancedOptionsDTO.ContainsAlcohol" class="form-check-label">Contains Alcohol</label>
+                                                <input asp-for="AdvancedOptionsDTO.ContainsAlcohol" type="checkbox" class="form-check-input" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-sm-6 col-xs-12">
+                                            <div class="form-check form-switch">
+                                                <label asp-for="AdvancedOptionsDTO.MergedOrSplit" class="form-check-label">Merge or Split</label>
+                                                <input asp-for="AdvancedOptionsDTO.MergedOrSplit" type="checkbox" class="form-check-input" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.CustomField1" class="form-check-label">Custom Field 1: </label>
+                                            <textarea asp-for="AdvancedOptionsDTO.CustomField1" type="checkbox" class="form-control" rows="5"></textarea>
+                                        </div>
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.CustomField2" class="form-check-label">Custom Field 2: </label>
+                                            <textarea asp-for="AdvancedOptionsDTO.CustomField2" type="checkbox" class="form-control" rows="5"></textarea>
+                                        </div>
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.CustomField3" class="form-check-label">Custom Field 3: </label>
+                                            <textarea asp-for="AdvancedOptionsDTO.CustomField3" type="checkbox" class="form-control" rows="5"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.Source" class="form-check-label">Source: </label>
+                                            <input asp-for="AdvancedOptionsDTO.Source" type="text" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.BillToParty" class="form-check-label">Bill to Party: </label>
+                                            <select class="select2 form-control select2" data-toggle="select2"
+                                                    asp-for="AdvancedOptionsDTO.BillToParty"
+                                                    asp-items="(List<SelectListItem>)Html.GetEnumSelectList<OrderAdvancedOptions.BillToParty>()">
+                                                <option value="">--Select an Option--</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.BillToAccount" class="form-check-label">Bill To Account: </label>
+                                            <input asp-for="AdvancedOptionsDTO.BillToAccount" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.BillToPostalCode" class="form-check-label">Bill To Postal Code: </label>
+                                            <input asp-for="AdvancedOptionsDTO.BillToPostalCode" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.BillToCountryCode" class="form-check-label">Bill To Country Code: </label>
+                                            <input asp-for="AdvancedOptionsDTO.BillToCountryCode" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.BillToMyOtherAccount" class="form-check-label">Bill To My Other Account: </label>
+                                            <input asp-for="AdvancedOptionsDTO.BillToMyOtherAccount" type="text" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.LabelMessageReference1" class="form-check-label">Label Message Reference 1: </label>
+                                            <input asp-for="AdvancedOptionsDTO.LabelMessageReference1" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.LabelMessageReference2" class="form-check-label">Label Message Reference 2: </label>
+                                            <input asp-for="AdvancedOptionsDTO.LabelMessageReference2" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6 col-xs-12">
+                                            <label asp-for="AdvancedOptionsDTO.LabelMessageReference3" class="form-check-label">Label Message Reference 3: </label>
+                                            <input asp-for="AdvancedOptionsDTO.LabelMessageReference3" type="text" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <hr class="hr m-0 mt-3 mb-2" />
+
+            <input asp-for="OrderItemsJsonString" type="hidden" class="form-control" id="order-items-json-input" />
+
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="button" id="duplicate-order-btn" class="btn btn-dark float-end" onclick="SubmitData()">
+                        <span id="duplicate-order-btn-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                        Duplicate Order
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/lib/hyper-assets/vendor/handlebars/handlebars.min.js"></script>
+    <script src="~/lib/hyper-assets/vendor/typeahead.js/typeahead.bundle.min.js"></script>
+    <script src="~/lib/hyper-assets/vendor/typeahead.js/typeahead.bundle.min.js"></script>
+
+    <script type="text/javascript">
+        var storeName = '@Model.StoreName';
+
+        var orderItems = @Html.Raw(Json.Serialize(Model.OrderItems is null ? new object[] { } : Model.OrderItems));
+    </script>
+
+    <script src="~/js/pages/duplicate-order.js"></script>
+}

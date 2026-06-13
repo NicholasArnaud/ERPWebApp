@@ -1,0 +1,132 @@
+﻿@model ERPWebApp.Models.Inventory.InventoryRequestForm
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h1>Create</h1>
+
+<h4>Inventory Request Form</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4" id="production-form">
+        <form asp-action="Create">
+            @if (User.IsInRole(RoleList.Administrator) ||
+            User.IsInRole(RoleList.Manager) ||
+            User.IsInRole(RoleList.ProductionBasic) ||
+            User.IsInRole(RoleList.InventoryBasic))
+            {
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group p-1">
+                    <label class="control-label">Request Type</label>
+                    <select class="form-control select2" data-toggle="select2" id="RequestType-select">
+                        <option value="Choose Request Type" disabled="disabled" selected="true">Choose Request Type</option>
+                        <option value="Production Products">Production Products</option>
+                        <option value="Consumable Products">Consumable Products</option>
+                    </select>                   
+                </div>
+
+                <!-- Order Number field (Initially Hidden) -->
+                <div class="form-group p-1" id="orderNumber-field" style="display: none;">
+                    <label asp-for="OrderNumber" class="control-label"></label>
+                    <select asp-for="OrderNumber" class="form-control select2" id="order-select-id"
+                            placeholder="Search Order Number">
+                        @if (ViewData["Orders"] != null && ViewData["Orders"] is SelectList orders)
+                        {
+                            @foreach (var order in orders)
+                            {
+                                <option value="@order.Value" selected="@order.Selected">
+                                    @order.Text
+                                </option>
+                            }
+                        }
+                        else
+                        {
+                            <option disabled>Search Order Number...</option>
+                        }
+                    </select>
+                    <span asp-validation-for="OrderNumber" class="text-danger"></span>
+                </div>
+
+                <!-- Product Id field (Always Visible) -->
+                <div class="form-group p-1" id="productId-field">
+                    <label asp-for="ProductId" class="control-label"></label>
+                    <select asp-for="ProductId" class="form-control select2"
+                            data-toggle="select2" id="product-select-id">
+                        @if (ViewData["Products"] != null && ViewData["Products"] is SelectList productList)
+                        {
+                            @foreach (var product in productList)
+                            {
+                                <option value="@product.Value" selected="@product.Selected">
+                                    @product.Text
+                                </option>
+                            }
+                        }
+                        else
+                        {
+                            <option disabled>No products available</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ProductId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group p-1">
+                    <label asp-for="QuantityNeeded" class="control-label"></label>
+                    <input asp-for="QuantityNeeded" class="form-control" type="number" min="1" value="1" />
+                    <span asp-validation-for="QuantityNeeded" class="text-danger"></span>
+                </div>
+                <div class="form-group p-1">
+                    <label asp-for="RequestedByEmployeeId" class="control-label"></label>
+                    <select id="crt" asp-for="RequestedByEmployeeId" class="form-control select2" data-toggle="select2"
+                            asp-items="ViewBag.RequestedEmployeeId"></select>
+                    <span asp-validation-for="RequestedByEmployeeId" class="text-danger"></span>
+                </div>
+                <div class="form-group p-1">
+                    <label asp-for="PickReason" class="control-label"></label>
+                    <select asp-for="PickReason" class="form-control select2" data-toggle="select2" id="pickReason-select">
+                        <option value="Choose Pick Reason" disabled="disabled" selected="true">Choose Pick Reason</option>
+                        <option value="Operator Error">Operator Error</option>
+                        <option value="Picker Error">Picker Error</option>
+                        <option value="Machine Error">Machine Error</option>
+                        <option value="Defective Item">Defective Item</option>
+                        <option value="Consumables">Consumables</option>
+                        <option value="Unbatched Item">Unbatched Item</option>
+                        <option value="Manager Miscount">Manager Miscount</option>
+                        <option value="Mismatched Personalization">Mismatched Personalization</option>
+                        <option value="Test Product Request">Test Product Request</option>
+                    </select>
+                    <span asp-validation-for="PickReason" class="text-danger"></span>
+                </div>
+                <div class="form-group p-1" id="reasonExplanation-container" style="display: none;">
+                    <label asp-for="ReasonExplanation" class="control-label">Reason</label>
+                    <textarea asp-for="ReasonExplanation" id="ReasonExplanation" class="form-control"
+                              placeholder="Explain the Error"></textarea>
+                    <span asp-validation-for="ReasonExplanation" class="text-danger"></span>
+                </div>
+
+                <div class="form-group p-1">
+                    <label asp-for="ToLocationId" class="control-label"></label>
+                    <select asp-for="ToLocationId" class="form-control select2" data-toggle="select2"
+                            asp-items="ViewBag.ToLocations" id="toLocationId-select2">
+                        <option value="0"></option>
+                    </select>
+                    <span asp-validation-for="ToLocationId" class="text-danger"></span>
+                </div>
+                <div class="form-group p-1">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+<div>
+    <a class="p-1" asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/pages/InventoryRequestForms/create.min.js"></script>  
+}

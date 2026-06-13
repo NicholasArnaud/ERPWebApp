@@ -1,0 +1,89 @@
+﻿@model ERPWebApp.Models.BarcodeViewModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-6">
+        <span class="text-success" style="font-size:30px">@TempData["successMessage"]</span>
+        <span class="text-warning" style="font-size:30px">@TempData["errorMessage"]</span>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Barcode Submission</h3>
+            </div>
+            <div class="card-body">
+                <form asp-controller="BarcodeScans" asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="row">
+                        @if(ViewBag.TagIds != null){
+                            <div class="col-4">
+                            <label>Shipstation Tags</label>
+                            <select class="select2 form-control select2-multiple" 
+                            data-toggle="select2" required="required"
+                            data-placeholder="Choose ..." id="TagIds" name="TagIds"
+                            asp-items="ViewBag.TagIds" multiple="multiple">
+                            </select>
+                        </div>
+                        }
+                        <div class="col-10 mt-3">
+                            <div class="row">
+                                <div class="form-group col-md-7">
+                                    <input id="simpleinput" class="form-control focus" name="BarcodeScan.BarcodeScanCode" placeholder="Barcode Scan Here" autofocus tabindex="1 " />  
+                                    <span asp-validation-for="BarcodeScan.BarcodeScanCode" class="text-danger"></span>
+                                </div>
+                                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager) || User.IsInRole(RoleList.ProductionBasic)){
+                                    <div class="form-group col-md-4">
+                                        <input type="submit" id="submit-button" class="btn btn-outline-primary btn-rounded" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="errorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Barcode Scan Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <span class="text-danger fw-bold" style="font-size:30px">@TempData["errorMessage"]</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.select2-multiple').select2();
+            var error = @((TempData["errorMessage"] != null).ToString().ToLower());
+            if (error == true) {
+                $('#errorModal').modal('show');
+            }
+        });
+    </script>
+}

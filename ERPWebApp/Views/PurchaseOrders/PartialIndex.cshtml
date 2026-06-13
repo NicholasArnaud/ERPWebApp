@@ -1,0 +1,44 @@
+﻿@model ERPWebApp.Models.PurchaseOrders.PurchaseOrderViewModel  
+<div class="card-body">  
+    <div class="row">  
+        <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%" id="Stock-datatable">  
+            <thead>  
+                <tr>  
+                    <th>Stock</th>  
+                    <th>Site</th>  
+                    <th>Location</th>  
+                    <th>Quantity</th>  
+                </tr>  
+            </thead>  
+            <tbody>  
+                @foreach (var item in Model.ProductPurchaseOrderStockMappings)  
+                {  
+                    <tr>  
+                        <td class="product-sku">  
+                            <a target="_blank" href="/Products/Details/@item.Stock.Products.ProductId">@Html.DisplayFor(modelItem => item.Stock.Products.Sku)</a>  
+                        </td>  
+                        <td>  
+                            @Html.DisplayFor(modelItem => item.Stock.Location.Sites.SiteName)  
+                        </td>  
+                        <td>  
+                            @Html.DisplayFor(modelItem => item.Stock.Location.LocationName)  
+                        </td>  
+                        <td>  
+                            @Html.DisplayFor(modelItem => item.QtyRecieved)  
+                        </td>  
+                    </tr>  
+                }  
+            </tbody>  
+        </table>  
+    </div>  
+</div>  
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+
+<script>  
+    $(document).ready(function () {  
+        $('.product-sku').each(function () {  
+            var skuText = $(this).find('a').text();  
+            $(this).text(skuText);  
+        });  
+    });  
+</script>  

@@ -1,0 +1,64 @@
+﻿@using ERPWebApp.Data.DTOModels;
+@using ERPWebApp.Models.Orders
+@model List<BatchItemViewModel>
+@{
+    int columnCount = 3;
+    double cellWidthPercentage = 100.0 / columnCount;
+    int index = 0;
+}
+
+<table id="completed-batches-table" class="table dt-responsive webkit-nowrap w-100">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Sku</th>
+            <th>Description</th>
+            <th>Quantity</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var group in Model.GroupBy(x => x.Sku))
+        {
+            var firstItem = group.First();
+            var totalQuantity = group.Sum(x => x.BatchItem.Quantity);
+            <tr>
+                <td>
+                    <button type="button" class="btn btn-sm btn-primary nested-table-toggle"
+                            style="border: none; background-color: transparent; width: 30px; height: 30px; text-align: center; padding: 0; line-height: 30px; font-size: 14px;"
+                            onclick="var row = this.closest('tr').nextElementSibling; row.style.display = row.style.display === 'none' ? '' : 'none'; var icon = this.querySelector('i'); icon.classList.toggle('mdi-plus-circle'); icon.classList.toggle('mdi-minus-circle');">
+                        <i class="mdi mdi-24px mdi-plus-circle"></i>
+                    </button>
+                </td>
+                <td>@firstItem.Sku</td>
+                <td>@firstItem.BatchItem.Product.Description</td>
+                <td>@totalQuantity</td>
+            </tr>
+            <tr class="nestedTableRow" style="display: none;">
+                <td colspan="4">
+                    <table class="nested-table dt-responsive webkit-nowrap w-100">
+                        <thead>
+                            <tr>
+                                <th width="200">Order Sku</th>
+                                <th width="200">Order Number</th>
+                                <th width="200">Required Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in group)
+                            {
+                                <tr>
+                                    <td>@item.Sku</td>
+                                    <td>@item.BatchItem.OrderNumber</td>
+                                    <td>@(item.BatchItem.Quantity * item.Multiplier)</td>
+                                    <td></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            index++;
+        }
+    </tbody>
+</table>

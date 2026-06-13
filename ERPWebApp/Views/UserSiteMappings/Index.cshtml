@@ -1,0 +1,86 @@
+﻿@model IEnumerable<ERPWebApp.Models.Mappings.UserSiteMapping>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@Html.DisplayNameFor(model => model.UserSiteMappingId)</h3>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-primary" role="alert">
+                <strong>Info</strong> Created mappings allow users to make inventory transfers inside and between sites.
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-5 col-xs-12">
+                    <a class="btn btn-dark" asp-action="Create">Create New</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table dt-responsive webkit-nowrap w-100" id="userSiteMapping-datatable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.IdentityUser)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Site)
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.IdentityUser.UserName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Site.SiteName)
+                                        </td>
+                                        <td class="table-action">
+                                            <a class="action-icon" asp-action="Details" asp-route-id="@item.UserSiteMappingId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                                            @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager) || this.User.IsInRole(RoleList.InventoryManager))
+                                            {
+                                                <a class="action-icon" asp-action="Edit" asp-route-id="@item.UserSiteMappingId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                                            }
+                                            @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager) || this.User.IsInRole(RoleList.InventoryManager))
+                                            {
+                                                <a class="action-icon" asp-action="Delete" asp-route-id="@item.UserSiteMappingId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#userSiteMapping-datatable").DataTable({
+                keys: !0, language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                    },
+
+                }, drawCallback: function() {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                }
+            });
+        });
+    </script>
+}

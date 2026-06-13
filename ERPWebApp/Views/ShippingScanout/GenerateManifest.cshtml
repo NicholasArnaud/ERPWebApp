@@ -1,0 +1,37 @@
+@using ERPWebApp.Data.DTOModels.ShippingScanout;
+@model ManifestGenerateRequest;
+<form method="post" asp-action="GenerateManifest" asp-controller="ShippingScanout">
+    <div class="card">
+        <div class="card-header">Generate Manifest</div>
+        @if (ViewBag.manifestError != null && ViewBag.manifestError != "")
+        {
+            <div class="alert alert-danger" role="alert">
+                @ViewBag.manifestError
+            </div>
+        }
+        <div class="card-body">
+            <!-- Warehouse Selection -->
+            <div class="form-group mb-1">
+                <label class="control-label">Warehouse</label>
+                <select class="form-control select2" data-toggle="select2" id="shippingWarehouse"
+                        asp-items="ViewBag.Warehouses" name="warehouseId" asp-for="WarehouseId">
+                    <option value="" selected disabled hidden>--Select a Warehouse--</option>
+                </select>
+            </div>
+
+            <!-- Carrier Selection -->
+            <div class="form-group mb-1">
+                <label class="control-label">Carrier</label>
+                <select class="form-control select2" data-toggle="select2" id="shippingCarriers"
+                        asp-items="ViewBag.Carriers" name="carrierId" asp-for="CarrierId">
+                    <option value="" selected disabled hidden>--Select a Carrier--</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group text-right mt-1">
+                <button class="btn btn-primary" type="submit">Generate Manifest</button>
+            </div>
+        </div>
+    </div>
+</form>

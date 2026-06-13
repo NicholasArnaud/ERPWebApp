@@ -1,0 +1,86 @@
+﻿@page
+@model SubscribedAlertsModel
+@{
+    ViewData["Title"] = "Subscribed Email Alerts";
+    ViewData["ActivePage"] = ManageNavPages.SubscribedAlerts;
+}
+
+<div class="container-fluid text-white">
+    <div class="card">
+        <div class="row justify-content-center">
+            <!-- Subscribed Alerts Table -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3>Subscribed Alerts</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Scheduled Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var alert in Model.SubscribedAlerts)
+                                {
+                                    <tr>
+                                        <td>@alert.Subject</td>
+                                        <td>@alert.ScheduledTime</td>
+                                        <td>
+                                            <form method="post">
+                                                <input type="hidden" name="emailAlertId" value="@alert.EmailAlertId" />
+                                                <button type="submit" class="btn btn-danger btn-sm" asp-page-handler="Unsubscribe">-</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unsubscribed Alerts Table -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3>Unsubscribed Alerts</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Scheduled Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var alert in Model.UnsubscribedAlerts)
+                                {
+                                    <tr>
+                                        <td>@alert.Subject</td>
+                                        <td>@alert.ScheduledTime</td>
+                                        <td>
+                                            <form method="post">
+                                                <input type="hidden" name="emailAlertId" value="@alert.EmailAlertId" />
+                                                <button type="submit" class="btn btn-primary btn-sm" asp-page-handler="Subscribe">+</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

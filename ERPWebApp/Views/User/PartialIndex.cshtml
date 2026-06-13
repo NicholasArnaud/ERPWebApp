@@ -1,0 +1,49 @@
+﻿@model IEnumerable<ERPWebApp.Models.Company.ApplicationUser>
+
+<div class="table-responsive"style="overflow-x: hidden;">
+<table class="table dt-responsive webkit-nowrap w-100" id="user-datatable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.UserName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                </td>
+
+                <td class="table-action">
+                    @if (this.User.Identity.Name != item.UserName && (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager)))
+                    {
+                        <a class="action-icon" asp-action="Edit" asp-route-id="@item.Id"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                    }
+                    <a class="action-icon" asp-action="Details" asp-route-id="@item.Id"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                    @if (this.User.Identity.Name != item.UserName && (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager)))
+                    {
+                        <a class="action-icon" asp-action="Delete" asp-route-id="@item.Id"><i class="mdi mdi-24px mdi-delete"></i></a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>

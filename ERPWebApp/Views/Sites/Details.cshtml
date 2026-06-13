@@ -1,0 +1,92 @@
+﻿@model ERPWebApp.Models.Inventory.Site
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-12">
+
+        <div class="card">
+
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-9 col-sm-7 col-xs-12 card-title">
+                        <h3>Details</h3>
+                        <h5>Site</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <dl class="row">
+                    <dt class = "col-sm-2">
+                        @Html.DisplayNameFor(model => model.SiteName)
+                    </dt>
+                    <dd class = "col-sm-10">
+                        @Html.DisplayFor(model => model.SiteName)
+                    </dd>
+                    <dt class = "col-sm-2">
+                        @Html.DisplayNameFor(model => model.SiteDescription)
+                    </dt>
+                    <dd class = "col-sm-10">
+                        @Html.DisplayFor(model => model.SiteDescription)
+                    </dd>
+                    <dt class = "col-sm-2">
+                        @Html.DisplayNameFor(model => model.SiteVolume)
+                    </dt>
+                    <dd class = "col-sm-10">
+                        @Html.DisplayFor(model => model.SiteVolume)
+                    </dd>
+                    <dt class = "col-sm-2">
+                        @Html.DisplayNameFor(model => model.IsActive)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @if (@Html.ValueFor(model => model.IsActive) == "True")
+                        {<a>Yes</a>}
+                        else
+                        {<a>No</a>}
+                    </dd>
+                    @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ExternalViewer))
+                    {
+                        <dt class="col-sm-2">
+                            @Html.DisplayNameFor(model => model.IsExternal)
+                        </dt>
+                        <dd class="col-sm-10">
+                            @if (@Html.ValueFor(model => model.IsExternal) == "True")
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </dd>
+                    }
+                    <dt class = "col-sm-2">
+                        @Html.DisplayNameFor(model => model.IsRestricted)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @if (@Html.ValueFor(model => model.IsRestricted) == "True")
+                        {<a>Yes</a>}
+                        else
+                        {<a>No</a>}
+                    </dd>
+                </dl>
+                <div>
+                    @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.SiteId">Edit</a>
+                        <span> | </span>
+                    }
+    
+                    <a asp-action="Index">Back to List</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

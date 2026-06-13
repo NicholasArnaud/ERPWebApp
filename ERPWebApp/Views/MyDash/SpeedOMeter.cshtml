@@ -1,0 +1,106 @@
+﻿@*
+For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model Home;
+@{
+    ViewData["Title"] = "Speedo Meter";
+
+}
+<div class="card">
+    <div class="card-body">
+        <h3>
+            Speed-O-Meter
+            <button onclick="toggleHelpInfo('speedometer-info')"
+                style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                <i class="mdi mdi-information"></i>
+            </button>
+        </h3>
+        <div id="speedometer-info" class="hidden alert alert-info" role="alert">
+            <p>Tracks daily items shipped by department, and then compares it to specific goals. </p>
+        </div>
+        <div class="mt-3 mb-3" style="display: none;">
+            <select class="departments-select" multiple="multiple"></select>
+        </div>
+        <div class="dropdown float-end" style="margin:1rem">
+            <a href="#" class="dropdown-toggle arrow-none card-drop p-0" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <i class="mdi mdi-dots-vertical"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+                <a type="button" class="btn dropdown-item" asp-area="" asp-controller="SpeedOMeterHistories"
+                    asp-action="Index">History</a>
+
+                @if (User.IsInRole(RoleList.Manager) || User.IsInRole(RoleList.Administrator))
+                {
+                    <button type="button" class="btn dropdown-item" data-bs-toggle="modal"
+                        data-bs-target="#ModifyGoals">Modify Goals</button>
+                }
+
+            </div>
+        </div>
+        <!-- Add the navigation menu with tabs -->
+        <ul class="nav nav-tabs" id="chart-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="overview-tab" data-bs-toggle="tab" href="#overview" role="tab"
+                    aria-controls="overview" aria-selected="true">Overview</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="details-tab" data-bs-toggle="tab" href="#details" role="tab"
+                    aria-controls="details" aria-selected="false">Details</a>
+            </li>
+        </ul>
+
+        <div class="modal fade" id="departmentSelectionModal" tabindex="-1"
+            aria-labelledby="departmentSelectionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="departmentSelectionModalLabel">Select Departments</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="department-options"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary save-departments-btn">Apply changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add tab content container -->
+        <div class="tab-content mt-3">
+            <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                <div id="new-speed-o-meter-chart"></div>
+                <div id="no-data-message" class="d-none text-center">
+                    <h4>No shipped products today.</h4>
+                </div>
+                <div id="chart-labels" class="text-center"></div>
+                <div id="new-speed-o-meter-chart"></div>
+            </div>
+            <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab"></div>
+            <div id="no-data-message-details" class="d-none text-center">
+                <h4>No shipped products today.</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        //get the item order from the DB and parse in to a javascript array
+        var elementPositions = @Html.Raw(Json.Serialize(Model.DashboardLayouts is null ? new object[] { } : Model.DashboardLayouts));
+
+
+    </script>
+
+    <!-- for drag-n-drop -->
+    <script src="~/lib/hyper-assets/vendor/dragula/dragula.min.js"></script>
+
+    <script src="~/js/pages/home.min.js"></script>
+}

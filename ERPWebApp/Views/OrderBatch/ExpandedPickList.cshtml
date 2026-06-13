@@ -1,0 +1,110 @@
+﻿@using ERPWebApp.Data.DTOModels
+@using ERPWebApp.Services
+
+@model List<ExpandedPickList>
+@{
+    var batchNumber = TempData["BatchNumber"];
+    var date = DateTime.Now.ToString("MM/dd/yyyy");
+    var columns = 2;
+    var itemsPerColumn = 7;
+    var numRows = (int)Math.Ceiling((double)Model.Count / (columns * itemsPerColumn));
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Expanded Pick List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .header-text {
+            font-size: 1.5rem;
+        }
+
+        .qr-code {
+            width: 100px;
+            height: 100px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+            padding: 0 1rem;
+        }
+
+        .item {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #000;
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+            height: 150px; /* Adjust the height as needed */
+            position: relative;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            font-size: clamp(0.3rem, 1.5vw, 0.7rem); /* Adjust min, preferred, and max font sizes as needed */
+        }
+
+        .sku-quantity {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-text">Date: @date</div>
+        <div class="header-text">Batch Number: @batchNumber</div>
+@{  
+    var orderBatchId = Model.First().OrderBatchId;  
+}  
+<img class="qr-code" src="data:image/png;base64,@QRCodeHelper.GenerateQRCodeBase64(orderBatchId.ToString())" alt="Batch QR Code" />  
+
+    </div>
+    @for (int row = 0; row < numRows; row++)
+    {
+        <div class="container">
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var item = Model[i];
+                <div class="column" style="@(i % 2 == 1 ? "margin-left: auto;" : "")">
+                    <div class="item">
+                        <div class="item-info">
+                            <div class="sku-quantity">@item.Quantity x @item.Sku</div>
+                            <div>@item.Description</div>
+                            <div>@item.FromLocation</div>
+                        </div>
+                        <img class="qr-code" src="data:image/png;base64,@QRCodeHelper.GenerateQRCodeBase64(item.OrderBatchItemId.ToString())" alt="Item QR Code" />
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <script>
+        window.print();
+    </script>
+
+</body>
+</html>
+

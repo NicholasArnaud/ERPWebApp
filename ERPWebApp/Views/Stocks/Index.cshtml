@@ -1,0 +1,227 @@
+﻿@model ERPWebApp.Controllers.Inventory.StocksController.StockPageDataModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var isValidUserRole = User.IsInRole(RoleList.Manager) || User.IsInRole(RoleList.Administrator);
+}
+
+<style type="text/css">
+    #file-action-btn {
+        width: auto;
+    }
+
+    @@media (max-width: 767.98px) {
+        #file-action-btn {
+            border-top-right-radius: 0.15rem;
+            border-bottom-right-radius: 0.15rem;
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="row">
+    <div class="col-12">
+
+        <div class="card">
+
+            <div class="card-header">
+                <div class="row">
+
+                    <div class="col-md-8 col-sm-6 col-xs-12">
+                        <h3 class="card-title">Stocks</h3>
+                    </div>
+
+                    @if (User.IsInRole(RoleList.Administrator))
+                    {
+                        <div class="col-md-4 col-sm-6 col-xs-12 custom-mt-xs">
+                            <label class="control-label">File Action: &nbsp;</label>
+                            <div class="d-flex flex-column flex-md-row">
+
+                                <form asp-action="BatchUserUpload" asp-controller="Stocks" method="post" enctype="multipart/form-data" class="d-flex flex-grow-1" id="file-upload-form" style="display: none !important;">
+                                    <input id="userUpload" name="userUpload" class="form-control" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                                    <button type="submit" id="btnsubmit" style="display: none" class="btn btn-secondary">upload </button>
+                                </form>
+
+                                <button class="btn btn-dark dropdown-toggle flex-grow-0 btn-block" id="file-action-btn" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select an Action</button>
+                                <div id="file-action-dropdown" class="dropdown-menu">
+                                    <a class="dropdown-item" asp-action="DownloadExcelTemplate"><span class="mdi mdi-18px mdi-microsoft-excel"> Download Template</span></a>
+                                    <a class="dropdown-item" id="file-upload-option" href="#" disabled>Upload File</a>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.InventoryManager)
+                        || User.IsInRole(RoleList.ShippingManager))
+                {
+                    <a hidden id="myRoles">Yes</a>
+
+                    <div class="row custom-bb">
+                        <div class="col-md-3 col-sm-5 col-xs-12">
+                            <a class="btn btn-dark" asp-action="Create">Create New</a>
+                        </div>
+                    </div>
+                }
+
+                <div class="row mb-3">
+
+                    <div class="form-group col-md-4 col-sm-6 col-xs-12">
+                        <label class="control-label">Search by Site</label>
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                data-placeholder="Choose ..." asp-items="ViewBag.SiteName" name="site-select-id"
+                                id="site-select-id">
+                            <option selected>All</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-4 col-sm-6 col-xs-12" @(User.IsInRole(RoleList.ExternalUser) ? "hidden" : "")>
+                        <label class="control-label">Search by Department</label>
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                data-placeholder="Choose ..." asp-items="ViewBag.DepartmentName"
+                                name="department-select-id" id="department-select-id">
+                            <option selected>All</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-4 col-sm-6 col-xs-12" @(User.IsInRole(RoleList.ExternalUser) ? "hidden" : "")>
+                        <label class="control-label">Search by SubCategory</label>
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                data-placeholder="Choose ..." asp-items="ViewBag.SubCategoryList" name="sku-select-id"
+                                id="subCategory-select-id">
+                            <option selected>All</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="row mb-3 custom-bb">
+
+                    <div class="form-group col-md-4 col-sm-6 col-xs-12" @(User.IsInRole(RoleList.ExternalUser) ? "hidden" : "")>
+                        <label class="control-label">Search by Product Tags</label>
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                data-placeholder="Choose ..." asp-items="ViewBag.ProductTagList" name="producttag-select-id"
+                                id="producttag-select-id">
+                            <option selected>All</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-4 col-sm-6 col-xs-12" @(User.IsInRole(RoleList.ExternalUser) ? "hidden" : "")>
+                        <label class="control-label">Search by Vendors</label>
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                data-placeholder="Choose ..." asp-items="ViewBag.VendorsList" name="vendor-select-id"
+                                id="vendor-select-id">
+                            <option selected>All</option>
+                        </select>
+                    </div>
+
+                    @if (isValidUserRole)
+                    {
+                        <div class="col-md-4 col-sm-6 col-xs-12 d-flex flex-column justify-content-end">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="inactive-checkbox">
+                                    <label class="form-check-label" for="inactive-checkbox">
+                                        Show Inactive Stock
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="zero-quantity-checkbox" checked>
+                                    <label class="form-check-label" for="zero-quantity-checkbox">
+                                        Show Zero Quantities
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+
+                </div>
+
+                <div class="row" id="test">
+                    <div class="col-12">
+                        <div class="table-responsive" style="overflow-x: hidden;">
+
+                            <table class="table dt-responsive webkit-nowrap w-100" id="stock-datatable">
+                                <thead>
+                                    <tr>
+                                        <th class="notexport"></th>
+                                        <th>
+                                        </th>
+                                        <th>
+                                            Sku
+                                        </th>
+                                        <th>
+                                            Description
+                                        </th>
+                                        <th>
+                                            Product Tag
+                                        </th>
+                                        <th>
+                                            Total Available
+                                        </th>
+                                        <th>
+                                            Selected Total
+                                            <div id="my-filtered-select"></div>
+                                        </th>
+                                        <th>
+                                            On Order
+                                        </th>
+                                        <th class="none"></th>
+                                    </tr>
+                                </thead>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+    <script src="~/js/pages/stock-datatable.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".select2").select2();
+            document.querySelectorAll('mdi mdi-24px mdi-pencil').forEach(function (el) {
+                el.style.display = 'none';
+            });
+            
+
+            //register for file upload item click event
+            $("#file-upload-option").click(function (event) {
+                event.preventDefault()
+                $("#userUpload").trigger('click');
+            });
+
+            //register for file selection input change and upload the file directly
+            $("#userUpload").change(function () {
+                if ($("#userUpload").length) {
+                    var vidFileLength = $("#userUpload")[0].files.length;
+                    if (vidFileLength > 0) {
+                        $("#btnsubmit").trigger('click');
+                    }
+                }
+            });
+        });
+    </script>
+
+}

@@ -1,0 +1,57 @@
+﻿@model ERPWebApp.Data.DTOModels.ErrorResult
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title">Error page</h3>
+            </div>
+            <span class="text-danger"></span>
+            <div class="card-body">
+                <div class="row justify-content-center">
+                    <div class="col-lg-4">
+                        <div class="text-center">
+                            <img src="~/lib/hyper-assets/images/svg/file-searching.svg" height="90" alt="File not found Image">
+
+                            <h1 class="text-error mt-4">@Model.StatusCode</h1>
+                            @if (Model.StatusCode == 404)
+                            {
+                                <h4 class="text-uppercase text-danger mt-3">Page Not Found</h4>
+                            }
+                            else if (Model.StatusCode == 500)
+                            {
+                                <h4 class="text-uppercase text-danger mt-3">Internal Server Error</h4>
+                            }
+                            else if (Model.StatusCode == 401)
+                            {
+                                <h4 class="text-uppercase text-danger mt-3">Unauthorized</h4>
+                            }
+                            else if (Model.StatusCode == 400)
+                            {
+                                <h4 class="text-uppercase text-danger mt-3">BadRequest</h4>
+                            }
+                            <p class="text-muted mt-3">
+                                It's looking like you may have taken a wrong turn. Don't worry... it
+                                happens to the best of us. Here's a
+                                little tip that might help you get back on track.
+                            </p>
+                            <p class="text-muted mt-3">
+                                @Model.SupportMessage
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

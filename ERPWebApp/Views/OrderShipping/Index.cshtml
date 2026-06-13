@@ -1,0 +1,506 @@
+﻿@using ERPWebApp.Models.Orders
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Order
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row mx-2">
+    <div class="card col-md-12">
+        <div class="card-header d-flex flex-row ps-2 py-1 m-2">
+            <h3 class="flex-start ms-1 me-auto">ShipStation Order Shipping</h3>
+            <form asp-action="Index">
+                <input type="submit" class="btn btn-danger flex-end m-1" value="RESET">
+            </form>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <div class="card-body">
+                    @if (Model.orderNumber == null)
+                    {
+                        <form asp-action="GetOrderDetails">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input asp-for="orderNumber" class="form-control" placeholder="ShipStation Order#"
+                                           value='@(Model?.orderNumber ?? "")'/>
+                                    <span asp-validation-for="orderNumber" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="form-control" type="submit" value="Pull Order Details" @(Model?.orderNumber != null ? "hidden" : "") />
+                                </div>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="ForceGetOrderDetails" method="post">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input asp-for='@(Model.orderNumber)' class="form-control" value='@(Model.orderNumber)' disabled="@(Model?.orderNumber != null)" />
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="submit" name="submit" class="action-button btn btn-primary">Pull Updated Order Info</button>
+                                </div>
+                            </div>
+                        </form>
+                    }
+                    @if (Model.orderNumber != null)
+                    {
+                        <form asp-action="GetRateEstimate">
+                            <input type="hidden" asp-for="orderKey" />
+                            <input type="hidden" asp-for="orderNumber" />
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <label asp-for="weight.value" class="form-label">Enter Weight:</label>
+                                    <input asp-for="weight.value" type="number" class="form-control" id="weight-value-input" value="@(Model?.weight.value)" disabled="@(Model.IsCreateShipmentClicked)" />
+                                    <span asp-validation-for="weight.value" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="weight.units" class="form-label">Enter Unit:</label>
+                                    <select class="form-control form-select" data-toggle="dropdown" asp-for="weight.units" asp-items="Html.GetEnumSelectList<Order.OrderWeight.Units>()" disabled="@(Model.IsCreateShipmentClicked)"></select>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-3 col-sm-6">
+                                    <label asp-for="dimensions.length" class="form-label">Enter Length:</label>
+                                    <input asp-for="dimensions.length" type="number" class="form-control" id="length-value-input" value="@(Model?.dimensions.length)" disabled="@(Model.IsCreateShipmentClicked)" />
+                                    <span asp-validation-for="dimensions.length" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label asp-for="dimensions.width" class="form-label">Enter Width:</label>
+                                    <input asp-for="dimensions.width" type="number" class="form-control" id="width-value-input" value="@(Model?.dimensions.width)" disabled="@(Model.IsCreateShipmentClicked)" />
+                                    <span asp-validation-for="dimensions.width" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label asp-for="dimensions.height" class="form-label">Enter Height:</label>
+                                    <input asp-for="dimensions.height" type="number" class="form-control" id="height-value-input" value="@(Model?.dimensions.height)" disabled="@(Model.IsCreateShipmentClicked)" />
+                                    <span asp-validation-for="dimensions.height" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label asp-for="dimensions.units" class="form-label">Enter Unit:</label>
+                                    <select class="form-control form-select" data-toggle="dropdown" asp-for="dimensions.units" asp-items="Html.GetEnumSelectList<Order.OrderDimensions.Units>()" disabled="@(Model.IsCreateShipmentClicked)"></select>
+                                </div>
+                            </div>
+                            <div class="row p-2">
+                                <div align="right">
+                                    <input type="submit" class="btn btn-dark" value="Get Estimates" disabled="@(Model.IsCreateShipmentClicked)" />
+
+                                </div>
+                            </div>
+                        </form>
+                    }
+
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div class="row">
+                    @if (Model.orderId != 0)
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex flex-row">
+                                    @if ((Model.advancedOptions != null) && (Model.advancedOptions.OrderAdvancedOptionsId != 0))
+                                    {
+                                        <div>
+                                            <h3 class="header-title mb-1"> @Html.DisplayNameFor(model => model.advancedOptions.storeName) </h3>
+                                            <p>
+                                                @Model.advancedOptions.storeName
+                                            </p>
+                                        </div>
+                                    }
+                                    @if (Model.orderDate != default)
+                                    {
+                                        <div class="mx-5">
+                                            <h3 class="header-title mb-1"> @Html.DisplayNameFor(model => model.orderDate) </h3>
+                                            <p>
+                                                @Model.orderDate
+                                            </p>
+                                        </div>
+                                    }
+                                </div>
+                                @if (Model.items != default)
+                                {
+                                    <h3 class="header-title mb-1"> @Html.DisplayNameFor(model => model.items) </h3>
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Sku</th>
+                                                <th scope="col">Description</th>
+                                                <th scope="col">Qty</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.items)
+                                            {
+
+                                                <tr data-bs-placement="left" data-bs-toggle="popover" data-bs-trigger="hover"
+                                                    data-bs-content='<img alt="@item.name" src="@item.imageUrl" width="150" height="150" />' data-bs-html="true">
+                                                    <td>@item.sku</td>
+                                                    <td>@item.name</td>
+                                                    <td>@item.quantity</td>
+                                                </tr>
+                                                @if (item.options.Any())
+                                                {
+                                                    <tr>
+                                                        <td colspan="3">
+                                                            <table class="table table-sm table-centered table-bordered mb-0">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">Option Name</th>
+                                                                        <th scope="col">Option Value</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach (var option in item.options)
+                                                                    {
+                                                                        <tr>
+                                                                            <td>@option.Name</td>
+                                                                            @if (Uri.TryCreate(option.value, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+                                                                            {
+                                                                                <td data-bs-placement="left" data-bs-toggle="popover" data-bs-trigger="hover"
+                                                                                    data-bs-content='<img alt="@option.Name" src="@option.value" width="150" height="150" />' data-bs-html="true">
+                                                                                    <a type="button" class="btn btn-link" href="@option.value" target="_blank">Custom Link</a>
+                                                                                </td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td>@option.value</td>
+                                                                            }
+                                                                        </tr>
+                                                                    }
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                }
+
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.internalNotes))
+                                {
+                                    <h3 class="header-title mb-1"> @Html.DisplayNameFor(model => model.internalNotes)</h3>
+                                    <p>
+                                        @Model.internalNotes
+                                    </p>
+                                }
+                                @if (Model.advancedOptions != default)
+                                {
+                                    @if (!string.IsNullOrEmpty(Model.advancedOptions.customField1))
+                                    {
+                                        <h3 class="header-title mb-1"> @Html.DisplayNameFor(model => model.advancedOptions.customField1)</h3>
+                                        <p>
+                                            @Model.advancedOptions.customField1
+                                        </p>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.advancedOptions.customField2))
+                                    {
+                                        <h3 class="header-title mb-1"> @Html.DisplayNameFor(model => model.advancedOptions.customField2)</h3>
+                                        <p>
+                                            @Model.advancedOptions.customField2
+                                        </p>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.advancedOptions.customField3))
+                                    {
+                                        <h3 class="header-title mb-1"> @Html.DisplayNameFor(model => model.advancedOptions.customField3)</h3>
+                                        <p>
+                                            @Model.advancedOptions.customField3
+                                        </p>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+
+                </div>
+                <div class="row">
+                    @if (Model.Tags != null)
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="header-title mb-1">Order Tags</h3>
+                                <h4 class="mb-1" id="order-tags"></h4>
+                                @foreach (var tag in Model.Tags)
+                                {
+                                    <span class="badge badge-secondary-lighten">
+                                        @tag.name
+                                        <span class="dot" style="background-color: @tag.color; height: 10px; width: 10px; -ms-border-radius: 50%; border-radius: 50%; display: inline-block;"></span>
+                                    </span>
+                                }
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@if (Model.shipTo != null && (Model.shipTo.Id != 0))
+{
+    <div class="d-flex align-items-start p-1 gap-2">
+        <div class="card flex-fill">
+            <div class="card-header d-flex flex-row ps-2 py-1 m-2">
+                <h3 class="flex-start ms-1 me-auto">Best Shipment</h3>
+                <form asp-action="Index">
+                    <input type="submit" class="btn btn-danger flex-end m-1" value="RESET">
+                </form>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="row">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <i class="mdi mdi-truck-fast h2 text-muted"></i>
+                                        <p class="mb-1 h4">Ship To</p>
+                                        <p class="mb-1">@Model.shipTo.name</p>
+                                        <p class="mb-1">@Model.shipTo.company</p>
+                                        <p class="mb-1">@Model.shipTo.street1 @Model.shipTo.street2</p>
+                                        <p class="mb-1">@Model.shipTo.city, @Model.shipTo.state @Model.shipTo.postalCode @Model.shipTo.country</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            @if ((Model.shipFrom != null) && (Model.shipFrom != default))
+                            {
+                                <div class="card">
+                                    <div class="card-body">
+
+                                        <div class="text-center">
+                                            <i class="mdi mdi-warehouse h2 text-muted"></i>
+                                            <p class="mb-1 h4">Ship From</p>
+                                            <p class="mb-1">@Model.shipFrom.name</p>
+                                            <p class="mb-1">@Model.shipFrom.company</p>
+                                            <p class="mb-1">@Model.shipFrom.street1 @Model.shipFrom.street2</p>
+                                            <p class="mb-1">@Model.shipFrom.city, @Model.shipFrom.state @Model.shipFrom.postalCode @Model.shipFrom.country</p>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        @if (Model.IsGetEstimatesClicked || (Model.orderShipments != null) && Model.orderShipments.Any())
+                        {
+                            <form asp-action="GenerateLabelShipEngine" class="card">
+                                <input type="hidden" asp-for="orderKey" />
+                                <div asp-validation-summary="All" class="text-danger"></div>
+                                @if (ViewData["completed"] is false || Model.orderShipments.Any(x => !x.voided))
+                                {
+                                    <div class="card-body">
+                                        <h3 class="header-title mb-3 text-center">Selected Shipment</h3>
+                                        <div class="text-center">
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.carrierCode): @Model.carrierCode
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.serviceCode): @Model.serviceCode
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.packageCode): @Model.packageCode
+                                            </p>
+                                            @if (Model.estimatedShipmentCost is not 0)
+                                            {
+                                                <p class="mb-1">
+                                                    @Html.DisplayNameFor(model => model.estimatedShipmentCost): @Model.estimatedShipmentCost
+                                                </p>
+                                            }
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.insuranceOptions.insuredValue): @Model.insuranceOptions.insuredValue
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.isExpedited):
+                                                <span>
+                                                    @if (Model.isExpedited)
+                                                    {
+                                                        <a>Yes</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a>No</a>
+                                                    }
+                                                </span>
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.gift):
+                                                <span>
+                                                    @if (Model.gift)
+                                                    {
+                                                        <a>Yes</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a>No</a>
+                                                    }
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div align="right">
+                                            <button type="submit" class="btn btn-dark" @(Model.IsCreateShipmentClicked ? "disabled='true'" : "")>
+                                                Create Shipment
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="card-body">
+                                        <h3 class="header-title mb-3 text-center">Selected Shipment</h3>
+                                        <div class="text-center">
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.orderStatus): @Model.orderStatus
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.carrierCode): @Model.carrierCode
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.serviceCode): @Model.serviceCode
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.packageCode): @Model.packageCode
+                                            </p>
+                                            @if (Model.estimatedShipmentCost is not 0)
+                                            {
+                                                <p class="mb-1">
+                                                    @Html.DisplayNameFor(model => model.estimatedShipmentCost): @Model.estimatedShipmentCost
+                                                </p>
+                                            }
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.shipDate): @Model.shipDate?.ToShortDateString()
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.insuranceOptions.insuredValue): @Model.insuranceOptions.insuredValue
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.isExpedited):
+                                                <span>
+                                                    @if (Model.isExpedited)
+                                                    {
+                                                        <a>Yes</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a>No</a>
+                                                    }
+                                                </span>
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.gift):
+                                                <span>
+                                                    @if (Model.gift)
+                                                    {
+                                                        <a>Yes</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a>No</a>
+                                                    }
+                                                </span>
+                                            </p>
+                                            @if ((Model.orderShipments != null) && (Model.orderShipments.Any(x => !x.voided)))
+                                            {
+                                                <p class="mb-1">
+                                                    @Html.DisplayNameFor(model=>model.orderShipments.FirstOrDefault().trackingNumber):
+                                                    <span>
+                                                        @Model.orderShipments.FirstOrDefault().trackingNumber
+                                                    </span>
+                                                </p>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </form>
+                        }
+
+                    </div>
+                    <div class="col-md-6">
+                        @if ((Model.orderShipments != null) && (Model.orderShipments.Any()))
+                        {
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Shipment Generation</h3>
+                                </div>
+                                <div class="card-body">
+                                    <h3 class="header-title mb-3">@Html.DisplayNameFor(model=> model.orderShipments)</h3>
+                                    <div class="table-responsive">
+                                        <table class="table table-dark">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">@Html.DisplayNameFor(model=>model.orderShipments.FirstOrDefault().carrierCode)</th>
+                                                    <th scope="col">@Html.DisplayNameFor(model=>model.orderShipments.FirstOrDefault().shipmentCost)</th>
+                                                    <th scope="col">@Html.DisplayNameFor(model=>model.orderShipments.FirstOrDefault().trackingNumber)</th>
+                                                    <th scope="col">@Html.DisplayNameFor(model=>model.orderShipments.FirstOrDefault().voided)</th>
+                                                    <th scope="col">@Html.DisplayNameFor(model=>model.orderShipments.FirstOrDefault().createDate)</th>
+                                                    <th><a>Actions</a></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var shipment in Model.orderShipments)
+                                                {
+                                                    <tr>
+                                                        <td>@shipment.carrierCode</td>
+                                                        <td>@shipment.shipmentCost</td>
+                                                        <td>@shipment.trackingNumber</td>
+                                                        <td>
+                                                            @if (shipment.voided)
+                                                            {
+                                                                <a>Yes</a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <a>No</a>
+                                                            }
+                                                        </td>
+                                                        <td>@shipment.createDate</td>
+                                                        <td class="table-action">
+                                                            @if (!shipment.voided)
+                                                            {
+                                                                <a href="@shipment.labelData" class="btn btn-icon-only" download="label-@Model.orderNumber">
+                                                                    <i class="mdi mdi-24px mdi-download"></i>
+                                                                </a>
+                                                                <form asp-controller="OrderShipping" asp-action="Void"
+                                                                      enctype="application/x-www-form-urlencoded">
+                                                                    <input type="hidden" name="id" asp-for="@shipment.OrderShipmentId" />
+                                                                    <input type="hidden" name="orderId" asp-for="@shipment.ERPOrderId" />
+                                                                    <input type="hidden" name="timestamp" value="@Convert.ToBase64String(shipment.ERPTimestamp)" />
+                                                                    <a class="btn btn-icon-only" onclick="event.preventDefault(); this.parentElement.submit();">
+                                                                        <i class="mdi mdi-24px mdi-cancel"></i>
+                                                                    </a>
+                                                                </form>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <div class="card-footer">
+                                    <div align="right">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

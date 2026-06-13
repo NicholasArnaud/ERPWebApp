@@ -1,0 +1,63 @@
+﻿<!-- Edit Modal -->
+<div class="modal fade" id="editEmailAlertModal" tabindex="-1" role="dialog" aria-labelledby="editEmailAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="editEmailAlertForm" method="post" action="@Url.Action("UpdateEmailAlert", "EmailAlerts")">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editEmailAlertModalLabel">Edit Email Alert</h5>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="EmailAlert.EmailAlertId" id="emailAlertId" />
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" class="form-control" id="subject" name="EmailAlert.Subject">
+                    </div>
+                    <div class="form-group">
+                        <label for="alertType">Alert Type</label>
+                        <select class="form-control" id="alertType" name="EmailAlert.AlertType">
+                            <option value="0">Time Based</option>
+                            <option value="1">Trigger Based</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="frequencyGroup" style="display: none;">
+                        <label for="frequency">Frequency</label>
+                        <select class="form-control" id="frequency" name="EmailAlert.Frequency">
+                            <option value="0">Daily</option>
+                            <option value="1">Weekly</option>
+                            <option value="2">Monthly</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="presetTriggersGroup" style="display: none;">
+                        <label for="presetTriggers">Trigger Conditions</label>
+                        <select class="form-control" id="presetTriggers" name="AlertTemplateId"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="body">Body</label>
+                        <textarea class="form-control" id="body" rows="3" maxlength="400" name="EmailAlert.Body"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="recipients">Recipients</label>
+                        <select class="form-control" id="recipients" name="Recipients" multiple>
+                            @foreach (var userEmail in Model.UserEmails)
+                            {
+                                <option value="@userEmail">@userEmail</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group" id="scheduledTimeGroup">
+                        <label for="scheduledTime">Scheduled Time</label>
+                        <input type="text" class="form-control" id="editScheduledDateTime" name="EmailAlert.ScheduledTime">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="closeModal" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>  
+@{
+    var userEmails = ViewData["UserEmails"] as List<string>;
+}

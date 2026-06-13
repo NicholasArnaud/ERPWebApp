@@ -1,0 +1,44 @@
+﻿jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+    "date-euro-pre": function (a) {
+        var x;
+
+        if (a.trim() !== '') {
+            var frDatea = a.trim().split(' ');
+            var frTimea = (undefined != frDatea[1]) ? frDatea[1].split(':') : [00, 00, 00];
+            var frDatea2 = frDatea[0].split('/');
+            x = (frDatea2[2] + frDatea2[1] + frDatea2[0] + frTimea[0] + frTimea[1] + ((undefined != frTimea[2]) ? frTimea[2] : 0)) * 1;
+        } else {
+            x = Infinity;
+        }
+
+        return x;
+    },
+
+    "date-euro-asc": function (a, b) {
+        return a - b;
+    },
+
+    "date-euro-desc": function (a, b) {
+        return b - a;
+    }
+});
+
+var dateLimit = new Date();
+dateLimit.setDate(dateLimit.getDate() - 1);
+$('#daterange').daterangepicker(
+    {
+        maxDate: dateLimit,
+        format: 'YYYY-MM-DD'
+    },
+    function (start, end, label) {
+        if ($("#employee-dropdown").val() != 0) {
+            getDesignerData();
+        }
+        //alert('A date range was chosen: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+    }
+);
+$('#daterange').on('apply.daterangepicker', function (ev, picker) {
+    $('#selectedValue').text(
+        $('#daterange').data('daterangepicker').startDate.format('M/D/YY') + ' - ' +
+        $('#daterange').data('daterangepicker').endDate.format('M/D/YY'));
+});

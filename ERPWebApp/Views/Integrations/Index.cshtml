@@ -1,0 +1,28 @@
+﻿@*@model IEnumerable<IntegrationViewModel>*@
+
+<h2>Integrations</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Integration</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var integration in Model)
+        {
+            <tr>
+                <td>@integration.Name</td>
+                <td>@integration.Status</td>
+                <td>
+                    <a href="@Url.Action("Edit", "Integrations", new { id = integration.Id })">Edit</a> |
+                    <a href="@Url.Action("Delete", "Integrations", new { id = integration.Id })">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Create", "Integrations")">Add New Integration</a>

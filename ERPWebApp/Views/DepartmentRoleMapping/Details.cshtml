@@ -1,0 +1,39 @@
+﻿@model ERPWebApp.Models.DepartmentRoleMappingViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Department Role Mapping</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Department Name
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DepartmentName)
+        </dd>
+        <dt class="col-sm-2">
+            Default Roles
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Roles != null && Model.Roles.Any())
+            {
+                <p>@string.Join(", ", Model.Roles.Select(role => role.Name))</p>
+            }
+            else
+            {
+                <p>No roles assigned to this department.</p>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <form method="get">
+        <button type="submit" formaction="@Url.Action("Edit", new { id = Model?.DepartmentId })" class="btn btn-primary">Edit</button>
+        <button type="submit" formaction="@Url.Action("Index")" class="btn btn-secondary">Back to List</button>
+    </form>
+</div>

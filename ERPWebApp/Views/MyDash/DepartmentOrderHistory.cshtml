@@ -1,0 +1,61 @@
+﻿@using ERPWebApp.Models.Common
+@using ERPWebApp.Models.Company;
+@model Home;
+@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+
+@{
+    ViewData["Title"] = "Department Order History";
+
+}
+
+<feature name="@CwaFeatures.ORDER">
+    <div id="drac-ordhistory">
+        <div class="card">
+            <div class="card-body">
+                <h3>
+                    Department Order History
+                    <button onclick="toggleHelpInfo('dailyorder-info')"
+                        style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                        <i class="mdi mdi-information"></i>
+                    </button>
+                </h3>
+                <label for="department-select" class="form-label"></label>
+                <div>
+                    <div id="dailyorder-info" class="hidden alert alert-info" role="alert">
+                        <p>Tracks received and completed orders every day. </p>
+                    </div>
+                    <div class="order-fetching-container"
+                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                        <div id="order-fetching" class="hidden"
+                            style="background-color: #37404A; padding: 1rem; border-radius: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+                            <p>Fetching...</p>
+                            <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-sm-6 mb-3">
+                            <div style="width: 100%; overflow: hidden;">
+                                <select id="department-select" class="form-control" style="width: 100%; padding: 4px;">
+                                    <option value="0">All</option>
+                                    @foreach (var Department in (IEnumerable<SelectListItem>)ViewBag.Department)
+                                    {
+                                        <option value=@Html.DisplayTextFor(modelItem => Department.Value)>
+                                            @Html.DisplayTextFor(modelItem => Department.Text)
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                            <input type="text" id="departmentDateRange" name="departmentDateRange" class="form-control"
+                                value="Last 30 Days" readonly style="width: 100%;">
+                        </div>
+                    </div>
+                    <div id="daily-orders-chart" class="apex-charts"></div>
+                </div>
+                <!-- end card body-->
+            </div>
+            <!-- end card -->
+        </div>
+    </div>
+</feature>

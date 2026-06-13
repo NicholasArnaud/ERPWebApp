@@ -1,0 +1,66 @@
+parameters:
+  - name: azureSubscription
+    type: string
+  - name: resourceGroupName
+    type: string
+  - name: webAppName
+    type: string
+  - name: sourceBranchTrigger
+    type: string
+  - name: environment
+    type: string
+  - name: slotName
+    type: string
+    default: production
+  - name: artifactName
+    type: string
+    default: erpbuild
+  - name: dependsOn
+    type : string
+    default: BuildStage
+  - name: variableGroupName
+    type: string
+
+stages:
+- stage: ${{parameters.environment}}_DeployStage
+  displayName: '${{parameters.environment}} Deployment Stage'
+  variables:
+    - group: ${{ parameters.variableGroupName }}
+  dependsOn: ${{parameters.dependsOn}}
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+    - deployment : '${{parameters.environment}}Deployment'
+    #- job: DeployJob
+      displayName: '${{parameters.environment}} Deployment'
+      environment: ${{ parameters.environment }}
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - checkout: none
+              - task: DownloadPipelineArtifact@2
+                inputs:
+                  buildType: 'current'
+                  artifactName: ${{ parameters.artifactName }}
+                  targetPath: '$(Pipeline.workspace)'
+
+              # - script: |
+              #     dotnet tool install --global dotnet-ef
+              #     echo "##vso[task.prependpath]$HOME/.dotnet/tools"
+              #     dotnet tool restore
+              #   displayName: 'Install EF Core Tools'
+
+              # - script: |
+              #     $(Pipeline.workspace)/${{parameters.artifactName}}/EfBundle/efbundle.exe --connection "$(DefaultConnection)"
+              #   displayName: 'Apply EF Core Migration Bundle'
+
+              - task: AzureWebApp@1
+                inputs:
+                  azureSubscription: ${{ parameters.azureSubscription }}
+                  appType: 'webApp'
+                  appName: ${{ parameters.webAppName }}
+                  deployToSlotOrASE: true
+                  resourceGroupName: ${{ parameters.resourceGroupName }}
+                  slotName: ${{ parameters.slotName }}
+                  package: '$(Pipeline.workspace)/${{ parameters.artifactName }}/**/*.zip'
+                  deploymentMethod: 'auto'

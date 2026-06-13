@@ -1,0 +1,11 @@
+﻿@*@model CreateIntegrationViewModel*@
+
+<h2>Add New Integration</h2>
+
+<form method="post" action="@Url.Action("Create", "Integrations")">
+    @* Will put form fields for the integration details here. *@
+
+    <button type="button" onclick="window.location.href='@Url.Action("InitiateShopifyOAuth", "Integrations")'">
+        Connect to Shopify
+    </button>
+</form>

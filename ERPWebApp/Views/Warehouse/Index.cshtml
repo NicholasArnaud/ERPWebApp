@@ -1,0 +1,94 @@
+﻿@model IEnumerable<ERPWebApp.Models.Warehouse>
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<head>
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+    <link rel="stylesheet" type="text/css" href="~/css/sliderbutton.css">
+</head>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Warehouse</h3>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="custom-bb">
+            <a class="btn btn-dark" asp-action="Create">Create New</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="table-responsive" style="overflow-x: hidden;">
+            <table class="table dt-responsive webkit-nowrap w-100" id="department-role-dataTable">
+                <thead>
+                    <tr>
+                        <th>
+                            Warehouse
+                        </th>                   
+                        <th>
+                            Return Address
+                        </th>
+                        <th>
+                            Return Mobile Number
+                        </th>
+                        <th>
+                            Return Email 
+                        </th>
+                        <th>
+                            Billing Address
+                        </th>
+                        <th>
+                            Billing Mobile Number
+                        </th>
+                      
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                      @foreach (var warehouse in Model)
+                     {
+                         <tr>
+                             <td>
+                                 @Html.DisplayFor(modelItem => warehouse.WarehouseName)
+                             </td>
+                             <td>
+                                @($"{warehouse.Company},{warehouse.Country}, {warehouse.City}, {warehouse.State},{warehouse.PostalCode}")
+                             </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => warehouse.PhoneNumber)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => warehouse.Email)
+                            </td>
+                            <td>
+                                @($"{warehouse.BillingAddress.company},{warehouse.BillingAddress.country}, {warehouse.BillingAddress.city}, {warehouse.BillingAddress.state},{warehouse.BillingAddress.postalCode}")
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => warehouse.BillingAddress.phone)
+                            </td>
+                             <td class="table-action">
+                                 <a class="action-icon" asp-action="Details" asp-route-id="@warehouse.WarehouseId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                                 @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager) || this.User.IsInRole(RoleList.InventoryManager))
+                                 {
+                                    <a class="action-icon" asp-action="Edit" asp-route-id="@warehouse.WarehouseId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                                 }
+                                 @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager) || this.User.IsInRole(RoleList.InventoryManager))
+                                 {
+                                    <a class="action-icon" asp-action="Delete" asp-route-id="@warehouse.WarehouseId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                                 }
+                             </td>
+                         </tr>
+                     } 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

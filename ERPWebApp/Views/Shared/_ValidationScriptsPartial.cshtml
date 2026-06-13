@@ -1,0 +1,41 @@
+﻿<!-- Code Highlight js -->
+<script src="~/lib/hyper-assets/vendor/highlightjs/highlight.pack.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/clipboard/clipboard.min.js"></script>
+<script src="~/lib/hyper-assets/js/hyper-syntax.js"></script>
+
+<!-- Datatables js -->
+<script src="~/lib/hyper-assets/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-bs5/js/dataTables.bootstrap5.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-fixedcolumns-bs5/js/fixedColumns.bootstrap5.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-keytable/js/dataTables.keyTable.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/daterangepicker/moment.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/apexcharts/apexcharts.min.js"></script>
+<script src="~/lib/hyper-assets/vendor/daterangepicker/daterangepicker.js"></script>
+<script src="~/lib/hyper-assets/vendor/select2/js/select2.full.min.js"></script>
+<script src="~/lib/js-zip/jszip.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.dataTables_filter input').off().on('keyup', function() {
+            var searchVal = this.value.trim();
+            $('#'+$(this).attr('aria-controls')).DataTable().search(searchVal).draw()
+        });
+    })
+
+    $(document).on('select2:open', () => {
+        const selectElement = $(event.target);
+        const searchField = selectElement.find('.select2-search__field');
+        if (searchField && searchField.length > 0) {
+            searchField.focus();
+        }
+    });
+</script>

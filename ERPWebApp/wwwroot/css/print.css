@@ -1,0 +1,60 @@
+﻿/* print.css */
+header, footer, aside, nav, form, iframe, .menu, .hero, .adslot {
+    display: none;
+}
+
+article {
+    column-width: 17em;
+    column-gap: 3em;
+}
+
+/* print.css */
+* {
+    background-image: none !important;
+}
+
+img, svg {
+    display: none !important;
+}
+
+    img.print, svg.print {
+        display: block;
+        max-width: 100%;
+    }
+
+/* print.css */
+main::after {
+    content: "Copyright completeful.com";
+    display: block;
+    text-align: center;
+}
+
+table, img, svg {
+    break-inside: avoid;
+}
+
+/* hidden on-screen */
+.print {
+    display: none;
+}
+
+@media print {
+
+    /* visible when printed */
+    .print {
+        display: block;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    .section-to-print, .section-to-print * {
+        visibility: visible;
+    }
+
+    .article {
+        column-width: 17em;
+        column-gap: 3em;
+    }
+}

@@ -1,0 +1,221 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.Location>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+
+    <div class="card">
+        <div id="dialogContainer" class="modal fade text-width:80%;" role="dialog">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div style="display: none" class="modal-header modal-colored-header bg-primary" id="modalHeadeDialog">
+                        <h3 style="text-align:center;">Available Stocks!</h3>
+                    </div>
+
+                    <div id="myModalErrorAlertBody" class="modal-body" style="text-align:center; color: white; font-size: 20px;">
+                        <div class="row g-2">
+                            @*<div class="add-product table-responsive" id="add-product"></div>*@
+                            <table class="table table-hover table-dar" id="product-datatable">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Sku</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Total Available</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        &nbsp;
+                        <button type="button" id="myModalBtn" class="btn btn-secondary" onclick="$('#dialogContainer').modal('hide');">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div id="myModalError" class="modal fade text-width:80%;" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div style="display: none" class="modal-header modal-colored-header bg-danger" id="modalHeadeError">
+                        <center> <i class="dripicons-wrong h1"></i>&nbsp;&nbsp;Error Deleting!</center>
+                    </div>
+                    <div id="myModalErrorAlertBody" class="Modal-body" style="text-align:center; color: white; font-size: 20px;">
+                        Message will appear here
+                    </div>
+                    <div class="modal-footer">
+                        &nbsp;
+                        <button type="button" id="myModalBtn" class="btn btn-secondary" onclick="$('#myModalError').modal('hide');">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Locations</h3>
+            </div>
+
+            <div class="card-body">
+
+                @if (User.IsInRole(RoleList.Administrator) ||
+                User.IsInRole(RoleList.InventoryManager) ||
+                User.IsInRole(RoleList.ShippingManager))
+                {
+                    <div class="row custom-bb">
+                        <div class="col-md-3 col-sm-5 col-xs-12">
+                            <a class="btn btn-dark" asp-action="Create">Create New</a>
+                        </div>
+                    </div>
+                }
+
+                <div class="row mb-3">
+
+                    @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                    {
+                        <div class="col-md-4 col-sm-6 col-xs-12 d-flex flex-column justify-content-center">
+
+                            <div class="form-check form-switch">
+                                <label class="form-check-label" for="inactive-checkbox" id="inactive-checkbox-label">Show Inactive Locations</label>
+                                <input type="checkbox" class="form-check-input" id="inactive-checkbox" />
+                            </div>
+
+                        </div>
+                    }
+
+                    <div class="col-md-4 col-sm-6 col-xs-12 custom-mt-xs">
+                        <label class="form-check-label" for="site-select-id">Filter By Site</label>
+                        <select class="form-control select2" id="site-select-id" asp-items="ViewBag.Site">
+                            <option value="0">All Sites</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <hr class="hr m-0 mt-2 mb-3" />
+
+                <div class="row">
+
+                    <table class="table dt-responsive webkit-nowrap w-100" id="location-datatable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.LocationId)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Sites)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.LocationName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.LocationDescription)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Type)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.IsActive)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.IsExternal)
+                                </th>
+                                <th>
+                                    <a>Actions</a>
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/js/pages/location-datatable.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".select2").select2();
+
+            var msg = "@TempData["ErrorMessage"]";
+            if (msg) {
+                getErrorM(msg);
+            }
+            function getErrorM(myMessage) {
+                var msg = myMessage;
+                if (msg) {
+                    openErrorModal(msg);
+                }
+            }
+            function openErrorModal(strMessage) {
+                $('#myModalBtn').show();
+                var myDiv = document.getElementById("myModalErrorAlertBody");
+                myDiv.innerHTML = strMessage;
+                $('#myModalError').modal('show');
+                $('#modalHeadeError').show();
+            }
+
+            const table = new DataTable('#location-datatable');
+
+            $("#location-datatable tbody").on("click", "tr td:not(:last-child)", function (event) {
+                var lastColumnIndex = table.columns().nodes().length - 1;
+                if ($(event.target).index() === lastColumnIndex) {
+                    return;
+                }
+
+                if ($(this).hasClass("selected")) {
+                    $(this).removeClass("selected");
+                } else {
+                    table.$("tr.selected").removeClass("selected");
+                    $(this).addClass("selected");
+                }
+
+                var data = table.row(this).data();
+                const tableBody = document.getElementById("table-body");
+                while (tableBody.firstChild) {
+                    tableBody.removeChild(tableBody.firstChild);
+                }
+                const url = '../Locations/GetStockDetails'
+
+                $.getJSON(url, { id: data.locationId }, function (response) {
+                    response.forEach(item => {
+
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                                                <td>${item.products.sku}</td>
+                                                <td>${item.products.description}</td>
+                                                        <td>${item.totalAvailable}</td>
+                                    `;
+                        tableBody.appendChild(row);
+                    })
+                    if (response.length > 0) {
+                        $('#dialogContainer').modal('show');
+                        $('#modalHeadeDialog').show();
+                    }
+                });
+            });
+
+        });
+    </script>
+}

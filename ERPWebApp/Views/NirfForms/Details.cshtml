@@ -1,0 +1,1086 @@
+﻿@using ERPWebApp.Models.NirfForms
+@model ERPWebApp.Models.NirfForms.NirfViewModel
+<style>
+    .accordion-button:not(.collapsed) {
+        background: #464F5B;
+        color: white;
+    }
+
+    /*
+                                        This is for select2 validations.
+                                        If a select2 didnt pass the validation and gets auto applied the classes invalid
+                                        the css below will set the border to red. And same Visa Versa for if it passes validation
+                                        then the css below will set the border to green.S
+                                        */
+    .was-validated .custom-select:invalid + .select2 .select2-selection {
+        border-color: #FF5B5B !important;
+    }
+
+    .was-validated .custom-select:valid + .select2 .select2-selection {
+        border-color: #10C469 !important;
+    }
+
+    *:focus {
+        outline: 0px;
+    }
+
+    .select2-container .select2-selection--single .select2-selection__rendered {
+        color: white;
+        background-color: #37404A;
+    }
+
+    .ribbon-wrapper {
+        width: 85px;
+        height: 88px;
+        overflow: hidden;
+        position: absolute;
+        top: -3px;
+        right: -3px
+    }
+
+    .ribbon {
+        font-size: 12px;
+        color: white;
+        text-transform: uppercase;
+        font-family: 'Montserrat Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        letter-spacing: .05em;
+        line-height: 5px;
+        text-align: center;
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, .4);
+        -webkit-transform: rotate(45deg);
+        -moz-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        -o-transform: rotate(45deg);
+        transform: rotate(45deg);
+        position: relative;
+        padding: 15px 0;
+        right: 5px;
+        top: 15px;
+        width: 120px;
+        height: 28px;
+        -webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .3);
+        box-shadow: 0 0 3px rgba(0, 0, 0, .3);
+        background-color: #536DE6;
+        background-image: -webkit-linear-gradient(top, #536DE6 45%, #536DE6 100%);
+        background-image: -o-linear-gradient(top, #536DE6 45%, #536DE6 100%);
+        background-image: linear-gradient(to bottom, #536DE6 45%, #536DE6 100%);
+        background-repeat: repeat-x;
+    }
+
+        .ribbon:before,
+        .ribbon:after {
+            content: "";
+            border-top: 3px solid #536DE6;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+            position: absolute;
+            bottom: -3px
+        }
+
+        .ribbon:before {
+            left: 0
+        }
+
+        .ribbon:after {
+            right: 0
+        }
+</style>
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-6">
+                    <h3 class="text-nowrap">NIRF Form</h3>
+                </div>
+                @if (@Model.NirfProductMapping.NirfForm.NirfStatus == NirfForm.Status.Completed)
+                {
+                    <div class="col-6">
+                        @Html.ActionLink("Download Excel", "DownloadExcel", "NirfForms", new { id = @Model.NirfProductMapping.NirfForm.NirfFormId }, new Dictionary<string, object> { { "class", "btn btn-dark float-end" } })
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card-body" id="FormToPrint">
+            <div class="row">
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.NirfForm.SellersProductSku)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.NirfForm.SellersProductSku)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.Description)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.Description)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.Sku)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.Sku)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.AltItemNumber)
+                    </b>
+                    <i class="col-sm-10">
+
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.AltItemNumber)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.Departments)
+                    </b>
+                    <i class="col-sm-10">
+                        @foreach (var dept in Model.NirfProductMapping.Product.Departments)
+                        {
+                            @dept.DepartmentName
+                            <div></div>
+                        }
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.Length)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.Length)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.Width)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.Width)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.Height)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.Height)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.WeightUnit)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.WeightUnit)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.DimensionalUnit)
+                    </b>
+                    <i class="col-sm-10">
+
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.DimensionalUnit)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.WeightAmount)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.WeightAmount)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.NirfForm.Orientation)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.NirfForm.Orientation)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.NirfForm.DesignPlacement)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.NirfForm.DesignPlacement)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.NirfForm.DesignAlignment)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.NirfForm.DesignAlignment)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.NirfForm.SpecialInstructions)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.NirfForm.SpecialInstructions)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.FulfillmentCost)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.FulfillmentCost)
+                    </i>
+                </div>
+                <div class="col-md-3 card">
+                    <b class="col-sm-10">
+                        @Html.DisplayNameFor(model => model.NirfProductMapping.Product.Cost)
+                    </b>
+                    <i class="col-sm-10">
+                        @Html.DisplayFor(model => model.NirfProductMapping.Product.Cost)
+                    </i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-nowrap">Inventory</h3>
+
+            </div>
+            <div class="card-body">
+                @if (Model.NirfInventories == null)
+                {
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-danger col-12" style="font-size: 1.1em">Not Filled Out</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    Membrane Location
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfInventories.MembraneLocation.LocationName)
+                                </i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+
+                                <b class="col-sm-10">
+                                    Main Location
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfInventories.MainLocation.LocationName)
+                                </i>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    Alt Membrane Location
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfInventories.AltMembraneLocation.LocationName)
+                                </i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    Alt Location
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfInventories.AltMainLocation.LocationName)
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group p-1">
+                                <label class="control-label">Comments</label>
+                                <textarea asp-for="NirfInventories.Comments" class="form-control" rows="7" disabled></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em">@Model.NirfInventories.SignedBy : @Model.NirfInventories.SignedOn.ToLongDateString()</span>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-nowrap">Forecasting</h3>
+
+            </div>
+            <div class="card-body">
+                @if (Model.NirfForecastings == null)
+                {
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-danger col-12" style="font-size: 1.1em">Not Filled Out</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfForecastings.LeadTime)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfForecastings.LeadTime)
+                                </i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfForecastings.MinMaxLevel)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfForecastings.MinMaxLevel)
+                                </i>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfForecastings.MinMaxLevel)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfForecastings.Count)
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group p-1">
+                                <label class="control-label">Comments</label>
+                                <textarea asp-for="NirfForecastings.Comments" class="form-control" rows="7" disabled></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em">@Model.NirfForecastings.SignedBy : @Model.NirfForecastings.SignedOn.ToLongDateString()</span>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-nowrap">Packaging</h3>
+
+            </div>
+            <div class="card-body">
+                @if (Model.NirfPackagings == null)
+                {
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-danger col-12" style="font-size: 1.1em">Not Filled Out</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.BoxSize)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfPackagings.BoxSize)
+                                </i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.Bag)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfPackagings.Bag)
+                                </i>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.FoamWrap)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @if (@Html.ValueFor(model => model.NirfPackagings.FoamWrap) == "True")
+                                    {
+                                        <a>Yes</a>
+                                    }
+                                    else
+                                    {
+                                        <a>No</a>
+                                    }
+                                </i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.BubbleSleeve)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @if (@Html.ValueFor(model => model.NirfPackagings.BubbleSleeve) == "True")
+                                    {
+                                        <a>Yes</a>
+                                    }
+                                    else
+                                    {
+                                        <a>No</a>
+                                    }
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.UnitsPerBox)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfPackagings.UnitsPerBox)
+                                </i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.UnitsPerBag)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfPackagings.UnitsPerBag)
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.Height)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfPackagings.Height)
+                                </i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.Length)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfPackagings.Length)
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.Width)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfPackagings.Width)
+                                </i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group p-1">
+                                <b class="col-sm-10">
+                                    @Html.DisplayNameFor(model => model.NirfPackagings.ContainerDiminsion)
+                                </b><br>
+                                <i class="col-sm-10">
+                                    @Html.DisplayFor(model => model.NirfPackagings.ContainerDiminsion)
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group p-1">
+                                <label class="control-label">Comments</label>
+                                <textarea asp-for="NirfPackagings.Comments" class="form-control" rows="7" disabled></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em">@Model.NirfPackagings.SignedBy : @Model.NirfPackagings.SignedOn.ToLongDateString()</span>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-nowrap">Parameters</h3>
+
+            </div>
+            <div class="card-body">
+                @if (Model.NirfParameters == null)
+                {
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-danger col-12" style="font-size: 1.1em">Not Filled Out</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @if (Model.NirfProductMapping.NirfForm.IsSizingX)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.SizingX)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.SizingX)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.NirfProductMapping.NirfForm.IsSizingY)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.SizingY)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.SizingY)
+                                    </i>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        @if (Model.NirfProductMapping.NirfForm.IsLoopCount)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.LoopCount)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.LoopCount)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.NirfProductMapping.NirfForm.IsSpeed)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.Speed)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.Speed)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        @if (Model.NirfProductMapping.NirfForm.IsCurrent)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.Current)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.Current)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.NirfProductMapping.NirfForm.IsFrequency)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.Frequency)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.Frequency)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        @if (Model.NirfProductMapping.NirfForm.IsColorLayer)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.ColorLayers)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.ColorLayers)
+                                    </i>
+                                </div>
+                            </div>
+                        }@if (Model.NirfProductMapping.NirfForm.IsWhiteLayer)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.WhiteLayers)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.WhiteLayers)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        @if (Model.NirfProductMapping.NirfForm.IsFont)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.Font.FontTitle)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.Font.FontTitle)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.NirfProductMapping.NirfForm.IsUVPType)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.UVPTypes)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.UVPTypes)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        @if (Model.NirfProductMapping.NirfForm.IsTemperature)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.Temperature)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.Temperature)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.NirfProductMapping.NirfForm.IsTemperature)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.IsFahrenheit)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @if (@Model.NirfParameters.IsFahrenheit == true)
+                                        {
+                                            <a>Fahrenheit</a>
+                                        }
+                                        else
+                                        {
+                                            <a>Celcius</a>
+                                        }
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        @if (Model.NirfProductMapping.NirfForm.IsThreadColor)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.ThreadTypes)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.ThreadTypes)
+                                    </i>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.ThreadColor)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.ThreadColor)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        @if (Model.NirfProductMapping.NirfForm.IsThreadColor)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.ThreadHex)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.ThreadHex)
+                                    </i>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <div class="form-group p-1">
+                                    <b class="col-sm-10">
+                                        @Html.DisplayNameFor(model => model.NirfParameters.ThreadCode)
+                                    </b><br>
+                                    <i class="col-sm-10">
+                                        @Html.DisplayFor(model => model.NirfParameters.ThreadCode)
+                                    </i>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group p-1">
+                                <label class="control-label">Comments</label>
+                                <textarea asp-for="NirfParameters.Comments" class="form-control" rows="9" disabled></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em">@Model.NirfParameters.SignedBy : @Model.NirfParameters.SignedOn.ToLongDateString()</span>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+
+    <div class="col-12 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-nowrap">Shipping</h3>
+            </div>
+            <div class="card-body">
+                @if (Model.NirfShippings == null)
+                {
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-danger col-12" style="font-size: 1.1em">Not Filled Out</span>
+                    </div>
+                }
+                else
+                {
+                    <table class="table dt-responsive webkit-nowrap w-100" id="shipping-provider-datatable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Shipping Provider
+                                </th>
+                                <th>
+                                    Shipping Cost
+                                </th>
+                                <th>
+                                    Shipping Weight
+                                </th>
+                                <th>
+                                    Shipping Size
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.NirfShippings != null)
+                            {
+
+
+                                @foreach (var provider in Model.NirfShippings.NirfShippingProvider)
+                                {
+                                    <tr>
+                                        <td>
+                                            @foreach (var shippingProviders in Model.ShippingProviders)
+                                            {
+                                                if (shippingProviders.ShippingProviderId == provider.ShippingProviderId)
+                                                {
+                                                    @shippingProviders.ShippingProviderName
+                                                }
+
+                                            }
+                                        </td>
+
+                                        <td>
+                                            @provider.ShippingCost
+                                        </td>
+                                        <td>
+                                            @provider.ShippingWeight
+                                        </td>
+                                        <td>
+                                            @provider.ShippingSize
+                                        </td>
+
+
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group p-1">
+                                <label class="control-label">Comments</label>
+                                <textarea asp-for="NirfShippings.Comments" class="form-control" rows="7" disabled></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em">@Model.NirfShippings.SignedBy : @Model.NirfShippings.SignedOn.ToLongDateString()</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-nowrap">Vendor Mapping</h3>
+            </div>
+            <div class="card-body">
+                @if (Model.NirfVendorMapping == null)
+                {
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-danger col-12" style="font-size: 1.1em">Not Filled Out</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-12 col-lg-4">
+                        <div class="form-group p-1">
+                            <b class="col-sm-10">
+                                Selected Vendor
+                            </b><br>
+                            <i class="col-sm-10">
+                                @Html.DisplayFor(model => model.NirfVendorMapping.Vendor.VendorName)
+                            </i>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em">@Model.NirfVendorMapping.SignedBy : @Model.NirfVendorMapping.SignedOn.ToLongDateString()</span>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-12 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-nowrap">Product Variation</h3>
+            </div>
+            <div class="card-body">
+                @if (Model.NirfProducts == null)
+                {
+                    <div class="row justify-content-center">
+                        <span class="badge rounded-pill bg-danger col-12" style="font-size: 1.1em">Not Filled Out</span>
+                    </div>
+                }
+                else
+                {
+                    <table class="table dt-responsive webkit-nowrap w-100" id="product-variation-datatable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Sku
+                                </th>
+                                <th>
+                                    Description
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.NirfProducts != null && Model.NirfProducts.Any())
+                            {
+                                @foreach (var provider in Model.NirfProducts)
+                                {
+                                    <tr>
+                                        <td>
+                                            @provider.Sku
+                                        </td>
+                                        <td>
+                                            @provider.Description
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="text-nowrap">Images</h3>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var img in @Model.NirfImageMapping)
+                    {
+                        <div class="col-12 col-lg-3">
+                            <div class="card">
+                                @if (img.IsThumbnail)
+                                {
+                                    <div class="ribbon-wrapper">
+                                        <div class="ribbon">Thumbnail</div>
+                                    </div>
+                                }
+
+                                <img src="~/File?id=@img.FileId" alt="Image not loaded" class="card-img-top img-responsive" />
+                                <div class="card-header">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            @img.Files.FileName
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div m-3>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script type="text/javascript">
+            // this uses bootstraps custom validation rules and applies to every form on the page. If you set a "required" tag inside a form element
+            // ex. <textarea rows="2" required></textarea>
+            // then the form will not submit until that textarea gets validation with whatever conditions you set.
+            (function () {
+                'use strict'
+
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.querySelectorAll('.needs-validation');
+
+                // Loop over them and prevent submission
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+
+                            form.classList.add('was-validated');
+                        }, false)
+                    })
+            })()
+
+            function initializeDataTable(tableId) {
+                return $("#" + tableId).DataTable({
+                    "pageLength": 5,
+                    lengthMenu: [[5, 10, 25, 100], [5, 10, 25, 100]],
+                    keys: true,
+                    language: {
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>",
+                            next: "<i class='mdi mdi-chevron-right'>"
+                        },
+                    },
+                    drawCallback: function () {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded");
+                    }
+                });
+            }
+
+            $(document).ready(function () {
+
+                var ShippingProviderTable = initializeDataTable("shipping-provider-datatable");
+                var ProductVarationTable = initializeDataTable("product-variation-datatable");
+
+            });
+        </script>
+    }
+}

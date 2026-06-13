@@ -1,0 +1,1517 @@
+﻿@using ERPWebApp.Models.Inventory
+@using ERPWebApp.Models.NirfForms
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
+@model ERPWebApp.Models.NirfForms.NirfViewModel
+<head xmlns="http://www.w3.org/1999/html">
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+    <link rel="stylesheet" type="text/css" href="~/css/sliderbutton.css">
+</head>
+<style>
+    .accordion-button:not(.collapsed) {
+        background: #464F5B;
+        color: white;
+    }
+
+    /*
+                                                                                                                                                                            This is for select2 validations.
+                                                                                                                                                                            If a select2 didnt pass the validation and gets auto applied the classes invalid
+                                                                                                                                                                            the css below will set the border to red. And same Visa Versa for if it passes validation
+                                                                                                                                                                            then the css below will set the border to green.S
+                                                                                                                                                                            */
+    .was-validated .custom-select:invalid + .select2 .select2-selection {
+        border-color: #FF5B5B !important;
+    }
+
+    .was-validated .custom-select:valid + .select2 .select2-selection {
+        border-color: #10C469 !important;
+    }
+
+    *:focus {
+        outline: 0px;
+    }
+
+    .ribbon-wrapper {
+        width: 85px;
+        height: 88px;
+        overflow: hidden;
+        position: absolute;
+        top: -3px;
+        right: -3px;
+    }
+
+    .ribbon {
+        font-size: 14px;
+        color: white;
+        text-transform: uppercase;
+        font-family: 'Montserrat Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        letter-spacing: .05em;
+        line-height: 5px;
+        text-align: center;
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, .4);
+        -webkit-transform: rotate(45deg);
+        -moz-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        -o-transform: rotate(45deg);
+        transform: rotate(45deg);
+        position: relative;
+        padding: 15px 0;
+        right: 5px;
+        top: 15px;
+        width: 120px;
+        height: 28px;
+        -webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .3);
+        box-shadow: 0 0 3px rgba(0, 0, 0, .3);
+        background-color: #536DE6;
+        background-image: -webkit-linear-gradient(top, #536DE6 45%, #536DE6 100%);
+        background-image: -o-linear-gradient(top, #536DE6 45%, #536DE6 100%);
+        background-image: linear-gradient(to bottom, #536DE6 45%, #536DE6 100%);
+        background-repeat: repeat-x;
+    }
+
+        .ribbon:before,
+        .ribbon:after {
+            content: "";
+            border-top: 3px solid #536DE6;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+            position: absolute;
+            bottom: -3px;
+        }
+
+        .ribbon:before {
+            left: 0
+        }
+
+        .ribbon:after {
+            right: 0
+        }
+    /* Popup container */
+    .popup {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+        /* The actual popup (appears on top) */
+        .popup .popuptext {
+            visibility: hidden;
+            width: 180px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 10px;
+            padding: 4px 8px;
+            position: absolute;
+            z-index: 1;
+            top: 125%;
+            left: -250%;
+            margin-left: -80px;
+        }
+
+        /* Toggle this class when clicking on the popup container (hide and show the popup) */
+        .popup .show {
+            visibility: visible;
+            -webkit-animation: fadeIn 1s;
+            animation: fadeIn 1s
+        }
+
+    .info {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+        /* The actual popup (appears on top) */
+        .info .infotext {
+            visibility: hidden;
+            width: 180px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 10px;
+            padding: 4px 8px;
+            position: absolute;
+            z-index: 1;
+            top: 125%;
+             margin-left: -50px;
+        }
+
+        /* Toggle this class when clicking on the popup container (hide and show the popup) */
+        .info .show {
+            visibility: visible;
+            -webkit-animation: fadeIn 1s;
+            animation: fadeIn 1s
+        }
+
+    #department-error {
+        color: #ff5b5b;
+    }
+</style>
+@if (@TempData["Error"] != null)
+{
+    <div class="row">
+        <div class="col-12 text-danger">
+            <h2>@TempData["Error"]</h2>
+        </div>
+    </div>
+}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">NIRF Form</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="FinishForm" class="needs-validation" novalidate enctype="multipart/form-data">
+                <div class="row">
+                    <input asp-for="@Model.NirfForms.NirfFormId" value="@Model.NirfForms.NirfFormId" hidden />
+                    <input asp-for="NirfProductMapping.ProductId" value="@Model.NirfProductMapping.ProductId" hidden />
+                    
+                    <div class="row mt-3">
+                        <div class="form-group col">
+                            <label class="control-label" asp-for="@Model.NirfForms.SellersProductSku">Sellers Product Sku</label>
+                            <input asp-for="@Model.NirfForms.SellersProductSku" class="form-control" type="text" required />
+                        </div>
+                        <div class="form-group col">
+                            <label class="control-label" asp-for="NirfProductMapping.Product.Sku">Sku</label>
+                            <input asp-for="NirfProductMapping.Product.Sku" class="form-control" id="full-sku" type="text" required />
+                        </div>
+                        <div class="form-group col">
+                            <label class="control-label" asp-for="NirfProductMapping.Product.AltItemNumber">Alt Item No.</label>
+                            <input asp-for="NirfProductMapping.Product.AltItemNumber" class="form-control" type="text" />
+                        </div>
+                        <div class="form-group col">
+                            <label class="control-label">Department</label>
+                            @*<select name="DepartmentList" id="DepartmentList" asp-for="NirfProductMapping.Product.DepartmentList"
+                            class="select custom-select select2-multiple" data-toggle="select2" multiple="multiple"
+                            data-placeholder="Choose ..."
+                            asp-items="@ViewBag.DepartmentList" required>
+                            </select>*@
+                            @Html.ListBoxFor(m => m.NirfProductMapping.Product.DepartmentList, (MultiSelectList)ViewBag.DepartmentList,
+                                     new
+                                     {
+                                         @class = "select2 custom-select select2-multiple",
+                                         data_toggle = "select2",
+                                         multiple = "multiple",
+                                         data_placeholder = "Choose ...",
+                                         asp_for = "NirfProductMapping.Product.DepartmentList"
+                                     })
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="form-group col-12">
+                            <label class="control-label" asp-for="NirfProductMapping.Product.Description">Description</label>
+                            <textarea asp-for="NirfProductMapping.Product.Description" class="form-control" rows="5"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="form-group col-md-4">
+                            <label class="control-label" asp-for="NirfProductMapping.Product.DimensionalUnit">Dimensional Unit</label>
+                            <select class="select custom-select select2-multiple"
+                                    data-toggle="select2"
+                                    asp-for="NirfProductMapping.Product.DimensionalUnit" required asp-items="@Html.GetEnumSelectList<DimensionalUnit>()" class="form-control">
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label" asp-for="NirfProductMapping.Product.Length">Length</label>
+                            <input class="form-control" type="number" min="0.01" step="0.01" required asp-for="NirfProductMapping.Product.Length" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label" asp-for="NirfProductMapping.Product.Width">Width</label>
+                            <input class="form-control" type="number" min="0.01" step="0.01" required asp-for="NirfProductMapping.Product.Width" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label" asp-for="NirfProductMapping.Product.Height">Height</label>
+                            <input class="form-control" type="number" min="0.01" step="0.01" required asp-for="NirfProductMapping.Product.Height" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label" asp-for="NirfProductMapping.Product.WeightUnit">Weight Unit</label>
+                            <select class="select custom-select select2-multiple"
+                                    data-toggle="select2"
+                                    asp-for="NirfProductMapping.Product.WeightUnit" asp-items="@Html.GetEnumSelectList<WeightUnit>()" class="form-control" required>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label" asp-for="NirfProductMapping.Product.WeightAmount">Weight</label>
+                            <input class="form-control" type="number" min="0.01" step="0.01" required asp-for="NirfProductMapping.Product.WeightAmount" />
+                        </div>
+
+                    </div>
+
+                    <div class="row g-3 mt-3">
+                        <div class="form-group col-md-4">
+                            <label class="control-label" asp-for="@Model.NirfForms.Orientation">Orientation</label>
+                            <input class="form-control" type="text" required asp-for="@Model.NirfForms.Orientation" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label" asp-for="@Model.NirfForms.DesignPlacement">Design Placement</label>
+                            <input class="form-control" type="text" required asp-for="@Model.NirfForms.DesignPlacement" />
+                        </div>
+
+                        <div class="form-group col-md-4">
+                            <label class="control-label" asp-for="@Model.NirfForms.DesignAlignment">Design Alignment</label>
+                            <input class="form-control" type="text" required asp-for="@Model.NirfForms.DesignAlignment" />
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label" asp-for="@Model.NirfForms.SpecialInstructions">Special Instructions</label>
+                            <textarea asp-for="@Model.NirfForms.SpecialInstructions" class="form-control" rows="5"></textarea>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="form-label" asp-for="NirfProductMapping.Product.FulfillmentCost">Fulfillment Cost</label>
+                            <div class="input-group mb-1">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" min="0.01" step="0.01" required asp-for="NirfProductMapping.Product.FulfillmentCost">
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="form-label" asp-for="NirfProductMapping.Product.Cost">Cost</label>
+                            <div class="input-group mb-1">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" min="0.01" step="0.01" required asp-for="NirfProductMapping.Product.Cost">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (User.IsInRole(RoleList.CustomerSupportManager) || User.IsInRole(RoleList.Administrator))
+                {
+                    <div class="row g-3 mt-4">
+                        <div class="col-6">
+                            <div class="dropdown btn-group ">
+                                <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Save
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-animated">
+                                    <input value="Save Changes" type="submit" class="btn" name="submit" asp-action="Edit" asp-route-id="@Model.NirfForms.NirfFormId" />
+                                    <input value="Finish Form" type="submit" class="btn" name="submit" />
+                                </div>
+                            </div>
+                            <input value="Cancel Form" type="submit" class="btn btn-danger mr-4" asp-action="CancelForm" asp-route-id="@Model.NirfForms.NirfFormId" />
+                        </div>
+                    </div>
+                }
+                <input type="hidden" asp-for="@Model.NirfForms.CreatedBy" />
+                <input type="hidden" asp-for="@Model.NirfForms.AspUserId" />
+                <input type="hidden" asp-for="@Model.NirfForms.StartedDate" />
+                <input type="hidden" asp-for="@Model.NirfForms.CompletedDate" />
+                <input type="hidden" asp-for="@Model.NirfForms.NirfStatus" />
+                <input type="hidden" asp-for="@Model.NirfProductMapping.NirfProductMappingId" />
+                <input type="hidden" asp-for="@Model.NirfProductMapping.ProductId" />
+                <input type="hidden" asp-for="@Model.NirfProductMapping.NirfFormId" />
+                <input type="hidden" asp-for="@Model.NirfProductMapping.Product.ProductId" />
+                <input type="hidden" asp-for="@Model.NirfProductMapping.NirfForm.NirfFormId" />
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-lg-6">
+        <div class="accordion custom-accordion mt-1" id="custom-accordion-prod">
+            <div class="card mb-0">
+                <h4 class="accordion-header" id="heading-one">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-one" aria-expanded="false" aria-controls="collapse-one">
+                        Inventory
+                    </button>
+                </h4>
+                <div id="collapse-one" class="accordion-collapse collapse" aria-labelledby="heading-one" data-bs-parent="#accordion-example">
+                    <div class="accordion-body">
+                        <form asp-action="SignInventory" class="needs-validation" novalidate>
+                            <div class="row">
+                                <input asp-for="NirfInventories.NirfFormId" value="@Model.NirfProductMapping.NirfForm.NirfFormId" hidden />
+                                <div class="info mdi-24px mdi mdi-help-circle-outline" style="float:right" onclick="infoInventory()">
+                                    <span class="infotext" id="info-popup">
+                                        This tab sets where the default location of this item will be and should be when storing the item in the warehouse/membrane.
+                                    </span>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <div class="form-group p-1" style="align-content:center">
+                                        <label class="control-label">Membrane Site</label>
+                                        @{
+                                            var jsonData = JsonSerializer.Serialize(new { MembraneLocationId = Model.NirfInventories?.MembraneLocationId, AltMembraneLocationId = Model.NirfInventories?.AltMembraneLocationId });
+                                        }
+                                        <select class="select custom-select select2-multiple" data-toggle="select2"
+                                                data-placeholder="Choose ..."
+                                                asp-items="@ViewBag.SiteList" asp-for="@Model.NirfInventories.MembraneSiteId" id="membrane-site-select-id" data-locations="@jsonData">
+
+                                            <option value="" selected disabled></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <div class="form-group p-1" style="align-content:center">
+                                        <label class="control-label">Main Site</label>
+                                        @{
+                                            var jsonDataMainSite = System.Text.Json.JsonSerializer.Serialize(new { MainLocationId = Model.NirfInventories?.MainLocationId, AltMainLocationId = Model.NirfInventories?.AltMainLocationId });
+                                        }
+                                        <select class="select custom-select select2-multiple" data-toggle="select2"
+                                                data-placeholder="Choose ..."
+                                                asp-items="@ViewBag.SiteList" asp-for="@Model.NirfInventories.MainSiteId" id="main-site-select-id" data-locations="@jsonDataMainSite">
+                                            <option value="" selected disabled></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-6">
+                                    <div class="form-group p-1" id="membrane-location" style="display:none">
+                                        <label class="control-label">Membrane Location</label>
+                                        <select asp-for="NirfInventories.MembraneLocationId" class="select custom-select select2-multiple" data-toggle="select2"
+                                                data-placeholder="Choose ..."
+                                                asp-items="@ViewBag.MembraneList" asp-for="@Model.NirfInventories.MembraneLocationId" id="membrane-location-select-id">
+                                            <option value="" selected disabled></option>
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <div class="form-group p-1" id="main-location" style="display:none">
+                                        <label class="control-label">Main Location</label>
+                                        <select class="select custom-select select2-multiple" data-toggle="select2"
+                                                data-placeholder="Choose ..."
+                                                asp-items="@ViewBag.MainList" asp-for="@Model.NirfInventories.MainLocationId" id="main-location-select-id">
+                                            <option value="" selected disabled></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-6">
+                                    <div class="form-group p-1" id="alt-membrane-location" style="display:none">
+                                        <label class="control-label text-nowrap">Alt Membrane Location</label>
+                                        <select class="select custom-select select2-multiple" data-toggle="select2"
+                                                data-placeholder="Choose ..."
+                                                asp-for="@Model.NirfInventories.AltMembraneLocationId" id="alt-membrane-location-id">
+                                            <option value="" selected disabled></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <div class="form-group p-1" id="alt-main-location" style="display:none">
+                                        <label class="control-label">Alt Main Location</label>
+                                        <select class="select custom-select select2-multiple" data-toggle="select2"
+                                                data-placeholder="Choose ..."
+                                                asp-for="@Model.NirfInventories.AltMainLocationId" id="alt-main-location-id">
+                                            <option value="" selected disabled></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label class="control-label">Comments</label>
+                                        <textarea asp-for="NirfInventories.Comments" class="form-control" rows="7"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                @if (Model.NirfInventories == null)
+                                {
+                                    @if (User.IsInRole(RoleList.InventoryManager) || User.IsInRole(RoleList.Administrator))
+                                    {
+                                        <div class="col-1">
+                                            <button type="submit" class="btn btn-primary">Sign</button>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em; margin: 10px 0px;">@Model.NirfInventories.SignedBy : @Model.NirfInventories.SignedOn.ToLongDateString()</span>
+                                    @if (User.IsInRole(RoleList.InventoryManager) || User.IsInRole(RoleList.Administrator) && (Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Cancelled || Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Completed))
+                                    {
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <button type="submit" class="btn btn-primary">Re-Sign</button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @* forcasting *@
+    <div class="col-12 col-lg-6">
+        <div class="accordion custom-accordion mt-1" id="custom-accordion-prod">
+            <div class="card mb-0">
+                <h2 class="accordion-header" id="heading-four">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-four" aria-expanded="false" aria-controls="collapse-four">
+                        Forecasting
+                    </button>
+                </h2>
+                <div id="collapse-four" class="accordion-collapse collapse" aria-labelledby="heading-four" data-bs-parent="#accordion-example">
+                    <div class="accordion-body">
+                        <form asp-action="SignForecasting" class="needs-validation" novalidate>
+                            <div class="info mdi-24px mdi mdi-help-circle-outline" style="float:none" onclick="infoForecasting()">
+                                <span class="infotext" id="info-forecasting">
+                                    Lead time shows the estimated time it takes to receive the product from the supplier
+                                    all the way to the customer recieving the personalized item. Min Max level is a reordering
+                                    strategy that sets a trigger to reorder when the minimum value is reached
+                                </span>
+                            </div>
+                            <div class="row">
+                                <input asp-for="NirfForecastings.NirfFormId" value="@Model.NirfProductMapping.NirfForm.NirfFormId" hidden />
+                                <div class="col-6">
+                                    <div class="form-group p-1">
+                                        <label class="control-label">Lead Time (Days)</label>
+                                        <input class="form-control" min="1" type="number" asp-for="NirfForecastings.LeadTime" required />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group p-1">
+                                        <label class="control-label">Min Max Level</label>
+                                        <input class="form-control" min="1" type="number" asp-for="NirfForecastings.MinMaxLevel" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-group p-1">
+                                        <label class="control-label">Count</label>
+                                        <input class="form-control" min="1" type="number" asp-for="NirfForecastings.Count" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label class="control-label">Comments</label>
+                                        <textarea asp-for="NirfForecastings.Comments" class="form-control" rows="7"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (Model.NirfForecastings == null)
+                            {
+                                @if (User.IsInRole(RoleList.FinancialManager) || User.IsInRole(RoleList.Administrator))
+                                {
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button type="submit" class="btn btn-primary">Sign</button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="row justify-content-center">
+                                    <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em; margin: 10px 0px;">@Model.NirfForecastings.SignedBy : @Model.NirfForecastings.SignedOn.ToLongDateString()</span>
+                                </div>
+                                @if (User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.Administrator) && (Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Cancelled || Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Completed))
+                                {
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button type="submit" class="btn btn-primary">Re-Sign</button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-12 col-lg-6">
+        <div class="accordion custom-accordion mt-1" id="custom-accordion-prod">
+            <div class="card mb-0">
+                <h2 class="accordion-header" id="heading-three">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-three" aria-expanded="false" aria-controls="collapse-three">
+                    Packaging
+                </button>
+            </h2>
+            <div id="collapse-three" class="accordion-collapse collapse" aria-labelledby="heading-three" data-bs-parent="#accordion-example">
+                <div class="accordion-body">
+                    <form asp-action="SignPackaging" class="needs-validation" novalidate>
+                        <div class="row">
+                            <input asp-for="NirfPackagings.NirfFormId" value="@Model.NirfProductMapping.NirfForm.NirfFormId" hidden />
+                            <div class="info mdi-24px mdi mdi-help-circle-outline" style="float:right" onclick="infoPackaging()">
+                                <span class="infotext" id="info-packaging">
+                                    This tab is to show what bag and/or box that this item should be shipped in and the quantity of the product that each bag or box can be shipped in each,
+                                    also the option to select if foam wrap or bubble sleeves are needed.
+                                </span>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Box Size</label>
+                                    <input class="form-control" type="text" asp-for="NirfPackagings.BoxSize" required />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Bag Type</label>
+                                    <input class="form-control" type="text" asp-for="NirfPackagings.Bag" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Foam Wrap</label>
+                                    <input class="form-check-input" type="checkbox" asp-for="NirfPackagings.FoamWrap" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Bubble Sleeve</label>
+                                    <input class="form-check-input" type="checkbox" asp-for="NirfPackagings.BubbleSleeve" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Units Per Box</label>
+                                    <input class="form-control" min="1" type="number" asp-for="NirfPackagings.UnitsPerBox" required />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Units Per Bag</label>
+                                    <input class="form-control" min="1" type="number" asp-for="NirfPackagings.UnitsPerBag" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Container Height</label>
+                                    <input class="form-control" min=".01" step=".01" type="number" asp-for="NirfPackagings.Height" required />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Container Length</label>
+                                    <input class="form-control" min=".01" step=".01" type="number" asp-for="NirfPackagings.Length" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Container Width</label>
+                                    <input class="form-control" min=".01" step=".01" type="number" asp-for="NirfPackagings.Width" required />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label asp-for="NirfPackagings.ContainerDiminsion" class="control-label"></label>
+                                    <select asp-for="NirfPackagings.ContainerDiminsion" asp-items="@Html.GetEnumSelectList<ContainerDiminsions>()" class="form-control"></select>
+                                    <span asp-validation-for="NirfPackagings.ContainerDiminsion" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-6">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Products Per Container</label>
+                                    <input class="form-control" min="1" type="number" asp-for="NirfPackagings.UnitsPerContainer" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group p-1">
+                                    <label class="control-label">Comments</label>
+                                    <textarea asp-for="NirfPackagings.Comments" class="form-control" rows="7"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        @if (Model.NirfPackagings == null)
+                        {
+                            @if (User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.Administrator))
+                            {
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button type="submit" class="btn btn-primary">Sign</button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="row justify-content-center">
+                                <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em; margin: 10px 0px;">@Model.NirfPackagings.SignedBy : @Model.NirfPackagings.SignedOn.ToLongDateString()</span>
+                            </div>
+                            @if (User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.Administrator) && (Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Cancelled || Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Completed))
+                            {
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button type="submit" class="btn btn-primary">Re-Sign</button>
+                                    </div>
+                                </div>
+                            }
+
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    @* Parameters *@
+    <div class="col-12 col-lg-6">
+        <div class="accordion custom-accordion mt-1" id="custom-accordion-prod">
+            <div class="card mb-0">
+                <h2 class="accordion-header" id="heading-two">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-two" aria-expanded="false" aria-controls="collapse-two">
+                        Parameters
+                    </button>
+                </h2>
+                <div id="collapse-two" class="accordion-collapse collapse" aria-labelledby="heading-two" data-bs-parent="#accordion-example">
+                    <div class="accordion-body">
+                        <form asp-action="SignParameters" class="needs-validation" novalidate>
+                            <div class="row">
+                                <input asp-for="NirfParameters.NirfFormId" value="@Model.NirfProductMapping.NirfForm.NirfFormId" hidden />
+                                <label class="control-label">Sizing</label>
+                                <div class="info mdi-24px mdi mdi-help-circle-outline" style="float:right" onclick="infoSizing()">
+                                    <span class="infotext" id="info-sizing">
+                                        The parameters tab shows the suggested settings in terms of personalizing the item in the desired program,
+                                        if the product being created does not need these settings, just set the values to 0.
+                                    </span>
+                                </div>
+                                @if (Model.NirfProductMapping.NirfForm.IsSizingX)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">X</label>
+                                            <input class="form-control" min="0" type="number" min="0" asp-for="NirfParameters.SizingX" required />
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.NirfProductMapping.NirfForm.IsSizingY)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Y</label>
+                                            <input class="form-control" min="0" type="number" asp-for="NirfParameters.SizingY" required />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="row">
+                                @if (Model.NirfProductMapping.NirfForm.IsLoopCount)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Loop Count</label>
+                                            <input class="form-control" min="0" type="number" asp-for="NirfParameters.LoopCount" required />
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.NirfProductMapping.NirfForm.IsSpeed)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Speed</label>
+                                            <input class="form-control" min="0" type="number" asp-for="NirfParameters.Speed" required />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="row">
+                                @if (Model.NirfProductMapping.NirfForm.IsCurrent)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Current</label>
+                                            <input class="form-control" min="0" type="number" asp-for="NirfParameters.Current" required />
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.NirfProductMapping.NirfForm.IsFrequency)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Frequency</label>
+                                            <input class="form-control" min="0" type="number" asp-for="NirfParameters.Frequency" required />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="row">
+                                @if (Model.NirfProductMapping.NirfForm.IsColorLayer)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Color Layers</label>
+                                            <input class="form-control" asp-for="NirfParameters.ColorLayers" required />
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.NirfProductMapping.NirfForm.IsWhiteLayer)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">White Layers</label>
+                                            <input class="form-control" asp-for="NirfParameters.WhiteLayers" required />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="row">
+                                @if (Model.NirfProductMapping.NirfForm.IsFont)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+
+                                            <label class="control-label">Select a Font</label>
+                                            <select name="FontList" id="FontList"
+                                                    class="select custom-select select2-multiple" data-toggle="select2"
+                                                    data-placeholder="Choose ..."
+                                                    asp-items="@ViewBag.FontList" required>
+                                            </select>
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.NirfProductMapping.NirfForm.IsUVPType)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label" asp-for="NirfParameters.UVPTypes">UVP Types</label>
+                                            <select class="select custom-select select2-multiple" id="uvp-type"
+                                                    data-toggle="select2"
+                                                    asp-for="NirfParameters.UVPTypes" asp-items="@Html.GetEnumSelectList<UVPTypes>()" class="form-control" required>
+                                            </select>
+
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="row">
+                                @if (Model.NirfProductMapping.NirfForm.IsTemperature)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Temperature</label>
+                                            <input class="form-control" min="0" type="number" asp-for="NirfParameters.Temperature" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Temperature Type</label>
+                                            <select name="TempList" id="TempList"
+                                                    class="select custom-select select2-multiple" data-toggle="select2"
+                                                    data-placeholder="Choose ..."
+                                                    required>
+                                                <option value="1">Fahrenheit</option>
+                                                <option value="2">Celsius</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="row">
+                                @if (Model.NirfProductMapping.NirfForm.IsThreadColor)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label" asp-for="NirfParameters.ThreadTypes">Thread Types</label>
+                                            <select class="select custom-select select2-multiple" id="thread-type"
+                                                    data-toggle="select2"
+                                                    asp-for="NirfParameters.ThreadTypes" asp-items="@Html.GetEnumSelectList<ThreadType>()" class="form-control" required>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Thread Color</label>
+                                            <input class="form-control" asp-for="NirfParameters.ThreadColor" />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="row">
+                                @if (Model.NirfProductMapping.NirfForm.IsThreadColor)
+                                {
+                                    if (Model.NirfParameters != null && Model.NirfParameters.ThreadTypes == ThreadType.Code)
+                                    {
+                                        <div class="col-6" id="thread-hex" style="display:none">
+                                            <div class="form-group p-1">
+                                                <label class="control-label">Thread Hex</label>
+                                                <input class="form-control" asp-for="NirfParameters.ThreadHex" onkeyup="addHash(this)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6" id="thread-code">
+                                            <div class="form-group p-1">
+                                                <label class="control-label">Thread Code</label>
+                                                <input class="form-control" asp-for="NirfParameters.ThreadCode" />
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+
+
+                                        <div class="col-6" id="thread-hex">
+                                            <div class="form-group p-1">
+                                                <label class="control-label">Thread Hex</label>
+                                                <input class="form-control" asp-for="NirfParameters.ThreadHex" onkeyup="addHash(this)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6" id="thread-code" style="display:none">
+                                            <div class="form-group p-1">
+                                                <label class="control-label">Thread Code</label>
+                                                <input class="form-control" asp-for="NirfParameters.ThreadCode" />
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <div class="row">
+
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label class="control-label">Time To Complete</label>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                @if (Model.NirfParameters != null)
+                                {
+                                    <div class="col-4">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Hours</label>
+
+                                        </div>
+                                        <input class="form-control" name="TimeHour" type="number" min="0" max="23" step="1" value="@Model.NirfParameters.TimeToComplete.Hour" required />
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Minutes</label>
+
+                                        </div>
+                                        <input class="form-control" name="TimeMin" type="number" min="0" max="59" step="1" value="@Model.NirfParameters.TimeToComplete.Minute" required />
+
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Seconds</label>
+
+                                        </div>
+                                        <input class="form-control" name="TimeSec" type="number" min="0" max="59" step="1" value="@Model.NirfParameters.TimeToComplete.Second" required />
+
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="col-4">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Hours</label>
+
+                                        </div>
+                                        <input class="form-control" name="TimeHour" type="number" min="0" max="23" step="1" value="0" required />
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Minutes</label>
+
+                                        </div>
+                                        <input class="form-control" name="TimeMin" type="number" min="0" max="59" step="1" value="0" required />
+
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group p-1">
+                                            <label class="control-label">Seconds</label>
+
+                                        </div>
+                                        <input class="form-control" name="TimeSec" type="number" min="0" max="59" step="1" value="0" required />
+
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label class="control-label">Comments</label>
+                                        <textarea asp-for="NirfParameters.Comments" class="form-control" rows="7"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (Model.NirfParameters == null)
+                            {
+                                @if (User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.Administrator))
+                                {
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button type="submit" class="btn btn-primary">Sign</button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="row justify-content-center">
+                                    <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em; margin: 10px 0px;">@Model.NirfParameters.SignedBy : @Model.NirfParameters.SignedOn.ToLongDateString()</span>
+                                </div>
+                                @if (User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.Administrator) && (Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Cancelled || Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Completed))
+                                {
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button type="submit" class="btn btn-primary">Re-Sign</button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-12 col-lg-6">
+        <div class="accordion custom-accordion mt-1" id="custom-accordion-prod">
+            <div class="card mb-0">
+                <h2 class="accordion-header" id="heading-five">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-five" aria-expanded="false" aria-controls="collapse-five">
+                        Shipping
+                    </button>
+                </h2>
+                <div id="collapse-five" class="accordion-collapse collapse" aria-labelledby="heading-five" data-bs-parent="#accordion-example">
+                    <div class="accordion-body">
+
+                        <div class="row">
+                            <div class="info mdi-24px mdi mdi-help-circle-outline" style="float:right" onclick="infoShipping()">
+                                <span class="infotext" id="info-shipping">
+                                    Shipping shows the weight, cost, and size of the product being created for each shipping provider that is used. If there are no providers found in the list,
+                                    then all fields are already filled out.
+                                </span>
+                            </div>
+                            <div class="form-group p-1">
+                                <label class="control-label">Shipping Provider</label>
+                                <select name="ShipperList" id="shipper-list"
+                                        class="select custom-select select2" data-toggle="select2"
+                                        data-placeholder="Choose ..."
+                                        asp-items="@ViewBag.ShippersList" required>
+                                </select><br /><br />
+                                <button class="btn btn-secondary" id="add-provider">Add Provider</button>
+                            </div>
+                        </div>
+                        <form asp-action="SignShipping" class="needs-validation" enctype="multipart/form-data" novalidate>
+                            <div class="row" id="shipping">
+
+                                @if (Model.NirfShippings != null)
+                                {
+                                    for (var i = 0; i < Model.NirfShippings.NirfShippingProvider.Count; i++)
+                                    {
+                                        <div id="@Model.NirfShippings.NirfShippingProvider.ToList()[i].ShippingProviderId">
+                                            <h3>@Model.NirfShippings.NirfShippingProvider.ToList()[i].ShippingProvider.ShippingProviderName</h3>
+                                            <input asp-for="@Model.NirfShippings.NirfShippingProvider.ToList()[i].ShippingProviderId" hidden />
+                                            <label class="control-label">Weight(lbs)</label>
+                                            <input class="form-control" min="0.01" step="0.01" type="number" asp-for="@Model.NirfShippings.NirfShippingProvider.ToList()[i].ShippingWeight" placeholder="0.00" required />
+
+                                            <label class="control-label">Size</label>
+                                            <input class="form-control" asp-for="@Model.NirfShippings.NirfShippingProvider.ToList()[i].ShippingSize" placeholder="5x5x5" required />
+
+                                            <label class="control-label">Cost</label>
+                                            <input class="form-control" min="0.01" step="0.01" type="number" asp-for="@Model.NirfShippings.NirfShippingProvider.ToList()[i].ShippingCost" placeholder="0.00" required />
+                                            <i class="mdi mdi-24px mdi-delete item-action-btn dismiss" name="dismiss"></i><br />
+                                            <input id="@Model.NirfShippingProvider[i].ShippingProviderId-e" asp-for="@Model.NirfShippings.NirfShippingProvider.ToList()[i].ErrorMessage" hidden>
+                                        </div>
+                                    }
+                                }
+
+
+                                @for (var i = 0; i < Model.NirfShippingProvider.Count; i++)
+                                {
+                                    <div id="@Model.NirfShippingProvider[i].ShippingProviderId" style="display:none">
+                                        <h3>@Model.NirfShippingProvider[i].ShippingProvider.ShippingProviderName</h3>
+                                        <input asp-for="@Model.NirfShippingProvider[i].ShippingProviderId" hidden />
+                                        <label class="control-label">Weight(lbs)</label>
+                                        <input class="form-control" min="0.01" step="0.01" type="number" asp-for="@Model.NirfShippingProvider[i].ShippingWeight" placeholder="0.00" required />
+
+                                        <label class="control-label">Size</label>
+                                        <input class="form-control" asp-for="@Model.NirfShippingProvider[i].ShippingSize" placeholder="5x5x5" required />
+
+                                        <label class="control-label">Cost</label>
+                                        <input class="form-control" min="0.01" step="0.01" type="number" asp-for="@Model.NirfShippingProvider[i].ShippingCost" placeholder="0.00" required />
+                                        <i class="mdi mdi-24px mdi-delete item-action-btn dismiss" name="dismiss"></i><br />
+                                        <input id="@Model.NirfShippingProvider[i].ShippingProviderId-e" asp-for="@Model.NirfShippingProvider[i].ErrorMessage" hidden>
+                                    </div>
+                                    @* <div id="@item.ShippingProviderId">
+                                @{
+                                await Html.RenderPartialAsync("PartialEditRow", item);
+                                }
+                                </div>*@
+                                }
+                                @* @{
+                                await Html.RenderPartialAsync("PartialEdit", Model.NirfShippingProvider);
+                                }*@
+                            </div>
+
+                            <input asp-for="NirfShippings.NirfFormId" value="@Model.NirfProductMapping.NirfForm.NirfFormId" hidden />
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label class="control-label">Other</label>
+                                        <textarea asp-for="NirfShippings.Comments" class="form-control" rows="7"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (Model.NirfShippings == null)
+                            {
+                                @if (User.IsInRole(RoleList.ShippingManager) || User.IsInRole(RoleList.Administrator))
+                                {
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button id="shipping-button" title="Finish Adding Providers" type="submit" class="btn btn-primary" disabled>Sign</button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="row justify-content-center">
+                                    <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em; margin: 10px 0px;">@Model.NirfShippings.SignedBy : @Model.NirfShippings.SignedOn.ToLongDateString()</span>
+                                </div>
+                            }
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="accordion custom-accordion mt-1" id="custom-accordion-prod">
+            <div class="card mb-0">
+                <h2 class="accordion-header" id="heading-vendor">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-vendor" aria-expanded="false" aria-controls="collapse-vendor">
+                        Vendor Mapping
+                    </button>
+                </h2>
+                <div id="collapse-vendor" class="accordion-collapse collapse" aria-labelledby="heading-vendor" data-bs-parent="#accordion-example">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="info mdi-24px mdi mdi-help-circle-outline" style="float:right" onclick="infoVendor()">
+                                <span class="infotext" id="info-vendor">
+                                    This assigns a vendor to the product that is being created. It also assigns the same vendor to each of the product variations,
+                                    you have the option to choose an existing vendor or create a new one.
+                                </span>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-dark float-end" data-bs-toggle="modal" data-bs-target="#create-vendor-modal">Create</button>
+                            </div>
+                        </div>
+                        <form asp-action="SignVendorMapping" class="needs-validation" novalidate>
+                            <div class="row">
+                                <input asp-for="NirfVendorMapping.NirfFormId" value="@Model.NirfProductMapping.NirfForm.NirfFormId" hidden />
+
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label class="control-label">Select A Vendor</label>
+                                        <select class="select custom-select select2-multiple" data-toggle="select2" required
+                                                asp-items="@ViewBag.VendorList"
+                                                asp-for="NirfVendorMapping.VendorId"
+                                                data-placeholder="Choose ...">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (Model.NirfVendorMapping == null)
+                            {
+                                @if (User.IsInRole(RoleList.FinancialManager) || User.IsInRole(RoleList.Administrator))
+                                {
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button type="submit" class="btn btn-primary">Sign</button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="row justify-content-center">
+                                    <span class="badge rounded-pill bg-light col-12" style="font-size: 1.1em; margin: 10px 0px;">@Model.NirfVendorMapping.SignedBy : @Model.NirfVendorMapping.SignedOn.ToLongDateString()</span>
+                                </div>
+                                @if (User.IsInRole(RoleList.FinancialManager) || User.IsInRole(RoleList.Administrator) && (Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Cancelled || Model.NirfProductMapping.NirfForm.NirfStatus != NirfForm.Status.Completed))
+                                {
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button type="submit" class="btn btn-primary">Re-Sign</button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-12 col-lg-6">
+        <div class="accordion custom-accordion mt-1" id="variation-accordion">
+            <div class="card mb-3">
+                <h2 class="accordion-header" id="heading-variation">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-variation" aria-expanded="false" aria-controls="collapse-variation">
+                        Product Variations
+                    </button>
+                </h2>
+                <div id="collapse-variation" class="accordion-collapse collapse" aria-labelledby="heading-variation" data-bs-parent="#accordion-example">
+                    <div class="accordion-body">
+                        <form asp-action="AddNirfProductMapping" class="needs-validation" novalidate enctype="multipart/form-data">
+                            <input asp-for="NirfProductMapping.Product" id="nirf-form-product" value="@Model.NirfProductMapping.Product" hidden />
+                            <input asp-for="NirfProductMapping.Product.Sku" id="nirf-form-product-sku" value="@Model.NirfProductMapping.Product.Sku" hidden />
+                            <input asp-for="NirfProductMapping.NirfFormId" id="nirf-form-id" value="@Model.NirfProductMapping.NirfFormId" hidden />
+                            <div class="form-group p-1">
+                                <label class="control-label">Add Product Variant (If Necessary)</label>
+                                <div class="popup mdi-24px mdi mdi-help-circle-outline" style="float:right" onclick="infoVariation()">
+                                    <span class="popuptext" id="info-variant">
+                                        Product variants are the same product in terms of weight, dimensions, design, etc.
+                                        Most common variation type in products are different color
+                                    </span>
+                                </div>
+
+                                <!--Fill out Variations here-->
+                                <div class="form-group p-1" id="sku-variations">
+                                    @if (Model.NirfProducts != null && Model.NirfProducts.Any())
+                                    {
+                                        for (var i = 0; i < Model.NirfProducts.Count(); i++)
+                                        {
+                                            <div id="variant-div-@i">
+                                                <!-- Hidden input to store ProductId for updating existing products -->
+                                                <input type="hidden" name="NirfProducts[@i].ProductId" value="@Model.NirfProducts[i].ProductId" />
+
+                                                <!-- Input for SKU -->
+                                                <label class="control-label">Sku Variant @(i + 1)</label>
+                                                <input minlength="4" class="form-control" name="NirfProducts[@i].Sku" type="text" value="@Model.NirfProducts[i].Sku" required />
+
+                                                <!-- Input for Description -->
+                                                <label class="control-label">Description Variant @(i + 1)</label>
+                                                <input class="form-control" name="NirfProducts[@i].Description" type="text" value="@Model.NirfProducts[i].Description" required /><br />
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <!-- Default entry when no products exist -->
+                                        <div id="variant-div-0">
+                                            <input type="hidden" name="NirfProducts[0].ProductId" value="0" />
+                                            <label class="control-label">Sku Variant 1</label>
+                                            <input minlength="4" class="form-control" name="NirfProducts[0].Sku" type="text" value="@Model.NirfProductMapping.Product.Sku" required />
+
+                                            <label class="control-label">Description Variant 1</label>
+                                            <input class="form-control" name="NirfProducts[0].Description" type="text" required /><br />
+                                        </div>
+                                    }
+                                </div>
+ 
+                                <div class="form-group p-1" id="button1">
+                                    <button class="btn btn-secondary btn-sm" id="add-another" type="button" onclick="add_fields()" aria-haspopup="true" aria-expanded="false">Add Another</button>
+                                </div>
+                            </div>
+                            <div class="form-group p-1">
+                                <div class="dropdown">
+                                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        Save
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <center>
+                                            <div class="form-group p-1" style="padding: 15px; color: white">
+                                                <label>Confirm Variation(s)?</label>
+                                                <div class="dropdown-divider"></div>
+                                                <input type="button" value="Cancel" class="btn btn-danger btnClose"
+                                                       style="margin: 10px" />
+                                                <input type="submit" value="Yes" class="btn btn-primary"
+                                                       id="btn-transfer" style="margin: 10px" />
+                                            </div>
+                                        </center>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+    </div>
+</div>
+
+
+<br />
+<div class="modal fade" id="example-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!--Add Image popup-->
+
+            <div class="modal-header">
+                Add Images
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <form asp-action="UploadImages" class="needs-validation" novalidate enctype="multipart/form-data">
+                            <input name="nirfFormId" id="nirf-form-id" value="@Model.NirfProductMapping.NirfForm.NirfFormId" hidden />
+                            <div class="form-group p-1">
+                                <label class="control-label">Upload Images (Png / Jpeg)</label>
+                                <input accept="image/jpeg, image/png" class="form-control" type="file"
+                                       name="newImages" id="new-images" multiple="multiple" required />
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="create-vendor-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                Create Vendor
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        @using (Html.BeginForm("Create", "Vendors"))
+                        {
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <input type="number" value="@Model.NirfProductMapping.NirfForm.NirfFormId" hidden name="nirfFormId" id="nirf-form-id" />
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.VendorNumber" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.VendorNumber" class="form-control" placeholder="Vendor #" required />
+                                        <span asp-validation-for="@Model.Vendor.VendorNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.VendorName" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.VendorName" class="form-control" placeholder="Vendor Name" required />
+                                        <span asp-validation-for="@Model.Vendor.VendorName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.Notes" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.Notes" class="form-control" placeholder="Some notes here." />
+                                        <span asp-validation-for="@Model.Vendor.Notes" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.ContactName" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.ContactName" class="form-control" placeholder="John Doe" required />
+                                        <span asp-validation-for="@Model.Vendor.ContactName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.PhoneNumber" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.PhoneNumber" class="form-control" data-toggle="input-mask" data-mask-format="(000) 000-0000" placeholder="(012) 345-6789 " required />
+                                        <span asp-validation-for="@Model.Vendor.PhoneNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.BusinessEmail" class="control-label"></label>
+                                        <input type="email" asp-for="@Model.Vendor.BusinessEmail" class="form-control" placeholder="Email" required />
+                                        <span asp-validation-for="@Model.Vendor.BusinessEmail" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.Fax" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.Fax" class="form-control" placeholder="Fax Number" />
+                                        <span asp-validation-for="@Model.Vendor.Fax" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.Website" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.Website" class="form-control" placeholder="www.website.com" required />
+                                        <span asp-validation-for="@Model.Vendor.Website" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.Address1" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.Address1" class="form-control" placeholder="1234 Main St" required />
+                                        <span asp-validation-for="@Model.Vendor.Address1" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.Address2" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.Address2" class="form-control" placeholder="Apartment, studio, or floor" />
+                                        <span asp-validation-for="@Model.Vendor.Address2" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.City" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.City" class="form-control" placeholder="City" required />
+                                        <span asp-validation-for="@Model.Vendor.City" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.State" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.State" class="form-control" data-provide="typeahead" id="state-list" placeholder="State" required />
+                                        <span asp-validation-for="@Model.Vendor.State" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.PostalCode" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.PostalCode" class="form-control" data-toggle="input-mask" data-mask-format="00000-000" placeholder="12345" required />
+                                        <span asp-validation-for="@Model.Vendor.PostalCode" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group p-1">
+                                        <label asp-for="@Model.Vendor.Country" class="control-label"></label>
+                                        <input asp-for="@Model.Vendor.Country" class="form-control" data-provide="typeahead" id="country-list" placeholder="Country" required />
+                                        <span asp-validation-for="@Model.Vendor.Country" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-check">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" asp-for="@Model.Vendor.IsActive" checked />
+                                    @Html.DisplayNameFor(model => model.Vendor.IsActive)
+                                </label>
+                            </div>
+
+                            <div class="form-group form-check"
+                            @(User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ExternalViewer) ? "" : "hidden")>
+                                <label class="form-check-label">
+                                    <input class="form-check-input" asp-for="@Model.Vendor.IsExternal"
+                                           checked="@User.IsInRole(RoleList.ExternalUser)" />
+                                    @Html.DisplayNameFor(model => model.Vendor.IsExternal)
+                                </label>
+                            </div>
+
+                            <div class="form-group p-2">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <input type="submit" value="Create" class="btn btn-primary" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-6">
+                        <h3 class="text-nowrap">Images</h3>
+                        (Click on the <i class="mdi mdi-24px mdi-camera-gopro"></i> button to set the image as the product thumbnail)
+                    </div>
+                    @if (User.IsInRole(RoleList.CustomerSupportManager) || User.IsInRole(RoleList.Administrator))
+                    {
+                        <div class="col-6">
+                            <button type="button" class="btn btn-dark float-end" data-bs-toggle="modal" data-bs-target="#example-modal">Upload Images</button>
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var img in @Model.NirfImageMapping)
+                    {
+                        <div class="col-12 col-lg-3">
+                            <div class="card">
+                                @if (img.IsThumbnail)
+                                {
+                                    <div class="ribbon-wrapper">
+                                        <div class="ribbon">Thumbnail</div>
+                                    </div>
+                                }
+
+                                <img src="~/File?id=@img.FileId" alt="Image not loaded" class="card-img-top img-responsive" />
+                                <div class="card-header">
+                                    <div class="row">
+                                        <div class="col-9">
+                                            @img.Files.FileName
+                                        </div>
+                                        @if (User.IsInRole(RoleList.CustomerSupportManager) || User.IsInRole(RoleList.Administrator))
+                                        {
+                                            <div class="col-3">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <a class="action-icon" type="submit" asp-action="SetThumbnail"
+                                                           asp-route-FileId="@img.FileId" asp-route-NirfFormId="@img.NirfFormId">
+                                                            <i class="mdi mdi-24px mdi-camera-gopro"></i>
+                                                        </a>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <a class="action-icon" type="submit" asp-action="DeleteImage"
+                                                           asp-route-FileId="@img.FileId" asp-route-NirfFormId="@img.NirfFormId">
+                                                            <i class="mdi mdi-24px mdi-delete"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/js/pages/nirf-edit.min.js?"></script>
+
+    }
+}

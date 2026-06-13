@@ -1,0 +1,85 @@
+﻿@model ERPWebApp.Models.ProductionVsLaborCostHistory
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>ProductionVsLaborCostHistory</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ProductionVsLaborCostHistoryId" />
+            <div class="form-group p-1">
+                <label asp-for="Date" class="control-label"></label>
+                <input asp-for="Date" class="form-control" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="ElectroplatingItemCost" class="control-label"></label>
+                <input asp-for="ElectroplatingItemCost" class="form-control" />
+                <span asp-validation-for="ElectroplatingItemCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="EmbroideryItemCost" class="control-label"></label>
+                <input asp-for="EmbroideryItemCost" class="form-control" />
+                <span asp-validation-for="EmbroideryItemCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="EngravingItemCost" class="control-label"></label>
+                <input asp-for="EngravingItemCost" class="form-control" />
+                <span asp-validation-for="EngravingItemCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="MetalTotalItemCost" class="control-label"></label>
+                <input asp-for="MetalTotalItemCost" class="form-control" />
+                <span asp-validation-for="MetalTotalItemCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="UVPTotalItemCost" class="control-label"></label>
+                <input asp-for="UVPTotalItemCost" class="form-control" />
+                <span asp-validation-for="UVPTotalItemCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="ElectroplatingProdCost" class="control-label"></label>
+                <input asp-for="ElectroplatingProdCost" class="form-control" />
+                <span asp-validation-for="ElectroplatingProdCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="EmbroideryProdCost" class="control-label"></label>
+                <input asp-for="EmbroideryProdCost" class="form-control" />
+                <span asp-validation-for="EmbroideryProdCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="EngravingProdCost" class="control-label"></label>
+                <input asp-for="EngravingProdCost" class="form-control" />
+                <span asp-validation-for="EngravingProdCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="MetalTotalProdCost" class="control-label"></label>
+                <input asp-for="MetalTotalProdCost" class="form-control" />
+                <span asp-validation-for="MetalTotalProdCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="UVPTotalProdCost" class="control-label"></label>
+                <input asp-for="UVPTotalProdCost" class="form-control" />
+                <span asp-validation-for="UVPTotalProdCost" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

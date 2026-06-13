@@ -1,0 +1,65 @@
+﻿@{
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout))
+    {
+        Layout = (string)parentLayout;
+    }
+    else
+    {
+        // Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+        Layout = "_Layout";
+    }
+}
+
+@*<h2>Manage your account</h2>
+
+<div>
+    <h4>Change your account settings</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-3">
+            <partial name="_ManageNav" />
+        </div>
+        <div class="col-md-9">
+            @RenderBody()
+        </div>
+    </div>
+</div>*@
+@*<div class="container-fluid text-white">
+    <div class="card mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-title">Manage your account</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <partial name="_ManageNav" />
+                </div>
+                <div class="col-md-9">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+</div>*@
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title">Manage your account</h2>
+            </div>
+            <div class="card-body container-fluid text-white">
+                <div class="row">
+                    <div class="col-md-3">
+                        <partial name="_ManageNav" />
+                    </div>
+                    <div class="col-md-9">
+                        @RenderBody()
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

@@ -1,0 +1,92 @@
+﻿@model IEnumerable<ERPWebApp.Models.QCStationLocation>
+
+@{
+    ViewData["Title"] = "QC Station Locations";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">QC Locations Data</h3>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs nav-bordered mb-3">
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager) || this.User.IsInRole(RoleList.QCManager))
+                    {
+                        <li class="nav-item">
+                            <div class="col-sm-3 col-md-2">
+                                <div class="floatleft">
+                                    <a class="nav-link" asp-action="Create">
+                                        <div type="button" class="btn btn-dark mb-2">Create</div>
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <table class="table dt-responsive webkit-nowrap w-100" id="QCStationLocations-datatable">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.QCStationLocationName)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Departments)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.IsActive)
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.QCStationLocationName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Departments.DepartmentName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.IsActive)
+                                </td>
+                                <td>
+                                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager) || this.User.IsInRole(RoleList.QCManager))
+                                    {
+                                        <a class="action-icon" asp-action="Edit" asp-route-id="@item.QCStationLocationId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                                    }
+                                    <a class="action-icon" asp-action="Details" asp-route-id="@item.QCStationLocationId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#QCStationLocations-datatable").DataTable({
+                    keys: !0, language: {
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                        },
+
+                    }, drawCallback: function () {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                    }
+                });
+            });
+        </script>
+    }
+}

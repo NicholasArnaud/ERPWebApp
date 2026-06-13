@@ -1,0 +1,464 @@
+﻿@model IEnumerable<ERPWebApp.Controllers.Inventory.InventoryRequestFormsController.inventoryRequestModel>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    /* The switch - the box around the slider */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    /* The slider */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+</style>
+<div class="card">
+    <div id="my-Modal-Error" class="modal fade text-width:80%;" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-colored-header bg-warning">
+                    <i class="dripicons-warning h1"></i>
+                </div>
+                <div class="Modal-body" style="text-align:center">
+                    File is Being Downloaded, Please Wait...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="myModalBtn" class="btn btn-secondary" onclick="$('#my-Modal-Error').modal('hide');">Close </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="my-filter-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="my-edit-modal-label">Edit Product Count</h4>
+            </div>
+            <div class="modal-body">
+                <label>Order Number</label>
+                <input id="orderSearchId" class="form-control focus" placeholder="ex. 1234567" autofocus tabindex="1 " />
+                <label class="control-label"> Product Sub Category</label>
+                <select class="select2 form-control select2" data-toggle="select2" id="SubCategoryList" name="SubCategoryId" asp-items="ViewBag.SubCategoryList">
+                    <option value="-1" selected disabled hidden>--Select a Sub Category--</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="Submit" type="button" data-bs-dismiss="modal" class="btn btn-primary">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-9">
+                        <h3 class="card-title">Inventory Requests</h3>
+                    </div>
+                    <div class="col-2">
+                        <h4 class="float-end">Auto Refresh</h4>
+                    </div>
+                    <div class="col-1">
+                        <label class="switch">
+                            <input type="checkbox" checked id="autorefresh">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <ul class="nav nav-tabs nav-bordered mb-3">
+                    <li class="nav-item mb-1">
+                        @if (User.IsInRole(RoleList.Administrator) ||
+                        User.IsInRole(RoleList.Manager) ||
+                        User.IsInRole(RoleList.ProductionBasic) ||
+                        User.IsInRole(RoleList.InventoryBasic))
+                        {
+                            <a class="nav-link" asp-action="Create">
+                                <input type="button" class="btn btn-dark" value="Create" />
+                            </a>
+                        }
+                    </li>
+
+                    <li class="nav-item mb-1 col-2">
+                        <div class="form-group">
+                            <div class="form-control" id="datesearch" placeholder="Search by date range.." style="margin-top: 10px;">
+                                <i class="mdi mdi-calendar"></i>&nbsp;
+                                <span id="selectedValue"></span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item pull-right" style="margin-left: auto; padding-top: 10px">
+                        <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#my-filter-modal">Filter</button>
+                    </li>
+                </ul>
+
+                <table class="table dt-responsive webkit-nowrap w-100" id="requestForms-datatable">
+                    <thead>
+                        <tr>
+                            <th hidden>
+                                InventoryRequestFormId
+                            </th>
+                            <th>
+                                Sku
+                            </th>
+                            <th>
+                                Description
+                            </th>
+                            <th>
+                                Quantity Needed
+                            </th>
+                            <th>Picked Reason</th>
+                            <th>
+                                Requesting Station/User
+                            </th>
+                            <th>
+                                Requested By Employee
+                            </th>
+                            <th>
+                                Picked By Employee
+                            </th>
+                            <th>
+                                Is Picked
+                            </th>
+                            <th>
+                                Is Received
+                            </th>
+                            <th>
+                                Created Date
+                            </th>
+                            <th hidden>
+                                PickedDate
+                            </th>
+                            <th hidden>
+                                ReceivedDate
+                            </th>
+                            <th>
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+    <script type="text/javascript">
+        function newexportaction(e, dt, button, config) {
+            $('#my-Modal-Error').modal('show');
+            var self = this;
+            var oldStart = dt.settings()[0]._iDisplayStart;
+            dt.one('preXhr', function (e, s, data) {
+                // Just this once, load all data from the server
+                data.start = 0;
+                data.length = 2147483647;
+                dt.one('preDraw', function (e, settings) {
+                    // Call the original action function
+                    if (button[0].className.indexOf('buttons-copy') >= 0) {
+                        $.fn.dataTable.ext.buttons.copyHtml5.action.call(self, e, dt, button, config);
+                    } else if (button[0].className.indexOf('buttons-excel') >= 0) {
+                        $.fn.dataTable.ext.buttons.excelHtml5.available(dt, config) ? $.fn.dataTable.ext.buttons.excelHtml5.action.call(self, e, dt, button, config) : $.fn.dataTable.ext.buttons.excelFlash.action.call(self, e, dt, button, config);
+                    } else if (button[0].className.indexOf('buttons-csv') >= 0) {
+                        $.fn.dataTable.ext.buttons.csvHtml5.available(dt, config) ? $.fn.dataTable.ext.buttons.csvHtml5.action.call(self, e, dt, button, config) : $.fn.dataTable.ext.buttons.csvFlash.action.call(self, e, dt, button, config);
+                    } else if (button[0].className.indexOf('buttons-pdf') >= 0) {
+                        $.fn.dataTable.ext.buttons.pdfHtml5.available(dt, config) ? $.fn.dataTable.ext.buttons.pdfHtml5.action.call(self, e, dt, button, config) : $.fn.dataTable.ext.buttons.pdfFlash.action.call(self, e, dt, button, config);
+                    } else if (button[0].className.indexOf('buttons-print') >= 0) {
+                        $.fn.dataTable.ext.buttons.print.action(e, dt, button, config);
+                    }
+                    dt.one('preXhr', function (e, s, data) {
+                        // DataTables thinks the first item displayed is index 0, but we're not drawing that.
+                        // Set the property to what it was before exporting.
+                        settings._iDisplayStart = oldStart;
+                        data.start = oldStart;
+                    });
+                    // Reload the grid with the original page. Otherwise, API functions like table.cell(this) don't work properly.
+                    setTimeout(dt.ajax.reload, 0);
+                    // Prevent rendering of the full data to the DOM
+                    return false;
+                });
+            });
+            // Requery the server with the new one-time export settings
+            dt.ajax.reload();
+        }
+
+        $(document).ready(function () {
+            $(".select2").select2();
+            $('#SubCategoryList').select2({
+                dropdownParent: $('#my-filter-modal')
+            });
+
+            $('#datesearch').daterangepicker({ format: 'MM-DD-YYY' });
+
+            $('#datesearch').on('apply.daterangepicker', function (ev, picker) {
+                //sets the text field
+                $('#selectedValue').text(
+                    $('#datesearch').data('daterangepicker').startDate.format('MM/DD/YYYY') + ' - ' +
+                    $('#datesearch').data('daterangepicker').endDate.format('MM/DD/YYYY'));
+                //populates the table
+                populateTable($('#selectedValue').text(), $('#SubCategoryList').val(), $('#orderSearchId').text());
+            });
+
+            $('#Submit').on('click',
+                function () {
+                    populateTable($('#selectedValue').text(), $('#SubCategoryList').val(), $('#orderSearchId').text());
+                });
+
+            $('#autorefresh').change(function () {
+                if (this.checked) {
+                    window.location.reload();
+                }
+            });
+
+
+            populateTable();
+
+            window.setTimeout(function () {
+                if (document.getElementById('autorefresh').checked) {
+                    window.location.reload();
+                }
+            }, 60000);
+
+        });
+
+        function populateTable(dateSelect, subCategoryId, orderNumber) {
+            $("#requestForms-datatable").DataTable().destroy();
+            var permission = '@ViewBag.permission';
+            var $dTable = $("#requestForms-datatable").DataTable({
+                "processing": true, // for show progress bar
+                "serverSide": true, // for process server side
+                "filter": true, // this is for disable filter (search box)
+                "orderMulti": false, // for disable multiple column at once
+                "scrollCollapse": true,
+                "order": [[0, "desc"]],
+                "pageLength": 50,
+                dom: "<'row'<'col-8 col-sm-8 col-md-11'f><'d-none d-md-block d-lg-block col-sm-4 col-md-4 col-lg-1'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                "ajax": {
+                    "url": "LoadTable",
+                    "type": "POST",
+                    "data": function (d) {
+                        d.dateFilter = dateSelect;
+                        d.orderNumber = orderNumber;
+                        d.subCategory = subCategoryId;
+                    },
+                    "datatype": "json",
+                },
+                "columns": [
+                    { "data": "id", "name": "InventoryRequestFormId", "autoWidth": true },
+                    { "data": "sku", "name": "Sku", "autoWidth": true },
+                    { "data": "description", "name": "Description", "autoWidth": true },
+                    { "data": "quantityNeeded", "name": "Quantity Needed", "autoWidth": true },
+                    { "data": "pickedReason", "name": "Picked Reason", "autoWidth": true },
+                    { "data": "requestedByUser", "name": "Requesting Station/User", "autoWidth": true },
+                    { "data": "requestedEmployee", "name": "Requested By EmployeeId", "autoWidth": true },
+                    { "data": "pickedEmployee", "name": "Picked By Employee", "autoWidth": true, "defaultContent": "" },
+                    {
+                        "data": "isPicked",
+                        "render": function (IsPicked, type, full, meta) {
+                            if (IsPicked) {
+                                return 'Yes';
+                            } else {
+                                return 'No';
+                            }
+                        },
+                        "name": "Is Picked",
+                        "autoWidth": true
+                    },
+                    {
+                        "data": { isReceived: "isReceived", isPicked: "isPicked", id: "id" },
+                        "render": function (data, type, full, meta) {
+                            if (data.isReceived) {
+                                return 'Yes';
+                            } else {
+                                if (data.isPicked) {
+                                    return "<a class='btn btn-dark' href='InventoryRequestForms/CloseInventoryRequestForm?InventoryRequestFormId=" + data.id + "' onclick='disableButton(this)'> Received?</a>";
+
+                                }
+                                return 'No';
+                            }
+                        },
+                        "name": "Is Received",
+                        "autoWidth": true
+                    },
+                    {
+                        "data": "createdDate",
+                        "name": "Created Date",
+                        "autoWidth": true
+                    },
+                    { "data": "pickedDate", "name": "PickedDate", "autoWidth": true },
+                    { "data": "recievedDate", "name": "RecievedDate", "autoWidth": true },
+                    {
+                        title: 'Actions',
+                        "data": { permission: "permission" },
+                        mRender: function (data, type, row) {
+                            if (permission == 'yes') {
+                                var linkDetails = '<a style="color:white" class="mdi mdi-24px mdi-book-information-variant" href=/InventoryRequestForms/Details/' + row.id + '></a>';
+                                var linkEdit = '<a style="color:white" class="mdi mdi-24px mdi-pencil" href=/InventoryRequestForms/Edit/' + row.id + '></a>';
+                                var linkDelete = '<a style="color:white" class="mdi mdi-24px mdi-delete" href=/InventoryRequestForms/Delete/' + row.id + '></a>';
+                                return linkDetails + " " + linkEdit + " " + linkDelete;
+                            } else {
+                                var linkDetails = '<a style="color:white" class="mdi mdi-24px mdi-book-information-variant" href=/InventoryRequestForms/Details/' + row.id + '></a>';
+                                return linkDetails;
+                            }
+
+
+                        }
+                    },
+                ],
+                "columnDefs": [
+                    {
+                        "targets": [0],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [11],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [12],
+                        "visible": false,
+                        "searchable": false
+                    }
+                ],
+                "createdRow": function (row, data, dataIndex, cells) {
+
+                    //  Conditional Highlighting
+
+                    if (cells[8].innerHTML == 'Yes') {
+                        if (cells[9].innerHTML != 'Yes') {
+                            $(row).css('color', 'black')
+                            $(row).css('background-color', '#e5a51d');
+                            //orange
+                        } //else, no highlighting for recived items. process is finished.
+                    } else {
+                        $(row).css('color', 'white')
+                        $(row).css('background-color', '#c92318');
+                        //red
+                    }
+
+                },
+
+
+                //preset visuals for the table
+                keys: !0,
+                language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>",
+                        next: "<i class='mdi mdi-chevron-right'>"
+                    },
+
+                },
+                drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                },
+                "buttons": [{
+                    extend: 'collection', text: 'Export', buttons: [{
+                        "extend": 'copy', "titleAttr": 'Copy', "action": newexportaction, exportOptions: {
+                            columns: ':not(.notexport)'
+                        }
+                    }, {
+                        "extend": 'excel', "titleAttr": 'Excel', "action": newexportaction, exportOptions: {
+                            columns: ':not(.notexport)'
+                        }
+                    }, {
+                        "extend": 'csv', "titleAttr": 'CSV', "action": newexportaction, exportOptions: {
+                            columns: ':not(.notexport)'
+                        }
+                    }, {
+                        "extend": 'pdf', "titleAttr": 'PDF', "action": newexportaction, exportOptions: {
+                            columns: ':not(.notexport)'
+                        }
+                    }, {
+                        "extend": 'print', "titleAttr": 'Print', "action": newexportaction, exportOptions: {
+                            columns: ':not(.notexport)'
+                        }
+                    }]
+                }],
+                "oLanguage": {
+                    "sLengthMenu": '<select class="btn btn-light">' +
+                        '<option value="10">10</option>' +
+                        '<option value="20">20</option>' +
+                        '<option value="30">30</option>' +
+                        '<option value="40">40</option>' +
+                        '<option value="50">50</option>' +
+                        '<option value="-1">All</option>' +
+                        '</select>'
+                }
+            });
+        }
+
+        function disableButton(button) {
+            button.classList.add('disabled');
+            button.innerText = 'Processing...';
+        }
+    </script>
+    }

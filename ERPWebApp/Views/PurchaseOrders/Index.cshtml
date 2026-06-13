@@ -1,0 +1,80 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Purchase Orders</h3>
+            </div>
+            <span class="text-danger"></span>
+            <div class="card-body">
+                <ul class="nav nav-tabs nav-bordered mb-3">
+                    <li class="nav-item">
+                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.ShippingManager) || this.User.IsInRole(RoleList.FinancialManager) || this.User.IsInRole(RoleList.Developer))
+                        {
+                            <a asp-action="Create">
+                                <button type="submit" name="submit" class="action-button btn btn-dark mb-2" >
+                                    Create new PO
+                                </button>
+                            </a>
+                        }
+                    </li>
+                </ul>
+                <div class="row custom-bb">
+                    <div class="form-group p-1 col-md-4">
+                        <label class="control-label"> Select A Product</label>
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required" data-placeholder="Choose ..." id="selector-pid" name="selector-pid" asp-items="ViewBag.ProductList" multiple="multiple">
+                            <option value="">Select a Product</option>
+                        </select>
+                    </div>
+                    <div class="form-group p-1 col-md-4">
+                        <label class="control-label"> Set A Status</label>
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required" data-placeholder="Choose ..." id="status-pid" name="status-pid" asp-items="ViewBag.StatusList" multiple="multiple">
+                            <option value="">Select a Status</option>
+                        </select>
+                    </div>
+                    <div class="form-group p-1 col-md-4">
+                        <div class="form-group">
+                            <label>Select Last Modified Date</label>
+                            <div id="date-picker" class="input-group date" data-provide="date-picker">
+                                <input type="text" id="date-picks" class="form-control" />
+                            </div>
+                            <input hidden id="startDate" name="startDate">
+                            <input hidden id="endDate" name="endDate">
+                        </div>
+                    </div>
+                    <div class="form-group p-1 col-md-4">
+                        <div class="form-group">
+                            <label>Select Estimated Date</label>
+                            <div id="estimate-date-picker" class="input-group date" data-provide="date-picker">
+                                <input type="text" id="estimate-date-picks" class="form-control" />
+                            </div>
+                            <input hidden id="estimateStartDate" name="startDate">
+                            <input hidden id="estimateEndDate" name="endDate">
+                        </div>
+                    </div>
+
+                </div>
+                <div id="po-partial-index">
+                    @{
+                        await Html.RenderPartialAsync("POPartialTable");
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <link href="~/css/site.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+    <script src="~/js/pages/purchase-order-index.min.js"></script>
+   
+}

@@ -1,0 +1,459 @@
+﻿@using ERPWebApp.Models
+@model ERPWebApp.Models.Inventory.ProductVendorMappingFilter
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <link rel="stylesheet" type="text/css" href="~/css/sliderbutton.css">
+</head>
+<div class="row">
+    <div id="myModalError" class="modal fade text-width:80%;" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div style="display: none" class="modal-header modal-colored-header bg-danger" id="modalHeadeError">
+                    <center> <i class="dripicons-wrong h1"></i>&nbsp;&nbsp;Error Deleting!</center>
+                </div>
+                <div id="myModalErrorAlertBody" class="Modal-body" style="text-align:center; color: white; font-size: 20px;">
+                    Message will appear here
+                </div>
+                <div class="modal-footer">
+                    &nbsp;
+                    <button type="button" id="myModalBtn" class="btn btn-secondary" onclick="$('#myModalError').modal('hide');">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Product Vendor Mapping</h3>
+            </div>
+            <div class="card-body">
+
+                @if (User.IsInRole(RoleList.Administrator) ||
+                User.IsInRole(RoleList.InventoryManager) ||
+                User.IsInRole(RoleList.ShippingManager) ||
+                User.IsInRole(RoleList.ExternalUser))
+                {
+                    <ul class="nav nav-tabs nav-bordered mb-3">
+                        <li class="nav-item">
+                            <a asp-action="Create">
+                                <button type="submit" name="submit" class="btn btn-dark mb-2">
+                                    Create
+                                </button>
+                            </a>
+                        </li>
+                    </ul>
+                }
+
+                <ul class="nav nav-tabs mb-3">
+                    <li class="nav-item">
+                        <a href="#home" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                            <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                            <span class="d-none d-md-block">Products</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#profile" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <i class="mdi mdi-account-circle d-md-none d-block"></i>
+                            <span class="d-none d-md-block">Vendors</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane show active" id="home">
+                        <br />
+                        <div id="my-test">
+                            @{
+                                await Html.RenderPartialAsync("PartialIndex");
+                            }
+                        </div>
+
+                    </div>
+                    <div class="tab-pane" id="profile">
+                        <br />
+                        <div id="my-vendor-table">
+                            @{
+                                await Html.RenderPartialAsync("PartialIndexVendor");
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/js/pages/product-vendor-map.min.js?"></script>
+    <script src="~/js/pages/product-vendor-datatable.min.js?"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var msg = "@TempData["ErrorMessage"]"
+            if (msg) {
+                getErrorM(msg);
+            }
+            function getErrorM(myMessage) {
+                var msg = myMessage;
+                if (msg) {
+                    openErrorModal(msg);
+                    console.log("ERROR MESSAGE!: " + msg);
+                }
+            }
+            function openErrorModal(strMessage) {
+                $('#myModalBtn').show();
+                var myDiv = document.getElementById("myModalErrorAlertBody");
+                myDiv.innerHTML = strMessage;
+                $('#myModalError').modal('show');
+                $('#modalHeadeError').show();
+            }
+
+            });
+
+        $(document).ready(function() {
+            $('#infoIcon').popover({
+                trigger: 'hover',
+                placement: 'right',
+                content: 'If you do not see the Vendor you are looking for, there is already a mapping between that product and a Vendor!'
+            });
+
+            $("#filter-button").click(function() {
+                $("#filter-button").html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').addClass("disabled");
+                refreshproductlist();
+            });
+
+            $("#filter-button-vendor").click(function() {
+                $("#filter-button-vendor").html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').addClass("disabled");
+                refreshvendorlist();
+            });
+
+            //form rules for the model to make sure user enters correct values
+            var rulescreatecost = {
+                createcost: {
+                    required: true
+                }
+            };
+            var messagescreatecost = {
+                createcost: {
+                    required: "Create Cost Is Required"
+                }
+            };
+            var rulesLeadTime = {
+                createleadtime: {
+                    required: true
+                }
+            };
+            var messagesLeadTime = {
+                createleadtime: {
+                    required: "Lead time Is Required"
+                }
+            };
+
+            $("#form-create-cost").validate({
+                rules: rulescreatecost,
+                messages: messagescreatecost
+            });
+
+            $("#form-lead-time").validate({
+                rules: rulesLeadTime,
+                messages: messagesLeadTime
+            });
+
+            function GetVendorsByProductId(_productId) {
+                var url = '@Url.Action("VendorsByProductId")';
+                $.getJSON(url, { Id: _productId }).done(function(response) {
+                    $('#selector-vid').empty();
+                    var s = "";
+                    for (var i = 0; i < response.length; i++) {
+                        s += '<option value="' + response[i].vendorId + '">' + response[i].vendorName + '</option>';
+                    }
+                    $('#selector-vid').html(s);
+                });
+            }
+
+            $('#selector-pid').on("change", function(e) {
+                GetVendorsByProductId(+$('#selector-pid').val());
+            });
+
+            var product = getQueryParam('product');
+            if(product != null && product != "" && !isNaN(product)){
+                $('#selector-pid').val(parseInt(product)).change();
+                $('.btn-create')[0].click();
+            }
+        });
+
+        function getQueryParam(name) {
+            var urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        async function refreshproductlist() {
+            var url = '@Url.Action("GetProductList")';
+            $.getJSON(url, { psku: $('#selector').val() }).done(function() {
+                console.log("PartialViewTable Loading");
+                //Recalled DataTable in Load to wait for data is allocated in the table before reloading it
+                //otherwise DataTable does not work
+                $('#my-test').load('/ProductVendorMapping/PartialViewTable', function(response) {
+                    $("#filter-button").html('Filter').removeClass("disabled");
+                    var awaitingOrdersTable = $("#product-vendor-mapping-datatable").DataTable({
+                        keys: !0, language: {
+                            paginate: {
+                                previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                                },
+
+                            }, drawCallback: function() {
+                                $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                            }
+                        });
+                        //SetupDataTable($("#shipstation-awaiting-order-datatable"), response.TotalNeeded);
+                        //$("#shipstation-awaiting-order-datatable").DataTable().draw();
+                        console.log("PartialViewTable Reloaded");
+                    });
+                }).then(function(partialView) {
+                    callvendordelete();
+                });
+            }
+
+            async function refreshproductlistcreate() {
+                var url = '@Url.Action("GetProductList")';
+
+                $.getJSON(url, { psku: $('#selector').val() }).done(function() {
+                    console.log("PartialViewTable Loading");
+                    //Recalled DataTable in Load to wait for data is allocated in the table before reloading it
+                    //otherwise DataTable does not work
+                    $('#my-test').load('/ProductVendorMapping/PartialViewTable', function(response) {
+                        $("#filter-button").html('Filter').removeClass("disabled");
+                        var awaitingOrdersTable = $("#product-vendor-mapping-datatable").DataTable({
+                            keys: !0, language: {
+                                paginate: {
+                                    previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                                    },
+
+                                }, drawCallback: function() {
+                                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                                }
+                            });
+                            //SetupDataTable($("#shipstation-awaiting-order-datatable"), response.TotalNeeded);
+                            //$("#shipstation-awaiting-order-datatable").DataTable().draw();
+                            console.log("PartialViewTable Reloaded");
+                        });
+                    }).then(function(partialView) {
+                        callvendorrefresh();
+                    });
+                }
+
+                function resolveAfter2Seconds(x) {
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            resolve(x);
+                        }, 2000);
+                    });
+                }
+
+                async function refreshvendorlist() {
+                    var y = resolveAfter2Seconds(1000);
+                    var url = '@Url.Action("GetVendorList")';
+
+                    $.getJSON(url, { vname: $('#selector-vendor').val() }).done(function() {
+                        console.log("PartialViewTable Loading");
+                        //Recalled DataTable in Load to wait for data is allocated in the table before reloading it
+                        //otherwise DataTable does not work
+                        $('#my-vendor-table').load('/ProductVendorMapping/PartialViewTableVendor', function(response) {
+                            $("#filter-button-vendor").html('Filter').removeClass("disabled");
+                            var awaitingVendorTable = $("#vendor-product-mapping-datatable").DataTable({
+                                keys: !0, language: {
+                                    paginate: {
+                                        previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                                        },
+                                    }, drawCallback: function() {
+                                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                                    }
+                                });
+                                //SetupDataTable($("#shipstation-awaiting-order-datatable"), response.TotalNeeded);
+                                //$("#shipstation-awaiting-order-datatable").DataTable().draw();
+                                console.log("PartialViewTable Reloaded");
+                            });
+                        });
+                    }
+
+                    function CreateThePVM() {
+                        $("#filter-button").html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').addClass("disabled");
+                        $("#filter-button-vendor").html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').addClass("disabled");
+                        var paylod = {
+                            productid: $('#selector-pid').val(),
+                            vendorid: $('#selector-vid').val(),
+                            cost: $('#create-cost').val(),
+                            leadtime: $('#create-lead-time').val(),
+                            primaryvendor: $('#custom-switch-2').is(":checked"),
+                            vendorsku: $('#create-vendor-sku').val(),
+                            isActive: $('#checkIsActive').prop('checked')
+                        };
+
+                        $.ajax({
+                            url: '/ProductVendorMapping/PostCreate',
+                            type: 'POST',
+                            data: paylod,
+                            success: function(partialView) {
+                                $("#my-create-modal").modal('hide');
+                                console.log("Grabbed PVM Info");
+                                var url = '@Url.Action("VPMList")';
+                                $.getJSON(url).done(function(response) {
+                                    $('#selector').empty();
+                                    var s = "";
+                                    s += '<option value="' + "Any" + '">' + "Any" + '</option>';
+                                    for (var i = 0; i < response.length; i++) {
+                                        s += '<option value="' + response[i].value + '">' + response[i].text + '</option>';
+                                    }
+                                    $('#selector').html(s);
+                                    refreshproductlistcreate();
+                                });
+                            },
+                            error: function(data) {
+                                console.log(data);
+                                refreshproductlistcreate();
+                            }
+                        }).then(function(partialView) {
+
+                        });
+                    }
+
+                    function callvendorrefresh() {
+                        $.ajax({
+                            url: '/ProductVendorMapping/PostCreateVendor',
+                            type: 'POST',
+                            success: function(partialView) {
+                                $("#my-vendor-table").html(partialView);
+                                console.log("Grabbed PVM Info");
+                                var url = '@Url.Action("VPMVendorList")';
+                                $.getJSON(url).done(function(response) {
+                                    $('#selector-vendor').empty();
+                                    var s = "";
+                                    s += '<option value="' + "All" + '">' + "All" + '</option>';
+                                    for (var i = 0; i < response.length; i++) {
+                                        s += '<option value="' + response[i].value + '">' + response[i].text + '</option>';
+                                    }
+                                    $('#selector-vendor').html(s);
+                                    refreshvendorlist();
+                                });
+                            },
+                            error: function(data) {
+                                callvendorrefresh();
+                            }
+                        }).then(function(partialView) {
+                            resetEditPage();
+                        });
+                    }
+
+                    function resetEditPage() {
+                        $('#create-cost').val('');
+                        $('#create-lead-time').val('');
+                        $('#selector-pid').val('');
+                        $('#selector-pid').change();
+                        $('#selector-vid').val('');
+                        $('#selector-vid').change();
+                        $('#custom-switch-2').prop('checked', false);
+                    }
+
+                    function deleteDataField(id, vid) {
+                        $("#filter-button").html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').addClass("disabled");
+                        $("#filter-button-vendor").html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').addClass("disabled");
+                        $.ajax({
+                            url: '/ProductVendorMapping/PostDelete',
+                            type: 'POST',
+                            data: { id: id },
+                            success: function(partialView) {
+                                $("#my-delete-modal").modal('hide');
+                                console.log("Deleted Info");
+                                var url = '@Url.Action("VPMList")';
+                                $.getJSON(url).done(function(response) {
+                                    $('#selector').empty();
+                                    var s = "";
+                                    s += '<option value="' + "Any" + '">' + "Any" + '</option>';
+                                    for (var i = 0; i < response.length; i++) {
+                                        s += '<option value="' + response[i].value + '">' + response[i].text + '</option>';
+                                    }
+                                    $('#selector').html(s);
+                                    refreshproductlist();
+                                });
+                            },
+                            error: function(data) {
+                                console.log(data);
+                            }
+                        }).then(function(partialView) {
+
+                        });
+                    }
+
+                    function callvendordelete() {
+                        $.ajax({
+                            url: '/ProductVendorMapping/PostCreateVendor',
+                            type: 'POST',
+                            success: function(partialView) {
+                                $("#my-vendor-table").html(partialView);
+                                console.log("Grabbed VPMVendorList Info");
+                                url = '@Url.Action("VPMVendorList")';
+                                $.getJSON(url).done(function(response) {
+                                    $('#selector-vendor').empty();
+                                    var s = "";
+                                    s += '<option value="' + "All" + '">' + "All" + '</option>';
+                                    for (var i = 0; i < response.length; i++) {
+                                        s += '<option value="' + response[i].value + '">' + response[i].text + '</option>';
+                                    }
+                                    $('#selector-vendor').html(s);
+                                    refreshvendorlist();
+                                });
+
+                            },
+                            error: function(data) {
+                                console.log(data);
+                            }
+                        }).then(function(partialView) {
+
+                        });
+                        $('#selector').val($('#selector-pid').val()).select2();
+                        $('#selector').select2();
+                        $('#selector').trigger('change.select2');
+                        $('#selector-vendor').val($('#selector-vid').val()).select2();
+                        $('#selector-vendor').select2();
+                        $('#selector-vendor').trigger('change.select2');
+                    }
+                    window.addEventListener("pageshow", function(event) {
+                        var historyTraversal = event.persisted ||
+                        (typeof window.performance != "undefined" &&
+                        window.performance.navigation.type === 2);
+                        if (historyTraversal) {
+                            // Handle page restore.
+                            window.location.reload();
+                        }
+                    });
+
+                    function myFunction() {
+                        // Get the checkbox
+                        var checkBox = document.getElementById("myCheck");
+                        // Get the output text
+                        var text = document.getElementById("cost-update");
+                        var text2 = document.getElementById("success-cost-update");
+                        // If the checkbox is checked, display the output text
+                        if (checkBox.checked == true) {
+                            text.style.display = "block";
+                        } else {
+                            text.style.display = "none";
+                            text2.style.display = "none";
+                        }
+                    }
+                    function UpdateCostAndLeadTime() {
+                        var url = '@Url.Action("UpdateCostAndLeadTime")';
+                        $.getJSON(url, { Id: $('#editid').val() }, function(data) {
+                        });
+                        var text = document.getElementById("cost-update");
+                        text.style.display = "block";
+                    }
+                </script>
+            }
+            

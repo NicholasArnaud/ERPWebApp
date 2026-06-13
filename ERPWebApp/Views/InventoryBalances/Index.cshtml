@@ -1,0 +1,169 @@
+﻿@model IEnumerable<ERPWebApp.Controllers.InventoryBalancesController.BalanceModel>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-12">
+
+        <div class="card col-12">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-9 col-sm-7 col-xs-12">
+                        <h3 class="card-title">Inventory Balance</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                {
+                    <!--Refresh Option-->
+                    <div class="row custom-bb">
+                        <div class="col-md-3 col-sm-5 col-xs-12">
+                            <a id="refresh-table-btn" data-toggle="tab" aria-expanded="false" class="nav-link">
+                                <div typeof="button" class="btn btn-dark">
+                                    <i id="reload-icon" class="mdi mdi-reload text-primary" style="color: black !important;"></i>
+                                    <span>Refresh</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                }
+
+                @if (ViewBag.TimeWarning != "")
+                {
+                    <div class="row">
+                        <div class="col-12 align-content-center">
+                            <div class="alert alert-warning" role="alert">
+                                <i class="dripicons-warning mr-2" style="font-size:20px"></i>@ViewBag.TimeWarning!
+                                <i id="timer"></i>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!--Warning Banner-->
+                <div class="row">
+                    <div id="reloading-banner" class="col-12 align-content-center">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="dripicons-warning mr-2"></i> Table is Refreshing! Please wait until page automatically reloads! <i class="dripicons-warning mr-2"></i>
+                            <i id="timer"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+
+                        <table class="table dt-responsive webkit-nowrap w-100" id="inventory-balance-datatable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Sku)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Description)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.TotalAvailable)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.PendingShipStationOrders)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.OrderDifference)
+                                    </th>
+                                    <th hidden>
+                                        @Html.DisplayNameFor(model => model.MinCost)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Sku)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Description)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.TotalAvailable)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.PendingShipStationOrders)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.OrderDifference)
+                                        </td>
+                                        <td hidden>
+                                            @Html.DisplayFor(modelItem => item.MinCost)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#reloading-banner").hide();
+            //Table
+            $("#inventory-balance-datatable").DataTable({
+                "createdRow": function (row, data, dataIndex) {
+                    //Conditional Highlighting
+                    if (Number(data[4]) <= 0 || Number(data[4]) < Number(data[5])) {
+                        $(row).children(":nth-child(5)").addClass('table-danger');
+                        $(row).children(":nth-child(1)").addClass('table-danger');
+                    }
+                },
+                "dom": "<'row'<'col-md-6 col-sm-6 col-xs-12'l><'col-md-6 col-sm-6 col-xs-12 custom-mt-xs'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                keys: !0, language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                    },
+                }, drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                },
+                buttons: [
+                    'csvHtml5',
+                    'excelHtml5',
+                    'print'
+                ]
+            });
+        });
+        //Update table
+        $("#refresh-table-btn").on("click", function () {
+            $("#reloading-banner").show();
+            $("#refresh-table-btn").prop("disabled", true);
+
+            var now = new Date().getTime();
+            setInterval(function () {
+                var difference = new Date().getTime() - now;
+                var minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                document.getElementById("timer").innerHTML = minutes + "m " + seconds + "s ";
+            }, 1000)
+
+            $.post("/InventoryBalances/Reload", function (data) {
+                window.location.reload();
+            });
+        });
+    </script>
+}

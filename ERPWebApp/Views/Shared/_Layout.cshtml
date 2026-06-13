@@ -1,0 +1,285 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor;
+<!DOCTYPE html>
+<html lang="en" data-layout-mode="detached" data-topbar-color="dark" data-menu-color="dark" data-sidenav-user="true"
+      data-bs-theme="dark" data-layout-position="fixed" data-sidenav-size="default" class="menuitem-active">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @if (ViewContext.RouteData.Values["controller"] != null)
+    {
+        @if (ViewContext.RouteData.Values["controller"].ToString() == "Home")
+        {
+            <title>@ViewContext.RouteData.Values["controller"].ToString() - ERPWebApp</title>
+        }
+        @if (ViewContext.RouteData.Values["controller"].ToString() != "Home")
+        {
+            @if (ViewContext.RouteData.Values["action"].ToString() != "Index")
+            {
+                <title>@ViewContext.RouteData.Values["controller"].ToString() / @ViewContext.RouteData.Values["action"].ToString() - ERPWebApp</title>
+            }
+            else
+            {
+                <title>@ViewContext.RouteData.Values["controller"].ToString() - ERPWebApp</title>
+            }
+        }
+    }
+
+    <!-- App favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="~/Images/ERPIcon.ico">
+    <link rel="apple-touch-icon" type="image/x-icon" href="~/Images/ERPIcon.ico">
+
+    <script src="~/lib/hyper-assets/js/hyper-config.js"></script>
+
+    <link href="~/lib/hyper-assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- third party css -->
+    <link href="~/lib/hyper-assets/vendor/datatables.net-bs5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/hyper-assets/vendor/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/hyper-assets/vendor/datatables.net-fixedcolumns-bs5/css/fixedColumns.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/hyper-assets/vendor/datatables.net-fixedheader-bs5/css/fixedHeader.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/hyper-assets/vendor/datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+
+    <link href="~/lib/hyper-assets/vendor/daterangepicker/daterangepicker.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/hyper-assets/vendor/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/hyper-assets/vendor/jquery-datatables-checkboxes/css/dataTables.checkboxes.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/hyper-assets/vendor/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/hyper-assets/vendor/apexcharts/apexcharts.css" rel="stylesheet" type="text/css" />
+    <link href="~/css/datatablecoloring.css" rel="stylesheet" type="text/css">
+    <link href="~/css/sliderbutton.css" rel="stylesheet" type="text/css">
+
+    <!-- third party css end -->
+    <!-- App css -->
+    <link href="~/lib/hyper-assets/css/app-modern.min.css" rel="stylesheet" type="text/css" id="app-style" />
+</head>
+<body class="show">
+
+    <!-- Pre-loader -->
+    <div id="preloader" style="display: none;">
+        <div id="status" style="display: none;">
+            <div class="bouncing-loader"><div></div><div></div><div></div></div>
+        </div>
+    </div>
+    <!-- End Preloader-->
+    <!-- Begin Page-->
+    <div class="wrapper">
+        <!-- ========== Topbar Start ========== -->
+        <partial name="_Topbar" />
+        <!-- ========== Topbar End ========== -->
+        <!-- ========== Left Sidebar Start ========== -->
+        <partial name="_LeftSidebar" />
+        <!-- ========== Left Sidebar End ========== -->
+        <!-- ========== Main Content Start ========== -->
+        <div class="content-page">
+            <div class="content">
+                <div class="container-fluid mb-4">
+                    <main role="main" class="pb-0">
+                        @RenderBody()
+                    </main>
+                </div>
+            </div>
+            <!-- End Content -->
+
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12 col-md-6 add-padding-top text-center text-md-start">
+                            <span>
+                                <script>document.write(new Date().getFullYear())</script> &copy; ERP - ERP.com
+                                |
+                                <a asp-controller="Home" asp-action="Privacy">
+                                    Privacy Policy
+                                </a>
+                                |
+                                <a asp-controller="Home" asp-action="EULA">
+                                    EULA
+                                </a>
+
+                            </span>
+                        </div>
+                        @if (ViewContext.RouteData.Values["controller"] != null)
+                        {
+                            <div class="col-6">
+                                <div class="page-title-box">
+                                    <div class="page-title-right">
+                                        <ol class="breadcrumb m-0">
+                                            @if (ViewContext.RouteData.Values["controller"].ToString() == "Home")
+                                            {
+                                                <li class="breadcrumb-item active" aria-current="page">
+                                                    <i class="uil-home-alt"></i>
+                                                    @Html.Label(ViewContext.RouteData.Values["controller"].ToString(), ViewContext.RouteData.Values["controller"].ToString(), ViewContext.RouteData.Values["controller"].ToString())
+                                                </li>
+
+                                            }
+
+                                            @if (ViewContext.RouteData.Values["controller"].ToString() != "Home")
+                                            {
+                                                <li class="breadcrumb-item">
+                                                    <a asp-area="" asp-controller="Home" asp-action="Index">
+                                                        <i class="uil-home-alt"></i>
+                                                        Home
+                                                    </a>
+                                                </li>
+                                                @if (ViewContext.RouteData.Values["action"].ToString() != "Index")
+                                                {
+                                                    <li class="breadcrumb-item">
+                                                        @Html.Label(ViewContext.RouteData.Values["controller"].ToString(), ViewContext.RouteData.Values["controller"].ToString(), ViewContext.RouteData.Values["controller"].ToString())
+                                                    </li>
+                                                    <li class="breadcrumb-item active">
+                                                        @Html.Label(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["controller"].ToString())
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <li class="breadcrumb-item active">
+                                                        @Html.Label(ViewContext.RouteData.Values["controller"].ToString(), ViewContext.RouteData.Values["controller"].ToString(), ViewContext.RouteData.Values["controller"].ToString())
+                                                    </li>
+                                                }
+                                            }
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </footer>
+        </div> <!-- content-page -->
+    </div>
+    <!-- END wrapper-->
+    <!-- bundle -->
+    <!-- Load jQuery library first -->
+    <script type="text/javascript" src="~/lib/hyper-assets/vendor/jquery/jquery.min.js"></script>
+
+    <!-- Load other JavaScript files and libraries -->
+    <script type="text/javascript" src="~/lib/hyper-assets/js/vendor.min.js"></script>
+    <script type="text/javascript" src="~/lib/hyper-assets/vendor/select2/js/select2.min.js"></script> 
+    <script type="text/javascript" src="~/lib/hyper-assets/js/app.min.js"></script>
+    <script type="text/javascript" src="~/lib/hyper-assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script type="text/javascript" src="~/lib/hyper-assets/vendor/daterangepicker/daterangepicker.js"></script>
+
+    <!-- third party js ends -->
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        $(document).ready(function () {
+            //TO DO: Reimplement preferences later.
+            // var theme = 'httpContextAccessor.HttpContext.Session.GetString("userPreferenceTheme")'
+            // if (theme != null && theme != '') {
+            //     html['dataset'].bsTheme = theme;
+            //     html['dataset'].topbarColor = theme;
+            //     html['dataset'].menuColor = theme;
+            // };
+
+            loadPages();
+
+            $("#page-search").select2();
+        });
+
+        $("#page-search").on('select2:select', function (e) {
+            let page = e.params.data.id;
+            if (page != "")
+                window.location.href = `/${page}`;
+        });
+
+        function loadPages() {
+
+            var urls = $('.side-nav a[href^="/"]:not([href="/"])')
+                .map((index, element) => $(element).attr("href").slice(1))
+                .get()
+                .sort();
+
+            let s = `<option value=""></option>`;
+            urls.forEach((e) => { s += `<option value="${e}">${e}</option>`; });
+
+            $("#page-search").html(s);
+        }
+    </script>
+
+    <style type="text/css">
+        .content {
+            margin-top: calc(1.5rem * .5);
+        }
+
+        .card-header {
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #464f5b;
+        }
+
+        .card-body {
+            padding-top: 1rem;
+        }
+
+        .btn.btn-block {
+            display: block;
+            width: 100% !important
+        }
+
+        .card-header h3.card-title {
+            margin-bottom: 0px !important;
+            padding-bottom: 0px !important;
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .align-y-center {
+            display: flex;
+            align-items: center;
+        }
+
+        .custom-bb {
+            margin-bottom: 1.0rem;
+            padding-bottom: 1.0rem;
+            border-bottom: 2px solid #464f5b;
+        }
+
+        /*** data table custom styles ----------------- start ***/
+        .dataTables_wrapper .btn-group {
+            width: 100%;
+        }
+
+        .custom-mb-sm,
+        .custom-mb-xs {
+            margin-bottom: auto;
+        }
+
+        .custom-mt-sm,
+        .custom-mt-xs {
+            margin-top: auto;
+        }
+
+        /* Styles for xs devices and smaller */
+        @@media (max-width: 575.98px) {
+            .custom-mb-xs {
+                margin-bottom: 0.8rem;
+            }
+
+            .custom-mt-xs {
+                margin-top: 0.8rem;
+            }
+        }
+
+        /* Styles for sm devices and smaller */
+        @@media (min-width: 576px) and (max-width: 767.98px) {
+            .custom-mb-sm {
+                margin-bottom: 0.8rem;
+            }
+
+            .custom-mt-sm {
+                margin-top: 0.8rem;
+            }
+        }
+
+        .page-title-right {
+            margin-top: 0 !important;
+
+        }
+
+        .add-padding-top {
+            padding-top: 12px;
+        }
+
+    </style>
+
+</body>
+</html>

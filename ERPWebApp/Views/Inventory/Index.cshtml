@@ -1,0 +1,1234 @@
+﻿@using ERPWebApp.Models.Company;
+@model InventoryViewModel
+
+@{
+    ViewData["Title"] = "Inventory Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var productRequestItems = new Dictionary<string, string>
+{
+{ "Product", "Product" },
+{ "Requests", "Requests" },
+{ "Percentage", "Percentage" }
+};
+
+    var inventoryReasonsRequested = new Dictionary<string, string>
+{
+{ "Reasons", "Reasons" },
+{ "Frequency", "Frequency" },
+{ "Percantage", "Percentage" }
+};
+
+    var movedProductItems = new Dictionary<string, string>
+{
+{ "Product", "Product" },
+{ "Quantity", "Quantity" }
+};
+}
+
+<style>
+    #chart-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    #chart {
+        width: 100%;
+    }
+
+    #help-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    #help-info {
+        position: absolute;
+        top: 40px;
+        right: -200px;
+        width: 200px;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        pointer-events: none;
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        border-radius: 4px;
+        font-size: 13px;
+        z-index: 9999;
+        visibility: hidden;
+    }
+
+    .inventory-select2-container {
+        width: 25%;
+        /* Adjust this value to control the width of the select box */
+    }
+
+    .inventory-select2-container .inventory-select2-selection {
+        width: 25%;
+        height: 38px;
+        /* You can adjust this value to control the height of the select box */
+        border-radius: 0.25rem;
+    }
+</style>
+
+<!--error message-->
+<div class="alert alert-danger d-flex align-items-center" role="alert" id="error-message"
+    style="display: none !important;">
+    <div>
+        An error occurred while saving the layout
+    </div>
+</div>
+<!--error message-->
+
+<div class="form-check form-switch mt-2 mb-2">
+    <label class="form-check-label" for="layout-editing-check" id="layout-editing-check-label">Enable Layout
+        Editing</label>
+    <input class="form-check-input" type="checkbox" id="layout-editing-check">
+</div>
+
+<!--Volumetrics------------------------------------------------------->
+<div class="row" id="drac-inventory-container">
+    <div class="col-xl-6" id="drac-sitevolumetrics">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="header-container">
+                        <h4 class="header-title">
+                            Site Volumetrics
+                            <button onclick="toggleHelpInfo('volumetrics-info')"
+                                style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                                <i class="mdi mdi-information"></i>
+                            </button>
+                        </h4>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label" for="SiteVolumetrics">Add Favourite </label>
+                        <input class="form-check-input" asp-for="SiteVolumetrics" type="checkbox" id="SiteVolumetrics"
+                            name="SiteVolumetrics">
+                    </div>
+
+                </div>
+                <div id="volumetrics-info" class="hidden alert alert-info" role="alert">
+                    <p>Tracks volumetrics across the different sites. </p>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="inventory-select2-container">
+                            <select id="siteSelect" class="btn btn-secondary dropdown-toggle">
+                                <option value="-1">All Sites</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button id="volumetricsCSV" class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                        </div>
+                    </div>
+
+                    <div class="volumetrics-fetching-container"
+                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:flex">
+                        <div id="volumetrics-fetching"
+                            style="background-color: transparent; padding: 1rem; border-radius: 5px; text-align: center;">
+                            <p>Fetching...</p>
+                            <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                        </div>
+                    </div>
+                    <div id="chart"></div>
+                    <div id="info" style="display: flex; flex-wrap: wrap; justify-content: center;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Product Cycle Count------------------------------------------------------->
+    <div class="col-xl-6" id="drac-prodcyclecount">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="header-container">
+                        <h4 class="header-title">
+                            Product Cycle Count
+                            <button onclick="toggleHelpInfo('product-cycle-info')"
+                                style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                                <i class="mdi mdi-information"></i>
+                            </button>
+                        </h4>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label" for="ProductCyleCount">Add Favourite </label>
+                        <input class="form-check-input" asp-for="ProductCyleCount" type="checkbox" id="ProductCyleCount"
+                            name="ProductCyleCount">
+                    </div>
+                </div>
+                <div id="product-cycle-info" class="hidden alert alert-info" role="alert">
+                    <p> A display of products that are in need of being cycle counted by days passed.</p>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="inventory-select2-container">
+                            <select id="siteNameFilter" class="btn btn-secondary dropdown-toggle">
+                                <option value="">All Sites</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button id="cycleExportCSV" class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="cycle-count-chart" class="apex-charts" data-colors="#536de6,#e3eaef,#10c469,#35b8e0"></div>
+        </div>
+    </div>
+<!--Most Requested Products------------------------------------------------------->
+    <div class="col-xl-6" id="drac-toprequestedprod">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="header-container">
+                        <h4 class="header-title d-inline-block">
+                            Top 5 Requested Products Requested
+                        </h4>
+                        <button onclick="toggleHelpInfo('product-request-info')"
+                            style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                            <i class="mdi mdi-information"></i>
+                        </button>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label" for="TopRequestedProducts">Add Favourite </label>
+                        <input class="form-check-input" asp-for="TopRequestedProducts" type="checkbox"
+                            id="TopRequestedProducts" name="TopRequestedProducts">
+                    </div>
+
+                </div>
+                <div id="product-request-info" class="hidden alert alert-info" role="alert">
+                    <p>Displays the count & percentage of requests that have been made for the most requested products.
+                    </p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="col-12 col-md-6 col-lg-4" style="margin-bottom: 20px;">
+                        <input type="text" id="product-request-chart" name="productRequest" class="form-control"
+                            value="Last 30 Days" readonly>
+                    </div>
+                    <div>
+                        <button id="requestedProductExport"
+                            class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="request-fetching-container"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                    <div id="request-fetching" class="hidden"
+                        style="background-color: #37404A; padding: 1rem; border-radius: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+                        <p>Fetching...</p>
+                        <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                    </div>
+                </div>
+                <table class="table dt-responsive webkit-nowrap w-100" id="productRequestTable">
+                    <thead>
+                        <tr>
+                            @foreach (var header in productRequestItems)
+                            {
+                                    <th>@header.Value</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ProductRequestInfo)
+                        {
+                                <tr>
+                                    <td>@item.ProductSku</td>
+                                    <td>@item.QuantityNeeded</td>
+                                    <td>
+                                        <span style="margin-right: 5px;">@item.Percentage.ToString("0.##")%</span>
+                                        <div style="background-color: grey; width: 100%; height: 10px; position: relative;">
+                                            <div style="background-color: hotpink; width: @item.Percentage%; height: 10px;">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--Most Frequent Reasons------------------------------------------------------->
+    <div class="col-xl-6" id="drac-topreasons">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="header-container">
+                        <h4 class="header-title d-inline-block">
+                            Top 5 Reasons Requested
+                        </h4>
+                        <button onclick="toggleHelpInfo('inventory-reasons-info')"
+                            style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                            <i class="mdi mdi-information"></i>
+                        </button>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label" for="TopReasonRequest">Add Favourite </label>
+                        <input class="form-check-input" asp-for="TopReasonRequest" type="checkbox" id="TopReasonRequest"
+                            name="TopReasonRequest">
+                    </div>
+
+                </div>
+                <div id="inventory-reasons-info" class="hidden alert alert-info" role="alert">
+                    <p>Displays the count & percentage of requests that have been made for the most requested reasons.
+                    </p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="col-12 col-md-6 col-lg-4" style="margin-bottom: 20px;">
+                        <input type="text" id="reasons-chart" name="reasons" class="form-control" value="Last 30 Days"
+                            readonly>
+                    </div>
+                    <div>
+                        <button id="reasonsExport" class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="reasons-fetching-container"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                    <div id="reasons-fetching" class="hidden"
+                        style="background-color: #37404A; padding: 1rem; border-radius: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+                        <p>Fetching...</p>
+                        <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                    </div>
+                </div>
+                <table class="table dt-responsive webkit-nowrap w-100" id="reasonsTable">
+                    <thead>
+                        <tr>
+                            @foreach (var header in inventoryReasonsRequested)
+                            {
+                                    <th>@header.Value</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.RequestedReasonInfo)
+                        {
+                                <tr>
+                                    <td>@item.PickReason</td>
+                                    <td>@item.ReasonCount</td>
+                                    <td>
+                                        <span style="margin-right: 5px;">@item.Percentage.ToString("0.##")%</span>
+                                        <div style="background-color: grey; width: 100%; height: 10px; position: relative;">
+                                            <div style="background-color: hotpink; width: @item.Percentage%; height: 10px;">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<!--Most Moved Products------------------------------------------------------->
+    <div class="col-xl-6" id="drac-topmovedprod">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="header-container">
+                        <h4 class="header-title d-inline-block">
+                            Top 10 Most Moved Products
+                        </h4>
+                        <button onclick="toggleHelpInfo('moved-product-info')"
+                            style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                            <i class="mdi mdi-information"></i>
+                        </button>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label" for="TopMovedProducts">Add Favourite </label>
+                        <input class="form-check-input" asp-for="TopMovedProducts" type="checkbox" id="TopMovedProducts"
+                            name="TopMovedProducts">
+                    </div>
+
+                </div>
+                <div id="moved-product-info" class="hidden alert alert-info" role="alert">
+                    <p>Tracks the products that have been moved around the most.</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="col-12 col-md-6 col-lg-4" style="margin-bottom: 20px;">
+                        <input type="text" id="moved-products-chart" name="moved-products" class="form-control"
+                            value="Last 30 Days" readonly>
+                    </div>
+                    <div>
+                        <button id="movedExport" class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="moved-fetching-container"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                    <div id="moved-fetching" class="hidden"
+                        style="background-color: #37404A; padding: 1rem; border-radius: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+                        <p>Fetching...</p>
+                        <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                    </div>
+                </div>
+                <table class="table dt-responsive webkit-nowrap w-100" id="movedProductsTable">
+                    <thead>
+                        <tr>
+                            @foreach (var header in movedProductItems)
+                            {
+                                    <th>@header.Value</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.MovedProductsInfo)
+                        {
+                                <tr>
+                                    <td>@item.Sku</td>
+                                    <td>@item.Quantity</td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+        <script src="~/lib/hyper-assets/vendor/dragula/dragula.min.js"></script>
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+                InitDragNDrop();
+
+                $('#SiteVolumetrics').change(function () {
+                    updateFavouriteStatus('SiteVolumetrics', $(this).is(':checked'));
+                });
+
+                $('#ProductCyleCount').change(function () {
+                    updateFavouriteStatus('ProductCyleCount', $(this).is(':checked'));
+                });
+
+                $('#TopRequestedProducts').change(function () {
+                    updateFavouriteStatus('TopRequestedProducts', $(this).is(':checked'));
+                });
+                $('#TopReasonRequest').change(function () {
+                    updateFavouriteStatus('TopReasonRequest', $(this).is(':checked'));
+                });
+
+                $('#TopMovedProducts').change(function () {
+                    updateFavouriteStatus('TopMovedProducts', $(this).is(':checked'));
+                });
+                
+                window.toggleHelpInfo = function (id) {
+                    var helpInfo = document.getElementById(id);
+                    if (helpInfo) {
+                        helpInfo.classList.toggle('hidden');
+                    }
+                }
+                // #region Datatable Setup
+                $('#productRequestTable').DataTable({
+                    searching: false,
+                    lengthChange: false,
+                    paging: false,
+                    info: false,
+                    columnDefs: [
+                        { orderable: false, targets: '_all' }
+                    ]
+                });
+                $('#reasonsTable').DataTable({
+                    searching: false,
+                    lengthChange: false,
+                    paging: false,
+                    info: false,
+                    columnDefs: [
+                        { orderable: false, targets: '_all' }
+                    ]
+                });
+                $('#movedProductsTable').DataTable({
+                    searching: false,
+                    lengthChange: false,
+                    paging: false,
+                    info: false,
+                    order: [[1, 'desc']],
+                    columnDefs: [
+                        { orderable: false, targets: '_all' }
+                    ]
+                });
+                $('#siteSelect').select2();
+                $('#siteNameFilter').select2();
+
+                function updateFavouriteStatus(propertyName, value) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("UpdateFavouriteStatus", "MyDash")',
+                        data: {
+                            propertyName: propertyName,
+                            value: value
+                        },
+                        success: function (response) {
+                            console.log('Update successful');
+                        },
+                        error: function (xhr, status, error) {
+                            console.log('Update failed');
+                        }
+                    });
+                }
+                // #endregion
+                // #region Datatable Export
+                function downloadCSV(csv, filename) {
+                    const csvFile = new Blob([csv], { type: "text/csv" });
+                    const downloadLink = document.createElement("a");
+                    downloadLink.download = filename;
+                    downloadLink.href = window.URL.createObjectURL(csvFile);
+                    downloadLink.style.display = "none";
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                }
+
+                function exportTableToCSV(tableId, filename) {
+                    const table = document.getElementById(tableId);
+                    let csv = [];
+                    const rows = table.querySelectorAll("tr");
+
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = [], cols = rows[i].querySelectorAll("td, th");
+
+                        for (let j = 0; j < cols.length; j++) {
+                            row.push(cols[j].innerText);
+                        }
+
+                        csv.push(row.join(","));
+                    }
+
+                    downloadCSV(csv.join("\n"), filename);
+                }
+
+                document.getElementById("reasonsExport").addEventListener("click", function () {
+                    const tableId = "reasonsTable";
+                    const filename = "reasons.csv";
+                    exportTableToCSV(tableId, filename);
+                });
+                document.getElementById("requestedProductExport").addEventListener("click", function () {
+                    const tableId = "productRequestTable";
+                    const filename = "requestedProduct.csv";
+                    exportTableToCSV(tableId, filename);
+                });
+                document.getElementById("movedExport").addEventListener("click", function () {
+                    const tableId = "movedProductsTable";
+                    const filename = "movedProducts.csv";
+                    exportTableToCSV(tableId, filename);
+                });
+                // #endregion
+                var defaultStart = moment().subtract(29, 'days');
+                var defaultEnd = moment();
+
+                var defaultDays = defaultEnd.diff(defaultStart, 'days');
+
+            productRequestUpdate(-defaultDays);
+            reasonsUpdate(-defaultDays);
+            movedProductsUpdate(-defaultDays);
+            // #region CycleCount Chart
+            async function fetchData() {
+                const response = await fetch('/Inventory/ProductCycleCount');
+                const data = await response.json();
+                return data;
+            }
+
+                fetchData().then(data => {
+                    const categories = ["1 day", "2-10 days", "11-20 days", "21-30 days", "31+ days"];
+
+                    function getCategoryIndex(days) {
+                        if (days === 1) return 0;
+                        if (days >= 2 && days <= 10) return 1;
+                        if (days >= 11 && days <= 20) return 2;
+                        if (days >= 21 && days <= 30) return 3;
+                        return 4;
+                    }
+
+                    const siteDataMap = {};
+
+                    data.forEach(entry => {
+                        const categoryIndex = getCategoryIndex(entry.daysSinceLastVerification);
+
+                        if (!siteDataMap[entry.siteName]) {
+                            siteDataMap[entry.siteName] = Array(categories.length).fill(0);
+                        }
+
+                        siteDataMap[entry.siteName][categoryIndex] += entry.stockQuantity;
+                    });
+
+                    const seriesData = Object.keys(siteDataMap).map(siteName => {
+                        return {
+                            name: siteName,
+                            data: siteDataMap[siteName]
+                        };
+                    });
+
+                    const sortedSeriesData = seriesData.slice().sort((a, b) => a.name.localeCompare(b.name));
+
+
+                    function cycleExportCSV(chartData, categories) {
+                        let csvContent = "data:text/csv;charset=utf-8,";
+
+                        csvContent += "Site Name," + categories.join(",") + "\r\n";
+
+                        chartData.forEach(siteData => {
+                            csvContent += siteData.name + "," + siteData.data.join(",") + "\r\n";
+                        });
+
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", "cycle_count_data.csv");
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+
+                    document.getElementById("cycleExportCSV").addEventListener("click", () => {
+                        cycleExportCSV(seriesData, categories);
+                    });
+
+                    function dataLabelFormatter(value, { seriesIndex, dataPointIndex, w }) {
+                        // These are the thresholds that bars will be hidden.
+                        const threshold = 10; // For multiple bars in a row
+                        const singleBarThreshold = 5; // For the only bar in a row
+
+                        // Calculate the maximum value across all categories
+                        const maxValue = Math.max(...w.globals.series.map(s => Math.max(...s)));
+
+                        // Calculate the percentage size of the bar segment based on the maximum value
+                        const percentage = (w.globals.series[seriesIndex][dataPointIndex] / maxValue) * 100;
+
+                        // Count the number of non-zero segments in the row
+                        const nonZeroSegments = w.globals.series.map(s => s[dataPointIndex]).filter(val => val > 0).length;
+
+                        // If percentage is below the threshold, hide the data label
+                        if (percentage < threshold) {
+                            return "";
+                        }
+                        return value;
+                    }
+
+                    const chartOptions = {
+                        chart: {
+                            type: "bar",
+                            height: 350,
+                            stacked: true
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            formatter: dataLabelFormatter,
+                        },
+                        plotOptions: {
+                            bar: {
+                                horizontal: true
+                            }
+                        },
+                        series: sortedSeriesData,
+                        xaxis: {
+                            categories: categories,
+                            title: {
+                                text: "Total Quantity"
+                            }
+                        },
+                        yaxis: {
+                            title: {
+                                text: "Days Passed"
+                            }
+                        },
+                        legend: {
+                            position: "top",
+                            horizontalAlign: "left"
+                        },
+                        noData: {
+                            text: "No data available.", 
+                            align: 'center',
+                            verticalAlign: 'middle',
+                            style: {
+                                color: '#AAB8C5',  
+                                fontSize: '16px',  
+                            }
+                        }
+                    };
+
+                    const chart = new ApexCharts(document.querySelector("#cycle-count-chart"), chartOptions);
+                    chart.render();
+
+                    const siteNameFilter = document.getElementById("siteNameFilter");
+                    const siteNames = Object.keys(siteDataMap);
+                    siteNames.sort();
+                    siteNames.forEach(siteName => {
+                        const option = document.createElement("option");
+                        option.value = siteName;
+                        option.textContent = siteName;
+                        siteNameFilter.appendChild(option);
+                    });
+
+                    $('#siteNameFilter').select2();
+                    $('#siteNameFilter').on('select2:select', function () {
+                        const selectedSite = $(this).val();
+
+                        if (selectedSite === "") {
+                            updateChart(chart, seriesData);
+                        } else {
+                            const filteredData = seriesData.filter(siteData => siteData.name === selectedSite);
+                            updateChart(chart, filteredData);
+                        }
+                    });
+
+                    function updateChart(chart, data) {
+                        const seriesData = data.map(siteData => {
+                            return {
+                                name: siteData.name,
+                                data: siteData.data
+                            };
+                        });
+
+                    chart.updateOptions({
+                        series: seriesData
+                    });
+                }
+            });
+            // #endregion
+            // #region Volumetrics Graph
+            async function volumetricsData() {
+                const response = await fetch('/Inventory/Volumetrics');
+                const data = await response.json();               
+                return data;
+            }
+
+                volumetricsData().then(data => {
+                    const siteSelect = document.getElementById('siteSelect');
+                    data.forEach((entry, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = entry.siteNames;
+                        siteSelect.appendChild(option);
+                    });
+
+                    const colors = data.map(entry => entry.gradToColors);
+                    const chartDiv = document.getElementById('chart');
+
+                    const options = {
+                        series: [],
+                        chart: {
+                            type: 'radialBar',
+                            height: 380
+                        },
+                        noData: {
+                            text: "No data available.", 
+                            align: 'center',
+                            verticalAlign: 'middle',
+                            style: {
+                                color: '#AAB8C5',  
+                                fontSize: '16px', 
+                            }
+                        },
+                        colors: colors,
+                        plotOptions: {
+                            radialBar: {
+                                startAngle: -90,
+                                endAngle: 90,
+                                hollow: {
+                                    margin: 0,
+                                    size: '56%'
+                                },
+                                track: {
+                                    margin: 2,
+                                    startAngle: -90,
+                                    endAngle: 90,
+                                },
+                                dataLabels: {
+                                    name: {
+                                        fontSize: "18px",
+                                        fontWeight: 'bold'
+                                    },
+                                    value: {
+                                        fontSize: "18px",
+                                        fontWeight: 'bold'
+                                    },
+                                    enabled: true,
+                                    enabledOnSeries: true,
+                                    textAnchor: 'middle',
+                                }
+                            }
+                        },
+                        responsive: [
+                            {
+                                breakpoint: 480,
+                                options: {
+                                    chart: {
+                                        height: 280
+                                    },
+                                    plotOptions: {
+                                        radialBar: {
+                                            dataLabels: {
+                                                name: {
+                                                    fontSize: "14px"
+                                                },
+                                                value: {
+                                                    fontSize: "14px"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    };
+
+                    const chart = new ApexCharts(chartDiv, options);
+                    chart.render();
+
+                    function updateChart() {
+                        const selectedIndex = parseInt(siteSelect.value, 10);
+                        const selectedData = selectedIndex === -1 ? data : [data[selectedIndex]];
+                        selectedData.sort((a, b) => a.siteNames.localeCompare(b.siteNames));
+
+                        options.series = selectedData.map(entry => entry.volRatio);
+                        options.labels = selectedData.map(entry => entry.siteNames);
+                        options.colors = selectedData.map(entry => entry.gradToColors);
+                        chart.updateOptions(options);
+
+                        const infoDiv = document.getElementById('info');
+                        infoDiv.innerHTML = '';
+                        selectedData.forEach(entry => {
+                            const entryContainer = document.createElement('div');
+                            entryContainer.style.display = 'flex';
+                            entryContainer.style.flexDirection = 'column';
+                            entryContainer.style.marginRight = '16px';
+                            entryContainer.style.textAlign = 'center';
+                            entryContainer.style.marginTop = selectedIndex === -1 ? '0' : '32px';
+
+                            const volumeInfo = document.createElement('span');
+                            volumeInfo.textContent = `${entry.volumeTally}/${entry.volumeTarget}`;
+                            volumeInfo.style.fontWeight = 'bold';
+                            volumeInfo.style.marginTop = '1rem';
+                            volumeInfo.style.fontSize = '20px';
+                            entryContainer.appendChild(volumeInfo);
+
+                            const volumeLabel = document.createElement('label');
+                            volumeLabel.textContent = 'Volume in Use(Cft):';
+                            entryContainer.appendChild(volumeLabel);
+
+                            const siteName = document.createElement('i');
+                            siteName.textContent = entry.siteNames;
+                            siteName.style.marginBottom = '2px';
+                            siteName.style.marginTop = '2px';
+                            entryContainer.appendChild(siteName);
+
+                            infoDiv.appendChild(entryContainer);
+                        });
+                    }
+                    updateChart();
+                    $('#siteSelect').on('select2:select', updateChart);
+
+                    function volumetricsExport(data, filename) {
+                        const header = 'Site Names,Volume Tally,Volume Target,Volume Ratio\n';
+                        const csvData = data
+                            .map((entry) => `${entry.siteNames},${entry.volumeTally},${entry.volumeTarget},${entry.volRatio}`)
+                            .join('\n');
+                        const csvContent = header + csvData;
+
+                        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                        const link = document.createElement('a');
+                        const url = URL.createObjectURL(blob);
+
+                        link.setAttribute('href', url);
+                        link.setAttribute('download', filename);
+                        link.style.visibility = 'hidden';
+
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                    const volumetricsCSVButton = document.getElementById('volumetricsCSV');
+                    volumetricsCSVButton.addEventListener('click', () => {
+                        volumetricsExport(data, 'sites_volume_ratio.csv');
+                    });
+                    $(".volumetrics-fetching-container").css("display", "none");
+                    $("#volumetrics-fetching").addClass("hidden");
+                });
+                // #endregion
+                // #region Datatable Updates & Loading
+                async function productRequestUpdate(days) {
+                    const productRequestDays = document.getElementById("product-request-chart").value;
+
+                    const tableContainer = document.getElementById("productRequestTable");
+                    const tableBody = tableContainer.querySelector("tbody");
+
+                    $(".request-fetching-container").css("display", "flex");
+                    $("#request-fetching").removeClass("hidden");
+
+                const response = await fetch(`/Inventory/RequestedProducts?days=${days}`);
+                const updatedData = await response.json();
+               
+                if (updatedData.length != 0) {
+
+                    tableBody.innerHTML = ""; // Clear the existing table body
+
+                    updatedData.forEach(item => {
+                        const row = document.createElement('tr');
+
+                        const productSkuCell = document.createElement('td');
+                        productSkuCell.textContent = item.productSku;
+                        row.appendChild(productSkuCell);
+
+                        const quantityNeededCell = document.createElement('td');
+                        quantityNeededCell.textContent = item.quantityNeeded;
+                        row.appendChild(quantityNeededCell);
+
+                        const percentageCell = document.createElement('td');
+                        const percentageString = item.percentage.toFixed(2) + '%';
+                        percentageCell.innerHTML = `
+                                                        <span style="margin-right: 5px;">${percentageString}</span>
+                                                        <div style="background-color: grey; width: 100%; height: 10px; position: relative;">
+                                                            <div style="background-color: hotpink; width: ${item.percentage}%; height: 10px;"></div>
+                                                        </div>
+                                                    `;
+                        row.appendChild(percentageCell);
+
+                        tableBody.appendChild(row);
+                    });
+                }
+
+                    $(".request-fetching-container").css("display", "none");
+                    $("#request-fetching").addClass("hidden");
+                }
+
+                async function reasonsUpdate(days) {
+                    const reasonDays = document.getElementById("reasons-chart").value;
+
+                    const tableContainer = document.getElementById("reasonsTable");
+                    const tableBody = tableContainer.querySelector("tbody");
+
+                    $(".reasons-fetching-container").css("display", "flex");
+                    $("#reasons-fetching").removeClass("hidden");
+
+                const response = await fetch(`/Inventory/RequestedReason?days=${days}`);
+                const updatedData = await response.json();
+
+                if (updatedData.length != 0) {
+
+                    tableBody.innerHTML = ""; // Clear the existing table body
+
+                    updatedData.forEach(item => {
+                        const row = document.createElement('tr');
+
+                        const pickReasonCell = document.createElement('td');
+                        pickReasonCell.textContent = item.pickReason;
+                        row.appendChild(pickReasonCell);
+
+                        const reasonCountCell = document.createElement('td');
+                        reasonCountCell.textContent = item.reasonCount;
+                        row.appendChild(reasonCountCell);
+
+                        const percentageCell = document.createElement('td');
+                        const percentageString = item.percentage.toFixed(2) + '%';
+                        percentageCell.innerHTML = `
+                                                        <span style="margin-right: 5px;">${percentageString}</span>
+                                                        <div style="background-color: grey; width: 100%; height: 10px; position: relative;">
+                                                            <div style="background-color: hotpink; width: ${item.percentage}%; height: 10px;"></div>
+                                                        </div>
+                                                    `;
+                        row.appendChild(percentageCell);
+
+                        tableBody.appendChild(row);
+                    });
+                }
+
+                    $(".reasons-fetching-container").css("display", "none");
+                    $("#reasons-fetching").addClass("hidden");
+                }
+
+                async function movedProductsUpdate(days) {
+                    const movedDays = document.getElementById("moved-products-chart").value;
+
+                    const tableContainer = document.getElementById("movedProductsTable");
+                    const tableBody = tableContainer.querySelector("tbody");
+
+                    $(".moved-fetching-container").css("display", "flex");
+                    $("#moved-fetching").removeClass("hidden");
+
+                const response = await fetch(`/Inventory/MovedProducts?days=${days}`);
+                const updatedData = await response.json();
+                
+                if (updatedData.length != 0) {
+                    tableBody.innerHTML = ""; // Clear the existing table body
+
+                    updatedData.forEach(item => {
+                        const row = document.createElement('tr');
+
+                        const skuCell = document.createElement('td');
+                        skuCell.textContent = item.sku;
+                        row.appendChild(skuCell);
+
+                        const movedCell = document.createElement('td');
+                        movedCell.textContent = item.quantity;
+                        row.appendChild(movedCell);
+
+                        tableBody.appendChild(row);
+                    });
+                }
+                   
+                $(".moved-fetching-container").css("display", "none");
+                $("#moved-fetching").addClass("hidden");
+            }
+            // #endregion
+            // #region Datatable Date/Range Picker
+            //Date range info for product requests.
+            $('#product-request-chart').daterangepicker({
+                startDate: defaultStart,
+                endDate: defaultEnd,
+                autoUpdateInput: false,
+                opens: 'bottom',
+                showCustomRangeLabel: false,
+                alwaysShowCalendars: false,
+                ranges: {
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'Last 90 Days': [moment().subtract(89, 'days'), moment()]
+                }
+            });
+
+                //Date range info for reasons.
+                $('#reasons-chart').daterangepicker({
+                    startDate: defaultStart,
+                    endDate: defaultEnd,
+                    autoUpdateInput: false,
+                    opens: 'bottom',
+                    showCustomRangeLabel: false,
+                    alwaysShowCalendars: false,
+                    ranges: {
+                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                        'Last 90 Days': [moment().subtract(89, 'days'), moment()]
+                    }
+                });
+
+                //Date range info for moved products.
+                $('#moved-products-chart').daterangepicker({
+                    startDate: defaultStart,
+                    endDate: defaultEnd,
+                    autoUpdateInput: false,
+                    opens: 'bottom',
+                    showCustomRangeLabel: false,
+                    alwaysShowCalendars: false,
+                    ranges: {
+                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                        'Last 90 Days': [moment().subtract(89, 'days'), moment()],
+                        'Last Year': [moment().subtract(364, 'days'), moment()]
+                    }
+                });
+
+                //Date range application for product request chart.
+                $('#product-request-chart').on('apply.daterangepicker', async function (ev, picker) {
+                    var days = picker.endDate.diff(picker.startDate, 'days');
+                    var selectedRangeLabel = ev.chosenLabel || Object.keys(picker.ranges).find(rangeLabel => {
+                        var range = picker.ranges[rangeLabel];
+                        return range[0].isSame(picker.startDate) && range[1].isSame(picker.endDate);
+                    });
+                    if (selectedRangeLabel) {
+                        $(this).val(selectedRangeLabel);
+                    }
+                    await productRequestUpdate(-days);
+                });
+
+                //Date range application for reasons chart.
+                $('#reasons-chart').on('apply.daterangepicker', async function (ev, picker) {
+                    var days = picker.endDate.diff(picker.startDate, 'days');
+                    var selectedRangeLabel = ev.chosenLabel || Object.keys(picker.ranges).find(rangeLabel => {
+                        var range = picker.ranges[rangeLabel];
+                        return range[0].isSame(picker.startDate) && range[1].isSame(picker.endDate);
+                    });
+                    if (selectedRangeLabel) {
+                        $(this).val(selectedRangeLabel);
+                    }
+                    await reasonsUpdate(-days);
+                });
+
+                //Date range application for moved products chart.
+                $('#moved-products-chart').on('apply.daterangepicker', async function (ev, picker) {
+                    var days = picker.endDate.diff(picker.startDate, 'days');
+                    var selectedRangeLabel = ev.chosenLabel || Object.keys(picker.ranges).find(rangeLabel => {
+                        var range = picker.ranges[rangeLabel];
+                        return range[0].isSame(picker.startDate) && range[1].isSame(picker.endDate);
+                    });
+                    if (selectedRangeLabel) {
+                        $(this).val(selectedRangeLabel);
+                    }
+                    await movedProductsUpdate(-days);
+                });
+
+                //Hide calendar for product request chart.
+                $('#product-request-chart').on('show.daterangepicker', function () {
+                    $('.daterangepicker .calendar').css('display', 'none');
+                    $('.daterangepicker .ranges ul').css('width', '100%');
+                });
+
+                //Hide calendar for reasons chart.
+                $('#reasons-chart').on('show.daterangepicker', function () {
+                    $('.daterangepicker .calendar').css('display', 'none');
+                    $('.daterangepicker .ranges ul').css('width', '100%');
+                });
+
+                //Hide calendar for moved products chart.
+                $('#moved-products-chart').on('show.daterangepicker', function () {
+                    $('.daterangepicker .calendar').css('display', 'none');
+                    $('.daterangepicker .ranges ul').css('width', '100%');
+                });
+                // #endregion
+            });
+
+
+            function InitDragNDrop() {
+
+                //#region dragula drag-n-drop implementation
+
+                //listen to the drag n drop controller checkbox event and change the label text
+                $("#layout-editing-check").on('change', function () {
+                    $('#layout-editing-check-label').html($(this).is(':checked') ? 'Disable Layout Editing' : 'Enable Layout Editing');
+                });
+
+                //get main dragula container
+                let dracContainer = $('#drac-inventory-container');
+                //get error message element
+                let errorMsg = $('#error-message');
+
+                //get the item order from the DB and parse in to a javascript array
+                var elementPositions = @Html.Raw(Json.Serialize(Model.DashboardLayouts is null ? new object[] { } : Model.DashboardLayouts));
+                //dasboard's name
+                var dashboardName = '@DashboardNames.DashboardInventory.ToString()';
+
+                var ongoingAjax;
+                var isAjaxPending = false;
+
+                //if nothing received from the server (previous data is empty), get the current element positions
+                if (!elementPositions || !Array.isArray(elementPositions) || elementPositions.length == 0) {
+                    elementPositions = [];
+                    dracContainer.children("div").each((i, elem) => {
+                        elementPositions.push({ position: i, elemId: elem.id });
+                    });
+                }
+
+                dragula([document.getElementById('drac-inventory-container')], {
+                    isContainer: function (el) {
+                        return false; // only elements in drake.containers will be taken into account
+                    },
+                    moves: function (el, source, handle, sibling) {
+                        return $('#layout-editing-check').is(':checked'); //enable or disable drag n drop according to the user preference
+                    },
+                    accepts: function (el, target, source, sibling) {
+                        return true; // elements can be dropped in any of the `containers` by default
+                    },
+                    invalid: function (el, handle) {
+                        return false; // don't prevent any drags from initiating by default
+                    },
+                    direction: 'vertical',             // Y axis is considered when determining where an element would be dropped
+                    copy: false,                       // elements are moved by default, not copied
+                    copySortSource: false,             // elements in copy-source containers can be reordered
+                    revertOnSpill: false,              // spilling will put the element back where it was dragged from, if this is true
+                    removeOnSpill: false,              // spilling will `.remove` the element, if this is true
+                    mirrorContainer: document.body,    // set the element that gets mirror elements appended
+                    ignoreInputTextSelection: true,     // allows users to select input text, see details below
+                    slideFactorX: 0,               // allows users to select the amount of movement on the X axis before it is considered a drag instead of a click
+                    slideFactorY: 0,               // allows users to select the amount of movement on the Y axis before it is considered a drag instead of a click
+                })
+                    .on('drop', function (el, target, source, sibling) {
+                        //when the item dropped succesfully, prepare the new element order to save in the DB
+                        let newPositionsArr = [];
+                        dracContainer.children("div").each((i, elem) => {
+                            newPositionsArr.push({ Position: i, ElemId: elem.id });
+                        });
+
+                        //abort pending ajax calls
+                        if (isAjaxPending && ongoingAjax) {
+                            ongoingAjax.abort();
+                        }
+
+                        isAjaxPending = true;//mark as ajax is started
+
+                        var data = { Name: dashboardName, Layouts: newPositionsArr };
+                        ongoingAjax = $.ajax({
+                            url: "/UserPreference/SaveLayout",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            data: JSON.stringify(data),
+                            dataType: "json",
+                            success: function (data) {
+                                errorMsg.attr('style', 'display:none !important');
+                                isAjaxPending = false;
+                            },
+                            error: function (error) {
+                                if (error && error.statusText && error.statusText != 'abort') {
+                                    errorMsg.show();
+                                }
+
+                                isAjaxPending = false;
+
+                                //if in error, reset the view to the prvious order
+                                dracContainer.empty();//remove the existing child elements from main dragula container
+
+                                //add the elements back with the previously persisted order
+                                elementPositions.forEach((item, i) => {
+                                    dracContainer.append(item.elem);
+                                });
+
+                                isAjaxBeingAborted = false;
+                            }
+                        });
+                    });
+
+                //#endregion
+
+
+                //#region dragular drag-n-drop set initial positions
+
+                if (dracContainer.children.length == 0) {
+                    return;
+                }
+
+                elementPositions.sort((a, b) => a.position - b.position);//sort the retrived previously persisted element order array
+
+                //add the dom elements to the retrived array
+                dracContainer.children("div").each((i, elem) => {
+                    elementPositions.forEach((item, j) => {
+                        if (elem.id == item.elemId) {
+                            elementPositions[j]["elem"] = elem;
+                        }
+                    });
+                });
+
+                dracContainer.empty();//remove the existing child elements from main dragula container
+
+                //add the elements back with the previously persisted order
+                elementPositions.forEach((item, i) => {
+                    dracContainer.append(item.elem);
+                });
+
+                dracContainer.show();
+
+                //#endregion
+
+            }
+
+        </script>
+}

@@ -1,0 +1,103 @@
+﻿@model IEnumerable<ERPWebApp.Models.DesignOrderCounterViewModel>
+
+@{
+    ViewData["Title"] = "Design Order Counter";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card ribbon-box">
+            <div class="card-header">
+                <h3 class="card-title">Design Order Counter</h3>
+            </div>
+            <div class="card-body">
+                @* Beta Ribbon notice *@
+                <div class="ribbon ribbon-primary float-start"><i class="mdi mdi-access-point me-1"></i> Beta</div>
+
+                <div class="row mt-2">
+                    <div class="col-3">
+                        <label for="employee-dropdown">Employee</label>
+                        <select id="employee-dropdown" class="form-control select2" data-toggle="select2">
+                            <option class="dropdown-item" value="">Select Employee</option>
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label>Design Date Range</label>
+                            <div id="daterange" class="form-control" data-toggle="date-picker-range" data-target-display="#selectedValue" data-cancel-class="btn-light">
+                                <i class="mdi mdi-calendar"></i>&nbsp;
+                                <span id="selectedValue"></span> <i class="mdi mdi-menu-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+
+                    </div>
+                    <div class="col-3">
+                        <div class="float-end mt-3 mt-sm-0">
+                            <p>
+                                <b>Total Design Count:</b>
+                                <span id="total-design-count" class="float-end"> @ViewBag.DesignCount</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <table id="design-datatable" class="table dt-responsive webkit-nowrap w-100">
+                            @{
+                                await Html.RenderPartialAsync("PartialIndex");
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/js/pages/designer-order.min.js"></script>
+
+        <script type="text/javascript">
+            setupDataTable();
+            var dateLimit = new Date();
+            dateLimit.setDate(dateLimit.getDate() - 1);
+            $('#daterange').daterangepicker(
+                {
+                    maxDate: dateLimit,
+                    format: 'YYYY-MM-DD'
+                },
+                function (start, end, label) {
+                    //if ($("#employee-dropdown").val() != 0) {
+                        getDesignerData();
+                    //}
+                    //alert('A date range was chosen: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+                }
+            );
+            $('#daterange').on('apply.daterangepicker', function (ev, picker) {
+                $('#selectedValue').text(
+                $('#daterange').data('daterangepicker').startDate.format('M/D/YY') + ' - ' +
+                    $('#daterange').data('daterangepicker').endDate.format('M/D/YY'));
+            });
+
+            $("#employee-dropdown").on('select2:select', function () {
+                if ($("#selectedValue").text() != "") {
+                    getDesignerData();
+                }
+            });
+
+            var url = '@Url.Action("GetEmployees")';
+            $.getJSON(url, function (response) {
+                addEmployees(response);
+            });
+
+
+        </script>
+    }
+}

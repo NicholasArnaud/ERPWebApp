@@ -1,0 +1,23 @@
+{
+	"name": "Dotnet 9 Dev Container",
+	"image": "mcr.microsoft.com/devcontainers/dotnet",
+	"features": {
+		"ghcr.io/devcontainers/features/azure-cli:1": {},
+		"ghcr.io/nikiforovall/devcontainer-features/dotnet-csharpier:1": {}
+	},
+	"forwardPorts": [6000, 6001],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"fernandoescolar.vscode-solution-explorer",
+				"huizhou.githd",
+				"ms-azuretools.azure-dev",
+				"ms-dotnettools.csdevkit",
+				"ms-dotnettools.csharp",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"ms-dotnettools.vscodeintellicode-csharp"
+			]
+		}
+	},
+	"postCreateCommand": "dotnet tool install --global dotnet-ef && dotnet tool restore && dotnet restore && dotnet dev-certs https --trust"
+}

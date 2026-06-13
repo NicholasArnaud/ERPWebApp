@@ -1,0 +1,33 @@
+﻿@model MessageEmployeeFilter
+
+<table class="table dt-responsive" id="Message-table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(Model => Model.MessageEmployeeList.FirstOrDefault().Message)
+        </th>
+        <th>
+            @Html.DisplayNameFor(Model => Model.MessageEmployeeList.FirstOrDefault().SentFromEmployee)
+        </th>
+        <th>
+            @Html.DisplayNameFor(Model => Model.MessageEmployeeList.FirstOrDefault().SentTime)
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.MessageEmployeeList)
+    {
+        <tr>
+            <td style="white-space:normal;">
+                @Html.DisplayFor(modelItem => item.Message)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SentFromEmployee)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SentTime)
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

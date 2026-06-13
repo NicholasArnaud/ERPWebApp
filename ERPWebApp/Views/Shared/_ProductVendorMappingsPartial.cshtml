@@ -1,0 +1,58 @@
+@model IEnumerable<ERPWebApp.Models.Mappings.ProductVendorMapping>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title">Product Vendors</h5>
+        </div>
+        <div class="card-body">
+            <table class="table dt-responsive webkit-nowrap w-100">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Vendor.VendorName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.VendorSku)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Cost)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.LeadTime)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.isPrimaryVendor)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.UnitofMeasure)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.IsRawMaterial)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in Model){
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Vendor.VendorName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.VendorSku)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Cost)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.LeadTime)
+                            </td>
+                            <td>@(item.isPrimaryVendor ? "Yes" : "No")</td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.UnitofMeasure)
+                            </td>
+                            <td>@(item.IsRawMaterial ? "Yes" : "No")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>

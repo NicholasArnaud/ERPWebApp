@@ -1,0 +1,266 @@
+﻿@model ERPWebApp.Models.Inventory.Vendor
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+<h4>Vendor</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="VendorNumber" class="control-label"></label>
+                        <input asp-for="VendorNumber" class="form-control" placeholder="Vendor #" />
+                        <span asp-validation-for="VendorNumber" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="VendorName" class="control-label"></label>
+                        <input asp-for="VendorName" class="form-control" placeholder="Vendor Name" />
+                        <span asp-validation-for="VendorName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="Notes" class="control-label"></label>
+                        <textarea asp-for="Notes" class="form-control" placeholder="Some notes here."
+                            rows="4"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="ContactName" class="control-label"></label>
+                        <input asp-for="ContactName" class="form-control" placeholder="Joe Bob" />
+                        <span asp-validation-for="ContactName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="PhoneNumber" class="control-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" data-toggle="input-mask"
+                            data-mask-format="(000) 000-0000" placeholder="(012) 345-6789 " />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="BusinessEmail" class="control-label"></label>
+                        <input type="email" asp-for="BusinessEmail" class="form-control" placeholder="Email" />
+                        <span asp-validation-for="BusinessEmail" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="Fax" class="control-label"></label>
+                        <input asp-for="Fax" class="form-control" placeholder="Fax Number" />
+                        <span asp-validation-for="Fax" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="Website" class="control-label"></label>
+                        <input asp-for="Website" class="form-control" placeholder="www.website.com" />
+                        <span asp-validation-for="Website" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="Address1" class="control-label"></label>
+                        <input asp-for="Address1" class="form-control" placeholder="1234 Main St" />
+                        <span asp-validation-for="Address1" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="Address2" class="control-label"></label>
+                        <input asp-for="Address2" class="form-control" placeholder="Apartment, studio, or floor" />
+                        <span asp-validation-for="Address2" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="City" class="control-label"></label>
+                        <input asp-for="City" class="form-control" placeholder="City" />
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="State" class="control-label"></label>
+                        <input asp-for="State" class="form-control" data-provide="typeahead" id="state-list"
+                            placeholder="State" />
+                        <span asp-validation-for="State" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="PostalCode" class="control-label"></label>
+                        <input asp-for="PostalCode" class="form-control" data-toggle="input-mask"
+                            data-mask-format="00000-000" placeholder="12345" />
+                        <span asp-validation-for="PostalCode" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group p-1">
+                        <label asp-for="Country" class="control-label"></label>
+                        <input asp-for="Country" class="form-control" data-provide="typeahead" id="country-list"
+                            placeholder="Country" />
+                        <span asp-validation-for="Country" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-4">
+
+                </div>
+            </div>
+
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActive" checked />
+                    @Html.DisplayNameFor(model => model.IsActive)
+                </label>
+            </div>
+
+            <div class="form-group form-check" @(User.IsInRole(RoleList.Administrator) ||
+                User.IsInRole(RoleList.ExternalViewer) ? "" : "hidden")>
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsExternal"
+                        checked="@User.IsInRole(RoleList.ExternalUser)" />
+                    @Html.DisplayNameFor(model => model.IsExternal)
+                </label>
+            </div>
+
+            <div class="form-group p-2">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a class="p-2" asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/lib/hyper-assets/vendor/handlebars/handlebars.min.js"></script>
+    <script src="~/lib/hyper-assets/vendor/typeahead.js/typeahead.bundle.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var substringMatcher = function (strs) {
+                return function findMatches(q, cb) {
+                    var matches, substringRegex;
+
+                    // an array that will be populated with substring matches
+                    matches = [];
+
+                    // regex used to determine if a string contains the substring `q`
+                    substrRegex = new RegExp(q, 'i');
+
+                    // iterate through the pool of strings and for any string that
+                    // contains the substring `q`, add it to the `matches` array
+                    $.each(strs, function (i, str) {
+                        if (substrRegex.test(str)) {
+                            matches.push(str);
+                        }
+                    });
+
+                    cb(matches);
+                };
+            };
+
+            const states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+                'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
+                'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
+                'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
+                'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+                'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
+                'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
+                'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+                'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+            ];
+            const countryList = ["Afghanistan", "Albania", "Algeria", "American Samoa",
+                "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua and Barbuda", "Argentina",
+                "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas (the)", "Bahrain",
+                "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan",
+                "Bolivia (Plurinational State of)", "Bonaire, Sint Eustatius and Saba",
+                "Bosnia and Herzegovina", "Botswana", "Bouvet Island", "Brazil", "British Indian Ocean Territory (the)",
+                "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia",
+                "Cameroon", "Canada", "Cayman Islands (the)", "Central African Republic (the)",
+                "Chad", "Chile", "China", "Christmas Island", "Cocos (Keeling) Islands (the)",
+                "Colombia", "Comoros (the)", "Congo (the Democratic Republic of the)", "Congo (the)",
+                "Cook Islands (the)", "Costa Rica", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia",
+                "Côte d'Ivoire", "Denmark", "Djibouti", "Dominica", "Dominican Republic (the)",
+                "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini",
+                "Ethiopia", "Falkland Islands (the) [Malvinas]", "Faroe Islands (the)", "Fiji",
+                "Finland", "France", "French Guiana", "French Polynesia", "French Southern Territories (the)",
+                "Gabon", "Gambia (the)", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Greenland",
+                "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau",
+                "Guyana", "Haiti", "Heard Island and McDonald Islands", "Holy See (the)",
+                "Honduras", "Hong Kong", "Hungary", "Iceland", "India", "Indonesia", "Iran (Islamic Republic of)",
+                "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jersey", "Jordan",
+                "Kazakhstan", "Kenya", "Kiribati", "Korea (the Democratic People's Republic of)",
+                "Korea (the Republic of)", "Kuwait", "Kyrgyzstan", "Lao People's Democratic Republic (the)",
+                "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
+                "Macao", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands (the)",
+                "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Micronesia (Federated States of)",
+                "Moldova (the Republic of)", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco",
+                "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands (the)", "New Caledonia",
+                "New Zealand", "Nicaragua", "Niger (the)", "Nigeria", "Niue", "Norfolk Island", "Northern Mariana Islands (the)",
+                "Norway", "Oman", "Pakistan", "Palau", "Palestine, State of", "Panama", "Papua New Guinea",
+                "Paraguay", "Peru", "Philippines (the)", "Pitcairn", "Poland", "Portugal", "Puerto Rico",
+                "Qatar", "Republic of North Macedonia", "Romania", "Russian Federation (the)", "Rwanda",
+                "Réunion", "Saint Barthélemy", "Saint Helena, Ascension and Tristan da Cunha",
+                "Saint Kitts and Nevis", "Saint Lucia", "Saint Martin (French part)", "Saint Pierre and Miquelon",
+                "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe",
+                "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten (Dutch part)",
+                "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia and the South Sandwich Islands",
+                "South Sudan", "Spain", "Sri Lanka", "Sudan (the)", "Suriname", "Svalbard and Jan Mayen",
+                "Sweden", "Switzerland", "Syrian Arab Republic", "Taiwan", "Tajikistan", "Tanzania, United Republic of",
+                "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey",
+                "Turkmenistan", "Turks and Caicos Islands (the)", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates (the)",
+                "United Kingdom of Great Britain and Northern Ireland (the)", "United States Minor Outlying Islands (the)",
+                "United States of America (the)", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela (Bolivarian Republic of)",
+                "Viet Nam", "Virgin Islands (British)", "Virgin Islands (U.S.)", "Wallis and Futuna", "Western Sahara",
+                "Yemen", "Zambia", "Zimbabwe", "Åland Islands"
+            ];
+
+            $('#state-list').typeahead({
+                hint: true,
+                highlight: true,
+                minLength: 1
+            },
+                {
+                    name: 'states',
+                    source: substringMatcher(states)
+                });
+            $('#country-list').typeahead({
+                hint: true,
+                highlight: true,
+                minLength: 3
+            },
+                {
+                    name: 'countries',
+                    source: substringMatcher(countryList)
+                });
+        });
+    </script>
+}

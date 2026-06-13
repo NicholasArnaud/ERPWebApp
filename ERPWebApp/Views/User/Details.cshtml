@@ -1,0 +1,118 @@
+﻿@model ERPWebApp.Models.Company.ApplicationUser
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container-fluid text-white">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">User</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Details</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <form asp-action="Edit">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title">User Details</h2>
+                <div>
+                    <a sp-route-id="@Model.Id">
+                        <button type="submit" name="submit" class="action-button btn btn-primary"><span class="mdi mdi-18px mdi-content-save">&nbsp;Move to Edit</span></button>
+                    </a>
+                    <a asp-action="Index">
+                        <button type="button" class="btn btn-info"><span class="mdi mdi-18px mdi-arrow-top-left-thick">&nbsp;Back to List</span></button>
+                    </a>
+                </div>
+            </div>
+            <div class="justify-content-center">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="UserName" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="UserName" class="form-control" />
+                                <span asp-validation-for="UserName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="Email" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="PhoneNumber" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="PhoneNumber" class="form-control" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                @Html.DisplayNameFor(model => model.LockoutEnd)
+                            </div>
+                            <div class="form-group col-sm-4">
+                                @Html.DisplayFor(model => model.LockoutEnd)
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                @Html.DisplayNameFor(model => model.AccessFailedCount)
+                            </div>
+                            <div class="form-group col-sm-4">
+                                @Html.DisplayFor(model => model.AccessFailedCount)
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="form-group form-check col-md-4">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" asp-for="EmailConfirmed" /> @Html.DisplayNameFor(model => model.EmailConfirmed)
+                                </label>
+                            </div>
+                            <div class="form-group form-check col-md-4">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" asp-for="TwoFactorEnabled" /> @Html.DisplayNameFor(model => model.TwoFactorEnabled)
+                                </label>
+                            </div>
+                            <div class="form-group form-check col-md-4">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" asp-for="PhoneNumberConfirmed" /> @Html.DisplayNameFor(model => model.PhoneNumberConfirmed)
+                                </label>
+                            </div>
+                        </div>
+                        <hr>
+                        @* <div class="row">
+                        <div class="col-sm-3">
+                        <label class="control-label">User Profile picture</label>
+                        </div>
+                        <div class="form-group col-sm-4">
+                        <input type="file" id="ProfilePic" name="profilePic" multiple class="form-control" />
+                        </div>
+                        </div> *@
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

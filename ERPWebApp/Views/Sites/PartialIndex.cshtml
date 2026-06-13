@@ -1,0 +1,98 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.Site>
+
+<div class="table-responsive" style="overflow-x: hidden;">
+    <table class="table dt-responsive webkit-nowrap w-100" id="site-datatable">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.SiteName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SiteDescription)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SiteVolume)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.IsActive)
+                </th>
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ExternalViewer))
+                {
+                    <th>
+                        @Html.DisplayNameFor(model => model.IsExternal)
+                    </th>
+                }
+                <th>
+                    @Html.DisplayNameFor(model => model.IsRestricted)
+                </th>
+                <th><a>Actions</a></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                @if (!item.IsRestricted || User.IsInRole(RoleList.Manager) || User.IsInRole(RoleList.Administrator))
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SiteName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SiteDescription)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SiteVolume)
+                        </td>
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </td>
+                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ExternalViewer))
+                        {
+                            <td>
+                                @if (item.IsExternal)
+                                {
+                                    <a>Yes</a>
+                                }
+                                else
+                                {
+                                    <a>No</a>
+                                }
+                            </td>
+                        }
+                        <td>
+                            @if (item.IsRestricted)
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </td>
+                        <td class="table-action">
+                            <a class="action-icon" asp-action="DownloadBarcode" asp-route-id="@item.SiteId"><i class="mdi mdi-24px mdi-barcode"></i></a>
+                            @*<button type="button" class="btn btn-info" id="openDialogButton"><span class="mdi mdi-18px mdi-arrow-top-left-thick"></span></button>*@
+                            <a class="action-icon" asp-action="Details" asp-route-id="@item.SiteId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                            @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.InventoryManager) || this.User.IsInRole(RoleList.ShippingManager))
+                            {
+                                <a class="action-icon" asp-action="Edit" asp-route-id="@item.SiteId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                            }
+                            @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.InventoryManager) || this.User.IsInRole(RoleList.ShippingManager))
+                            {
+                                <a class="action-icon" asp-action="Delete" asp-route-id="@item.SiteId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

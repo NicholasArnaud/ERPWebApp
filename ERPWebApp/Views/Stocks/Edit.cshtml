@@ -1,0 +1,154 @@
+﻿@model ERPWebApp.Models.Inventory.Stock
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-12">
+
+        <div class="card">
+
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-9 col-sm-7 col-xs-12 card-title">
+                        <h3>Edit</h3>
+                        <h5>Stock</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-lg-5 col-md-8 col-sm-12 col-xs-12">
+
+                        <div class="row">
+
+                            <form asp-action="Edit">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <input type="hidden" asp-for="StockId" />
+                                <input type="hidden" asp-for="LocationId" />
+
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label asp-for="ProductId" class="control-label"></label>
+                                        <select asp-for="ProductId" class="select2 form-control" asp-items="ViewBag.ProductId"></select>
+                                        <span asp-validation-for="ProductId" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- This section should not be editable to help ensure data safety-->
+                                <div hidden>
+                                    <div class="col-12">
+                                        <div class="form-group p-1">
+                                            <label asp-for="Location.SiteId" class="control-label"></label>
+                                            <select asp-for="Location.SiteId" class="form-control" id="site-select-id" asp-items="ViewBag.SiteName" disabled>
+                                            </select>
+                                            <span asp-validation-for="Location.SiteId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-group p-1">
+                                            <label asp-for="LocationId" class="control-label"></label>
+                                            <select asp-for="LocationId" class="form-control" id="location-select-id" asp-items="ViewBag.LocationName" disabled>
+                                            </select>
+                                            <span asp-validation-for="LocationId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label asp-for="TotalAvailable" class="control-label"></label>
+                                        <input asp-for="TotalAvailable" class="form-control" />
+                                        <span asp-validation-for="TotalAvailable" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 p-1">
+                                    <div class="form-group form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" asp-for="RecentlyReadded" /> @Html.DisplayNameFor(model => model.RecentlyReadded)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 p-1">
+                                    <div class="form-group form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" asp-for="IsPrimary" /> @Html.DisplayNameFor(model => model.IsPrimary)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 p-1">
+                                    <div class="form-group form-check"
+                                    @(User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ExternalViewer) ? "" : "hidden")>
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" asp-for="IsExternal" /> @Html.DisplayNameFor(model => model.IsExternal)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label asp-for="ShipStationStoreId" class="control-label"></label>
+                                        <select asp-for="ShipStationStoreId" class="select2 form-control" asp-items="ViewBag.ShipStationStore">
+                                            <option selected="selected" value="0">Select Store Owned</option>
+                                        </select>
+                                        <span asp-validation-for="ShipStationStoreId" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <input type="submit" value="Save" class="btn btn-primary" />
+                                    </div>
+                                </div>
+
+                            </form>
+
+                            <div class="col-12 p-1">
+                                <a asp-action="Index">Back to List</a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            $(".select2").select2();
+            function GetLocationBySiteId(_siteId) {
+                var url = '@Url.Action("LocationsBySiteId")';
+                $.getJSON(url, { SiteId: _siteId }).done(function (response) {
+                    $('#location-select-id').empty();
+                    var s = "";
+                    for (var i = 0; i < response.length; i++) {
+                        s += '<option value="' + response[i].locationId + '">' + response[i].locationName + '</option>';
+                    }
+                    $('#location-select-id').html(s);
+                });
+            }
+            $('#site-select-id').on("change", function (e) {
+                GetLocationBySiteId(+$('#site-select-id').val());
+            });
+        });
+    </script>
+}

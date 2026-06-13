@@ -1,0 +1,77 @@
+﻿@*
+For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@using ERPWebApp.Models.Common
+@using ERPWebApp.Models.Company;
+@model Home;
+@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+@{
+    ViewData["Title"] = "Top Department";
+}
+<div class="card">
+    <div class="card-body">
+        <div class="col-12 mb-3">
+            <div>
+                <h3>
+                    Top Departments
+                    <button onclick="toggleHelpInfo('leaderboard-info')"
+                        style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                        <i class="mdi mdi-information"></i>
+                    </button>
+                </h3>
+                <div id="leaderboard-info" class="hidden alert alert-info" role="alert">
+                    <p> Displays the 5 departments with the most items shipped monthly, quarterly, and yearly. </p>
+                </div>
+            </div>
+            <div>
+                <select id="timeframe-selector" class="form-control" style="width: fit-content; padding: 4px;">
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </div>
+        </div>
+        <div class="row" style="display: flex; align-items: flex-start;">
+            <div class="leaderboard-fetching-container"
+                style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                <div id="leaderboard-fetching" class="hidden"
+                    style="background-color: transparent; padding: 1rem; border-radius: 5px; text-align: center;">
+                    <p>Fetching...</p>
+                    <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h3 id="previous-title">Previous Month</h3>
+                <table id="past-table" class="table dt-responsive webkit-nowrap w-100">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Total Items Shipped</th>
+                        </tr>
+                    </thead>
+                    <tbody id="past-tbody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 id="current-title">Current Month</h3>
+                    <div class="days-remaining" style="margin-top: 8px;">
+                        <p><i>Days until next: </i><b><span id="remaining-days"></span></b></p>
+                    </div>
+                </div>
+                <table id="present-table" class="table dt-responsive webkit-nowrap w-100">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Total Items Shipped</th>
+                        </tr>
+                    </thead>
+                    <tbody id="present-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

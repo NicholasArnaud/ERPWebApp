@@ -1,0 +1,61 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.Stock>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="card">
+    <div class="card-header">
+        <h3>Cycle Counts</h3>
+    </div>
+    <div class="card-body">
+        <form>
+            <div class="row">
+                <div class="col-lg-2">
+                    <span>Search by Site</span>
+                    <select class="select2 form-control select2-multiple" data-toggle="select2" required="required" data-placeholder="Choose ..." asp-items="ViewBag.SiteName" name="site-select-id" id="site-select-id">
+                        <option selected value="-1">--Select A Option--</option>
+                    </select>
+                </div>
+                <div class="col-lg-2">
+                    <span style="white-space:nowrap">Search by Department</span>
+                    <select class="select2 form-control select2-multiple" data-toggle="select2" required="required" data-placeholder="Choose ..." asp-items="ViewBag.DepartmentName" name="department-select-id" id="department-select-id">
+                        <option selected value="-1">--Select A Option--</option>
+                    </select>
+                </div>
+                <div class="col-lg-2">
+                    <span>Search by SKU</span>
+                    <select class="select2 form-control select2-multiple" data-toggle="select2" required="required" data-placeholder="Choose ..." asp-items="ViewBag.SkuName" name="sku-select-id" id="sku-select-id">
+                        <option selected value="-1">--Select A Option--</option>
+                    </select>
+                </div>
+                <div class="col-2">
+                    <button style="margin-top:20px" type="button" class="btn btn-dark" id="Submit">Filter</button>
+                </div>
+            </div>
+        </form>
+        <div class="row">
+            <div id="searchResults" style="padding-top: 10px"></div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+        <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            var url = '@Url.Action("DisplayDefault")';
+            $('#searchResults').load(url);
+
+            $('#Submit').on('click', function(){
+                var url = '@Url.Action("DisplayResults")';
+                var siteResultId = $('#site-select-id').val();
+                var departmentResultId = $('#department-select-id').val();
+                var skuResultId = $('#sku-select-id').val();
+                $('#searchResults').load(url, { siteId: siteResultId, departmentId: departmentResultId, skuId: skuResultId});
+            });
+        });
+    </script>
+}

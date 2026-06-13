@@ -1,0 +1,41 @@
+﻿@model IEnumerable<ERPWebApp.Models.Mappings.ProductVendorMapping>
+    <table class="table dt-responsive webkit-nowrap w-100" id="product-vendor-mapping-datatable">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Vendor.VendorName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.VendorSku)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Product.Sku)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Product.Description)
+                </th>
+                <th>
+                    Product Tag
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Cost)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.LeadTime)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.isPrimaryVendor)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.UnitofMeasure)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Term)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.IsRawMaterial)
+                </th>
+                <th><a>Actions</a></th>
+            </tr>
+        </thead>
+    </table>

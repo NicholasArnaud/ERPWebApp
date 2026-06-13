@@ -1,0 +1,82 @@
+﻿@model ERPWebApp.Models.Inventory.Stock
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-12">
+
+        <div class="card">
+
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-9 col-sm-7 col-xs-12 card-title">
+                        <h3>Delete</h3>
+                        <h4>Are you sure you want to delete this?</h4>
+                        <h5>Stock</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                <div>
+                    <dl class="row">
+                        <dt class="col-sm-2">
+                            @Html.DisplayNameFor(model => model.Products)
+                        </dt>
+                        <dd class="col-sm-10">
+                            @Html.DisplayFor(model => model.Products.Description)
+                        </dd>
+                        <dt class="col-sm-2">
+                            @Html.DisplayNameFor(model => model.Location)
+                        </dt>
+                        <dd class="col-sm-10">
+                            @Html.DisplayFor(model => model.Location.LocationName)
+                        </dd>
+                        <dt class="col-sm-2">
+                            @Html.DisplayNameFor(model => model.TotalAvailable)
+                        </dt>
+                        <dd class="col-sm-10">
+                            @Html.DisplayFor(model => model.TotalAvailable)
+                        </dd>
+                        <dt class="col-sm-2">
+                            @Html.DisplayNameFor(model => model.RecentlyReadded)
+                        </dt>
+                        <dd class="col-sm-10">
+                            @Html.DisplayFor(model => model.RecentlyReadded)
+                        </dd>
+                        <dt class="col-sm-2">
+                            @Html.DisplayNameFor(model => model.IsPrimary)
+                        </dt>
+                        <dd class="col-sm-10">
+                            @Html.DisplayFor(model => model.IsPrimary)
+                        </dd>
+                        <dt class="col-sm-2">
+                            @Html.DisplayNameFor(model => model.ModifyDate)
+                        </dt>
+                        <dd class="col-sm-10">
+                            @Html.DisplayFor(model => model.ModifyDate)
+                        </dd>
+                        <dt class="col-sm-2">
+                            @Html.DisplayNameFor(model => model.ModifyByUser)
+                        </dt>
+                        <dd class="col-sm-10">
+                            @Html.DisplayFor(model => model.ModifyByUser)
+                        </dd>
+                    </dl>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="StockId" />
+                        <input type="submit" value="Delete" class="btn btn-danger" /> |
+                        <a asp-action="Index">Back to List</a>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

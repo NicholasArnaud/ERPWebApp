@@ -1,0 +1,14 @@
+global using ERPWebApp.Data;
+global using ERPWebApp.Data.Repositories.Interface;
+global using ERPWebApp.Models;
+global using ERPWebApp.Services;
+global using ERPWebApp.Services.IServices;
+global using ERPWebApp.UnitTests.Fixtures;
+global using FluentAssertions;
+global using Microsoft.AspNetCore.Mvc;
+global using Moq;
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Threading.Tasks;
+global using Xunit;

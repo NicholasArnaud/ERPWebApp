@@ -1,0 +1,168 @@
+﻿@model IEnumerable<ERPWebApp.Models.SubCategory>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+    <link rel="stylesheet" type="text/css" href="~/css/sliderbutton.css">
+</head>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Sub Categories</h3>
+            </div>
+            <div class="card-body">
+                <div class="row custom-bb">
+                    <div class="col-12 col-md-10 col-lg-10 mt-1">
+                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.InventoryManager) || User.IsInRole(RoleList.ShippingManager))
+                        {
+                            <a class="nav-link" asp-action="Create">
+                                <div typeof="button" class="btn btn-dark">Create</div>
+                            </a>
+                        }
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                    {
+                        <div class="form-check form-switch ms-2">
+                            <label class="form-check-label" for="custom-switch-2" id="custom-switch-2-label">Is Active</label>
+                            <input type="checkbox" class="form-check-input" id="custom-switch-2" checked />
+                        </div>
+
+                    }
+                </div>
+                <div id="filtered-orders-partial">
+                    @{
+                        await Html.RenderPartialAsync("PartialIndex", Model);
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var categorytable = $("#category-datatable").DataTable({
+                dom: "<'row'<'col-3 col-sm-4 col-md-4 col-lg-7'l><'col-6 col-sm-4 col-md-4'f><'d-none d-md-block d-lg-block col-sm-4 col-md-4 col-lg-1'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [
+                    {
+                    extend: 'collection',
+                    text:'Export',
+                    className: 'btn btn-dark',
+                        buttons: [
+                            {
+                                extend: 'excelHtml5',
+                                exportOptions:{columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                            },
+                            {
+                                "extend": 'csv',
+                                exportOptions:{columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                            },
+                            {
+                                extend: 'copy',
+                                exportOptions:{columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                            },
+                            {
+                                extend: 'print',
+                                exportOptions:{columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                            },
+                        ]
+                    }
+                ],
+                keys: !0, language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                    },
+
+                }, drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                },
+                "oLanguage": {
+                  "sLengthMenu": '<select class="btn btn-light">'+
+                    '<option value="10">10</option>'+
+                    '<option value="20">20</option>'+
+                    '<option value="30">30</option>'+
+                    '<option value="40">40</option>'+
+                    '<option value="50">50</option>'+
+                    '</select>'}
+            });
+
+                $("#custom-switch-2").click(function () {
+                    var switchStatus = false;
+                    if ($(this).is(':checked')) {
+                        switchStatus = $(this).is(':checked');
+                    }
+                    else {
+                        switchStatus = $(this).is(':checked');
+                    }
+                    var url = '@Url.Action("ToggleActive")';
+                    $.getJSON(url, { id: switchStatus }).done(function () {
+                        console.log("PartialViewTable Loading");
+                        //Recalled DataTable in Load to wait for data is allocated in the table before reloading it
+                        //otherwise DataTable does not work
+                        $('#filtered-orders-partial').load('/SubCategory/PartialViewTableShow', function (response) {
+                            var categorytable = $("#category-datatable").DataTable({
+                                dom: "<'row'<'col-3 col-sm-4 col-md-4 col-lg-7'l><'col-6 col-sm-4 col-md-4'f><'d-none d-md-block d-lg-block col-sm-4 col-md-4 col-lg-1'B>>" +
+                                    "<'row'<'col-sm-12'tr>>" +
+                                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                                buttons: [
+                                    {
+                                        extend: 'collection',
+                                        text: 'Export',
+                                        className: 'btn btn-dark',
+                                        buttons: [
+                                            {
+                                                extend: 'excelHtml5',
+                                                exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }
+                                            },
+                                            {
+                                                "extend": 'csv',
+                                                exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }
+                                            },
+                                            {
+                                                extend: 'copy',
+                                                exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }
+                                            },
+                                            {
+                                                extend: 'print',
+                                                exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }
+                                            },
+                                        ]
+                                    }
+                                ],
+                                keys: !0, language: {
+                                    paginate: {
+                                        previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                                    },
+
+                                }, drawCallback: function () {
+                                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                                },
+                                "oLanguage": {
+                                    "sLengthMenu": '<select class="btn btn-light">' +
+                                        '<option value="10">10</option>' +
+                                        '<option value="20">20</option>' +
+                                        '<option value="30">30</option>' +
+                                        '<option value="40">40</option>' +
+                                        '<option value="50">50</option>' +
+                                        '</select>'
+                                }
+                            });
+                            console.log("PartialViewTable Reloaded");
+                        });
+                    });
+                });
+        });
+    </script>
+}

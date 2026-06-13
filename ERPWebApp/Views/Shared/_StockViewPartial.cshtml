@@ -1,0 +1,50 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.Stock>
+
+    <table class="table responsive">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Products)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TotalAvailable)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.RecentlyReadded)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.IsPrimary)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.BeingCounted)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.IsExternal)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model) {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Products.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TotalAvailable)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.RecentlyReadded)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IsPrimary)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BeingCounted)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IsExternal)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>

@@ -1,0 +1,127 @@
+﻿@using ERPWebApp.Models.Company;
+@model FinancialsViewModel
+
+@{
+    ViewData["Title"] = "Top Product Sales";
+    var productSalesHeaders = new Dictionary<string, string>
+{
+{ "Sku", "Sku" },
+{ "Description", "Description" },
+{ "TotalQuantity", "Total Quantity" }
+};
+}
+<style>
+    #chart-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    #chart {
+        width: 100%;
+    }
+
+    #help-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    #help-info {
+        position: absolute;
+        top: 40px;
+        right: -200px;
+        width: 200px;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        z-index: 10;
+        padding: 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-family: Helvetica, Arial, sans-serif;
+        background: #FFF;
+        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+        color: #373d3f;
+    }
+</style>
+
+<div id="drac-topproductsales">
+    <div class="card">
+        <div class="card-body position-relative">
+            <!--Dropdown goes here!-->
+            <div class="header-container">
+                <div class="header-container d-flex justify-content-between align-items-center">
+                    <!-- Flex class is for repositioning buttons, so that the CSV button (and other buttons) are in the top right corner -->
+                    <div>
+                    </div>
+                    <div id="datatables-buttons-container">
+                        <!-- Sales datatable buttons go here! -->
+                    </div>
+                </div>
+
+                <h4 class="header-title">
+                    Top Product Sales
+                    <button onclick="toggleHelpInfo('sales-info')"
+                        style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                        <i class="mdi mdi-information"></i>
+                    </button>
+                </h4>
+                <div id="sales-info" class="hidden alert alert-info" role="alert">
+                    <p>Tracks the top products by sales quantity within a specified timeframe. </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-6 col-lg-4" style="margin-bottom: 20px;">
+                    <input type="text" id="product-sales-chart" name="productSales" class="form-control"
+                        value="Last 30 Days" readonly>
+                </div>
+            </div>
+            <div class="row">
+                <div class="sales-fetching-container"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                    <div id="sales-fetching" class="hidden"
+                        style="background-color: #37404A; padding: 1rem; border-radius: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+                        <p>Fetching...</p>
+                        <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center align-items-center w-100" style="min-height: 300px;">
+                    <table class="table dt-responsive webkit-nowrap w-100" id="productSalesTable">
+                        <thead>
+                            <tr>
+                                @foreach (var header in productSalesHeaders)
+                                {
+                                    <th>@header.Value</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ProductSalesInfo)
+                            {
+                                <tr>
+                                    <td>@item.ProductSku</td>
+                                    <td>@item.Description</td>
+                                    <td>@item.TotalQuantity</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- end card body-->
+    </div>
+    <!-- end card -->
+</div>

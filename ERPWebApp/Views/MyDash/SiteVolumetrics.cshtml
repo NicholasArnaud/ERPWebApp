@@ -1,0 +1,124 @@
+﻿@using ERPWebApp.Models.Company;
+@model InventoryViewModel
+
+@{
+    ViewData["Title"] = "Site Volumetrics";
+
+    var productRequestItems = new Dictionary<string, string>
+{
+{ "Product", "Product" },
+{ "Requests", "Requests" },
+{ "Percentage", "Percentage" }
+};
+
+    var inventoryReasonsRequested = new Dictionary<string, string>
+{
+{ "Reasons", "Reasons" },
+{ "Frequency", "Frequency" },
+{ "Percantage", "Percentage" }
+};
+
+    var movedProductItems = new Dictionary<string, string>
+{
+{ "Product", "Product" },
+{ "Quantity", "Quantity" }
+};
+}
+
+<style>
+    #chart-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    #chart {
+        width: 100%;
+    }
+
+    #help-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    #help-info {
+        position: absolute;
+        top: 40px;
+        right: -200px;
+        width: 200px;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        pointer-events: none;
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        border-radius: 4px;
+        font-size: 13px;
+        z-index: 9999;
+        visibility: hidden;
+    }
+
+    .inventory-select2-container {
+        width: 25%;
+        /* Adjust this value to control the width of the select box */
+    }
+
+    .inventory-select2-container .inventory-select2-selection {
+        width: 25%;
+        height: 38px;
+        /* You can adjust this value to control the height of the select box */
+        border-radius: 0.25rem;
+    }
+</style>
+
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="header-container">
+                <h4 class="header-title">
+                    Site Volumetrics
+                    <button onclick="toggleHelpInfo('volumetrics-info')"
+                        style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                        <i class="mdi mdi-information"></i>
+                    </button>
+                </h4>
+            </div>
+            <div>
+                <button id="volumetricsCSV" class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+            </div>
+        </div>
+        <div id="volumetrics-info" class="hidden alert alert-info" role="alert">
+            <p>Tracks volumetrics across the different sites. </p>
+        </div>
+        <div>
+            <div class="inventory-select2-container">
+                <select id="siteSelect" class="btn btn-secondary dropdown-toggle">
+                    <option value="-1">All Sites</option>
+                </select>
+            </div>
+            <div class="volumetrics-fetching-container"
+                style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:flex">
+                <div id="volumetrics-fetching"
+                    style="background-color: transparent; padding: 1rem; border-radius: 5px; text-align: center;">
+                    <p>Fetching...</p>
+                    <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                </div>
+            </div>
+            <div id="chartVolumetric"></div>
+            <div id="info" style="display: flex; flex-wrap: wrap; justify-content: center;"></div>
+        </div>
+    </div>
+</div>

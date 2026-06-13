@@ -1,0 +1,1113 @@
+﻿@model ERPWebApp.Models.PurchaseOrders.PurchaseOrderViewModel
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    kbd {
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.1em 0.5em;
+    margin: 0 0.2em;
+    box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2), 0 0 0 2px #fff inset;
+    background-color: #f7f7f7;
+    font-size: 1em;
+    }
+}
+</style>
+<div id="myModalWarn" class="modal fade text-width:80%;" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div style="display: none" class="modal-header modal-colored-header bg-warning" id="modalHeaderWarn">
+                <center> <i class="dripicons-wrong h1"></i>&nbsp;&nbsp;Save Data!</center>
+            </div>
+            <div id="myModalWarnAlertBody" class="Modal-body" style="text-align:center; color: white; font-size: 20px;">
+                Message will appear here
+            </div>
+            <div class="modal-footer">
+                &nbsp;
+                <button type="button" id="myModalCloseBtn" class="btn btn-secondary" onclick="$('#myModalWarn').modal('hide');">Close</button>
+                <button type="button" id="myModalBtn" class="btn btn-secondary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- help -->
+<div id="myModalHelp" class="modal fade text-width:80%;" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header modal-colored-header bg-success" id="modalHeaderWarn">
+                <center>
+                    <i class="dripicons-wrong h1" style="color: white; font-size: 1em;"></i>&nbsp;&nbsp;
+                    <span style="color: white; font-size: 1em;">Keyboard Shortcuts</span>
+                </center>
+            </div>
+            <div id="myModalWarnAlertBody" class="Modal-body" style="text-align:center; color: white; font-size: 1em;">
+                <table class="table table-striped" style="margin: 0 auto;">
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px;padding-top:10px;"><kbd>Enter</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px;padding-top:10px">submit/save data.</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px"><kbd>Esc</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px">Close any popups</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px"><kbd>Tab</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px">Navigates to next input</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px"><kbd>Ctrl</kbd>+<kbd>k</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px">Keyboard shortcuts help</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px"><kbd>Ctrl</kbd>+<kbd>p</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px">Navigates to PO first available input</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px"><kbd>Ctrl</kbd>+<kbd>e</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px">Navigates to 1st row Edit Product table</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px">
+                            <kbd>Ctrl</kbd>+
+                            <kbd><span class="mdi mdi-18px mdi-arrow-up-thin" style="color: black !important;"></span></kbd>
+                            <kbd><span class="mdi mdi-18px mdi-arrow-down-thin" style="color: black !important;"></span></kbd>
+                            <kbd><span class="mdi mdi-18px mdi-arrow-left-thin" style="color: black !important;"></span></kbd>
+                            <kbd><span class="mdi mdi-18px mdi-arrow-right-thin" style="color: black !important;"></span></kbd>
+                        </td>
+                        <td style="text-align: left;padding-bottom:10px">Navigates throughout the edit Product table</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px"><kbd>Ctrl</kbd>+<kbd>l</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px">Lock Changes</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px"><kbd>Ctrl</kbd>+<kbd>a</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px">Navigates to add products</td>
+                    </tr>
+                   
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px"><kbd>Ctrl</kbd>+<kbd>b</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px">Navigates back to PO list</td>
+                    </tr>
+                   
+                    <tr>
+                        <td style="text-align: left;padding-bottom:10px"><kbd>Ctrl</kbd>+<kbd>f</kbd></td>
+                        <td style="text-align: left;padding-bottom:10px">Navigates to add files</td>
+                    </tr>                                  
+                </table>
+            </div>
+            <div class="modal-footer">
+                &nbsp;
+                <button type="button" id="myModalHelpCloseBtn" class="btn btn-secondary" onclick="$('#myModalHelp').modal('hide');">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- help -->
+<div class="card-header d-flex justify-content-between align-items-center">
+    <h1>Edit: @Model.PurchaseOrderSingle.PurchaseOrderNumber</h1>
+    <div>
+        <a asp-action="Index">
+            <button type="button" id="btnbacktolist" class="btn btn-info"><span class="mdi mdi-18px mdi-arrow-top-left-thick">Back to List</span></button>
+        </a>
+        <button type="button" id="helpbtn" tabindex="15" name="help" class="btn btn-primary" style="background-color: #ADD8E6;"><span class="mdi mdi-18px mdi-keyboard"></span></button>
+    </div>
+</div>
+<div class="row"></div>
+@if (Model.PurchaseOrderSingle.POStatus != ERPWebApp.Models.PurchaseOrders.Status.Close)
+{
+    <div class="row">
+        <div class="col-12 col-xl-9 col-lg-12 col-md-12">
+            <form asp-action="Edit" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="accordion custom-accordion" id="custom-accordion-one">
+                    <div class="card mb-0">
+                        <div class="card-header" id="heading-Four">
+                            <h5 class="m-0">
+                                <a class="custom-accordion-title d-block py-1" data-bs-toggle="collapse" href="#collapse-Four" aria-expanded="false" aria-controls="collapse-Four">
+                                    Purchase Order<i class="mdi mdi-chevron-right accordion-arrow"></i>
+                                </a>
+                            </h5>
+                        </div>
+                        <div id="collapse-Four" class="collapse" aria-labelledby="heading-Four" data-bs-parent="#custom-accordion-one">
+                            <div class="card-body">
+                                <div class="row mt-1">
+                                    <input hidden asp-for="PurchaseOrderSingle.PurchaseOrderId" id="purchaseOrderId" />
+                                    <input hidden asp-for="PurchaseOrderSingle.PurchaseOrderNumber" />
+                                    <div class="col-md-3">
+                                        <label asp-for="PurchaseOrderSingle.Discount">Discount: (0-100%)</label>
+                                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                        {
+                                            <input  asp-for="PurchaseOrderSingle.Discount" id="discount-item" onchange="setTotal()" type="number" min="0" max="100" placegolder="0" tabindex="1" class="form-control wizard-required" />
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="PurchaseOrderSingle.Discount" id="discount-item" onchange="setTotal()" type="number" min="0" max="100"  placegolder="0" class="form-control wizard-required" />
+                                        }
+                                        <span asp-validation-for="PurchaseOrderSingle.Discount" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label asp-for="PurchaseOrderSingle.ShippingCost">Shipping Cost</label>
+                                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                        {
+                                            <input asp-for="PurchaseOrderSingle.ShippingCost" id="shipping-cost" onchange="setTotal()" type="number" step=".0001" min="0" tabindex="2" placeholder="0.0000" class="form-control wizard-required" />
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="PurchaseOrderSingle.ShippingCost" id="shipping-cost" onchange="setTotal()" type="number" step=".0001" min="0" placeholder="0.0000" class="form-control wizard-required" />
+                                        }
+                                        <span asp-validation-for="PurchaseOrderSingle.ShippingCost" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label asp-for="PurchaseOrderSingle.ShippingTax">Tax: (0-100%)</label>
+                                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                        {
+                                            <input asp-for="PurchaseOrderSingle.ShippingTax" tabindex="3" id="shipping-tax" onchange="setTotal()" type="number" min="0" max="100" step="0.001" class="form-control wizard-required" />
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="PurchaseOrderSingle.ShippingTax" id="shipping-tax" onchange="setTotal()" type="number" min="0" max="100" step="0.0001" class="form-control wizard-required" />
+                                        }
+                                        <span asp-validation-for="PurchaseOrderSingle.ShippingTax" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label asp-for="PurchaseOrderSingle.OtherCost">Other Cost</label>
+                                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                        {
+                                            <input asp-for="PurchaseOrderSingle.OtherCost" tabindex="4" id="other-cost" onchange="setTotal()" type="number" min="0" step="0.001" class="form-control wizard-required" />
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="PurchaseOrderSingle.OtherCost" id="other-cost" onchange="setTotal()" type="number" min="0" step="0.001" class="form-control wizard-required" />
+                                        }
+                                        <span asp-validation-for="PurchaseOrderSingle.OtherCost" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="row mt-1">
+                                    <div class="col-md-3">
+                                        <label asp-for="PurchaseOrderSingle.ReferenceNumber">Reference Number</label>
+                                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                        {
+                                            <input asp-for="PurchaseOrderSingle.ReferenceNumber" tabindex="5" id="reference-number" class="form-control" type="text" value="@Model.PurchaseOrderSingle.ReferenceNumber" />
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="PurchaseOrderSingle.ReferenceNumber"  id="reference-number" class="form-control" type="text" value="@Model.PurchaseOrderSingle.ReferenceNumber" />
+                                        }
+                                        <span asp-validation-for="PurchaseOrderSingle.ReferenceNumber" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                        {
+                                            <div>
+                                                <label asp-for="PurchaseOrderSingle.EstimatedDate" class="control-label">Estimated Due Date</label>
+                                                <div id="date-picker" class="input-group date" data-provide="date-picker">
+                                                    <input asp-for="PurchaseOrderSingle.EstimatedDate" tabindex="6" type="text" id="date-picks" class="form-control" />
+                                                    <span asp-validation-for="PurchaseOrderSingle.EstimatedDate" class="text-danger"></span>
+                                                    <div class="input-group-addon">
+                                                        <span class="glyphicon glyphicon-th"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <label asp-for="PurchaseOrderSingle.EstimatedDate" class="control-label">Estimated Due Date</label>
+                                            <div id="date-pickers" class="input-group date" data-provide="date-picker">
+                                                <input readonly asp-for="PurchaseOrderSingle.EstimatedDate" type="text" id="date-pick" class="form-control wizard-required" />
+                                                <span asp-validation-for="PurchaseOrderSingle.EstimatedDate" class="text-danger"></span>
+                                            </div>
+                                        }
+                                        <span asp-validation-for="PurchaseOrderSingle.EstimatedDate" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                        {
+                                            <div>
+                                                <label asp-for="PurchaseOrderSingle.ShippingProviderId" class="Shipping Provider">Shipping Provider</label>
+                                                <select asp-for="PurchaseOrderSingle.ShippingProviderId" tabindex="7" class="select2 form-control select2-multiple" data-toggle="select2" data-placeholder="Choose ..." id="selector-ship" name="selector-ship" asp-items="@ViewBag.ShippingPro">
+                                                    <span asp-validation-for="PurchaseOrderSingle.ShippingProviderId" class="text-danger"></span>
+                                                </select>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div hidden>
+                                                <label asp-for="PurchaseOrderSingle.ShippingProviderId" class="Shipping Provider">Shipping Provider</label>
+
+                                                <select asp-for="PurchaseOrderSingle.ShippingProviderId" class="select2 form-control select2-multiple" data-toggle="select2" data-placeholder="Choose ..." id="selector-ship" name="selector-ship" asp-items="@ViewBag.ShippingPro">
+                                                    <span asp-validation-for="PurchaseOrderSingle.ShippingProviderId" class="text-danger"></span>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label>Shipping Provider</label>
+                                                <input readonly value="@Model.PurchaseOrderSingle.ShippingProvider.ShippingProviderName" class="form-control wizard-required" />
+                                            </div>
+                                        }
+                                        <input hidden name="id-shipping-pro" id="id-shipping-pro" value="@Model.PurchaseOrderSingle.ShippingProviderId" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                        {
+                                            <div>
+                                                <label asp-for="PurchaseOrderSingle.ShippingMethod" class="Shipping Method">Shipping Method</label>
+                                                <select asp-for="PurchaseOrderSingle.ShippingMethod" class="select2 form-control select2-multiple" data-toggle="select2" data-placeholder="Choose ..." id="selector-ship-method" name="selector-ship-method" asp-items="@ViewBag.ShippingMeth">
+                                                    <span asp-validation-for="PurchaseOrderSingle.ShippingMethod" class="text-danger"></span>
+                                                </select>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div hidden>
+                                                <label asp-for="PurchaseOrderSingle.ShippingMethod" class="Shipping Method">Shipping Method</label>
+                                                <select asp-for="PurchaseOrderSingle.ShippingMethod" class="select2 form-control select2-multiple" data-toggle="select2" data-placeholder="Choose ..." id="selector-ship-method" name="selector-ship-method" asp-items="@ViewBag.ShippingMeth">
+                                                    <span asp-validation-for="PurchaseOrderSingle.ShippingMethod" class="text-danger"></span>
+                                                </select>
+
+                                            </div>
+                                            <div>
+                                                <label>Shipping Provider</label>
+                                                <input readonly value="@Model.PurchaseOrderSingle.ShippingMethod.ShippingMethodName" class="form-control wizard-required" />
+                                            </div>
+                                        }
+                                        <input hidden name="id-shipping-meth" id="id-shipping-meth" value="@Model.PurchaseOrderSingle.ShippingMethodId" />
+                                    </div>
+                                </div>
+                                <div class="row mt-1">
+                                    <div class="col-md-3">
+                                        <label class="form-check-label"> <input readonly class="form-check-input" asp-for="PurchaseOrderSingle.IsActive" checked /> @Html.DisplayNameFor(model => model.PurchaseOrderSingle.IsActive) </label>
+                                    </div>
+                                </div>
+                                <div class="row mt-1">
+                                    <div class="col-md-12">
+                                        <label asp-for="PurchaseOrderSingle.Notes">Notes</label>
+                                        @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                        {
+                                            <textarea style="height: 225px;" asp-for="PurchaseOrderSingle.Notes" class="form-control"></textarea>
+                                        }
+                                        else
+                                        {
+                                            <textarea style="height: 225px;" readonly asp-for="PurchaseOrderSingle.Notes" class="form-control"></textarea>
+                                        }
+                                        <span asp-validation-for="PurchaseOrderSingle.Notes" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="row mt-3" style="float:right">
+                                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager))
+                                    {
+                                        <div class="col-md-3 mt-2">
+                                            <label class="form-check-label">
+                                                <input style="float: right;" id="savePO" type="submit" name="submit" class="btn btn-success action-button me-3 mb-1" value="Save" />
+                                            </label>
+                                        </div>
+
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="stop-space" class="card mb-0">
+                        <div class="card-header" id="heading-Five">
+                            <h5 class="m-0">
+                                <a class="custom-accordion-title collapsed d-block py-1" data-bs-toggle="collapse" href="#collapse-Five" aria-expanded="false" aria-controls="collapse-Five">
+                                    Edit Products <i class="mdi mdi-chevron-down accordion-arrow"></i>
+                                </a>
+                            </h5>
+                        </div>
+                        <div id="collapse-Five" class="collapse show" aria-labelledby="heading-Five" data-bs-parent="#custom-accordion-one">
+                            <div class="card-body">
+                                <div id="my-products">
+                                    @{
+                                        await Html.RenderPartialAsync("PartialViewEdit", Model);
+                                    }
+                                </div>
+
+                                <div id="misc-item-section" class="mt-4">
+                                    <div class="card">
+                                        <div>
+                                            <h4 class="card-title">Miscellaneous Items</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover" id="misc-item-datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>SKU</th>
+                                                            <th>Description</th>
+                                                            <th>Product Cost</th>
+                                                            <th>Custom Cost</th>
+                                                            <th>Quantity</th>
+                                                            <th>Discount (%)</th>
+                                                            <th>Total</th>
+                                                            <th>Expected Date</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="misc-table-body">
+                                                        @if (Model.MiscProducts != null && Model.MiscProducts.Any())
+                                                        {
+                                                            @foreach (var item in Model.MiscProducts)
+                                                            {
+                                                                <tr data-id="@item.MiscProductId">
+                                                                    <td>@item.Sku</td>
+                                                                    <td>@item.Description</td>
+                                                                    <td><input type="number" class="form-control miscproduct-cost-product" value="@item.ProductCost" onchange="updateMiscTotal()" /></td>
+                                                                    <td><input type="number" class="form-control miscproduct-cost-set" value="@item.CustomCost" onchange="updateMiscTotal()" /></td>
+                                                                    <td><input type="number" class="form-control miscproduct-quantity" value="@item.Quantity" onchange="updateMiscTotal()" /></td>
+                                                                    <td><input type="number" class="form-control miscdiscount-percentage" value="@item.DiscountPercentage" onchange="updateMiscTotal()" /></td>
+                                                                    <td><input type="text" class="form-control miscproduct-total-cost" value="@item.TotalCost" readonly /></td>
+                                                                    <td><input type="text" class="form-control expected-date" value="@item.ExpectedDate.ToString("yyyy-MM-dd")" data-provide="datepicker" /></td>
+                                                                    <td>
+                                                                        <button type="button" class="btn btn-danger" onclick="removeMiscTableRow(this, @item.MiscProductId)">Remove</button>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            @* <button type="button" class="btn btn-success mt-3" onclick="addMiscItem()">Add Misc Item</button> *@
+                                            <button type="button" class="btn btn-primary mt-3" id="saveMiscBtn" onclick="saveMiscItems()">Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="m-3" style="float:right">
+                                    <input type="button"
+                                           onclick="lockProductChanges()"
+                                           id="lock-changes"
+                                           data-bs-toggle="collapse"
+                                           href="#collapseSix"
+                                           aria-expanded="false"
+                                           aria-controls="collapseSix"
+                                           value="Lock Changes"
+                                           class="btn btn-primary" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: none;" id="finish-edit" class="card mb-0">
+                        <div class="card-header" id="heading-Seven">
+                            <h5 class="m-0">
+                                <a class="custom-accordion-title collapsed d-block py-1" data-bs-toggle="collapse" href="#collapse-Seven" aria-expanded="false" aria-controls="collapse-Seven">
+                                    Finished<i class="mdi mdi-chevron-right accordion-arrow"></i>
+                                </a>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12" style="min-width: 300px;">
+                    <div class="accordion custom-accordion" id="custom-accordion-three">
+                        <div style="display: none;" id="stock-save" class="card mb-0">
+                            <div class="card-header" id="heading-Tree">
+                                <h5 class="m-0">
+                                    <a class="custom-accordion-title d-block py-1" data-bs-toggle="collapse" href="#collapse-Tree" aria-expanded="true" aria-controls="collapse-Tree">
+                                        Stock Locations<i class="mdi mdi-chevron-down accordion-arrow"></i>
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="collapse-Tree" class="collapse show" aria-labelledby="heading-Tree" data-bs-parent="#custom-accordion-three">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group p-1">
+                                                <label for="ProductId" class="control-label">Product Sku</label>
+                                                <input readonly for="ProductId" id="product-id" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group p-1" style="text-align: left;" id="filter-list">
+                                                <label style="text-align: left;" class="control-label">Select a Location</label>
+                                                <select style="text-align: left;" class="form-control select2" data-toggle="select2" id="selector" name="selector">
+                                                    <option>Any</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group p-1">
+                                                <label for="TotalAvailable" class="control-label">Recieved</label>
+                                                <input readonly id="product-received" for="TotalAvailable" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group p-2">
+                                            <span id="tooltip-next" class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" title="Select A Location">
+                                                <input type="button" class="btn btn-secondary" value="Next" disabled id="next-button-decoy" />
+                                            </span>
+                                            <input type="button" class="btn btn-secondary" value="Next" onclick="saveStock($('#counter-helper').val())" tabindex="0" id="next-product-button" />
+                                            <input hidden id="counter-helper" value="0" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="float:right">
+                    <input style="display: none;" type="submit" name="submit" class="btn btn-success action-button me-3 mb-1 mt-2" id="submit-btn" value="Submit" />
+                </div>
+            </form>
+            @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager) || this.User.IsInRole(RoleList.Developer))
+            {
+                <form asp-action="AddProduct" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="PurchaseOrderSingle.PurchaseOrderId" />
+                    <div class="accordion custom-accordion mt-3" id="custom-accordion-prod">
+                        <div class="card mb-0">
+                            <div class="card-header" id="heading-Prod-Four">
+                                <h5 class="m-0">
+                                    <a class="custom-accordion-title d-block py-1" data-bs-toggle="collapse" href="#collapse-Prod-Four" aria-expanded="false" aria-controls="collapse-Prod-Four">
+                                        Add Product<i class="mdi mdi-chevron-right accordion-arrow"></i>
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="collapse-Prod-Four" class="collapse" aria-labelledby="heading-Prod-Four" data-bs-parent="#custom-accordion-prod">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h4 class="card-title col-6">Products</h4>
+                                            <div class="row col-6">
+                                                <div class="col-md-9">
+                                                    <select class="select2 form-control select2-multiple wizard-require" data-toggle="select2" data-placeholder="Choose ..." id="selector-product" name="selector-prod">
+                                                        <option value="">Select a product</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button type="button" id="btn-add-product" class="btn btn-success float-end" onclick="add_fields()"><span class="mdi mdi-18px mdi-plus">&nbsp;Add Product</span></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="product-content  mt-3">
+                                                <div class="row g-2">
+                                                    <div class="add-product table-responsive" id="add-product"></div>
+                                                    <table class="table table-hover table-dar" id="product-datatable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">Product</th>
+                                                                <th scope="col">Product Cost</th>
+                                                                <th scope="col">Custom Cost</th>
+                                                                <th scope="col">Quantity</th>
+                                                                <th scope="col">Discount (%)</th>
+                                                                <th scope="col">Total</th>
+                                                                <th scope="col">Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="table-body">
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                <div class="row m-3" style="float:right">
+                                    <div class="col-3">
+                                        <input type="submit" value="Submit" id="btnaddproduct" class="btn btn-success mt-2" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+        <div id="stock-modal" class="col-12 col-xl-3 col-lg-12 col-md-12">
+            <div class="accordion custom-accordion" id="custom-accordion-two">
+                <div class="card mb-0">
+                    <div class="card-header" id="heading-One">
+                        <h5 class="m-0">
+                            <a class="custom-accordion-title d-block py-1" data-bs-toggle="collapse" href="#collapse-One" aria-expanded="true" aria-controls="collapse-One"> Stock Locations<i class="mdi mdi-chevron-down accordion-arrow"></i> </a>
+                        </h5>
+                    </div>
+                    <div id="collapse-One" class="collapse show" aria-labelledby="heading-One" data-bs-parent="#custom-accordion-two">
+                        <div id="stock-load">
+                            @{
+                                await Html.RenderPartialAsync("PartialIndex", Model);
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager) || this.User.IsInRole(RoleList.Developer))
+            {
+                <div id="stock-initial">
+                    <div class="accordion custom-accordion mt-3" id="custom-accordion-three">
+                        <div class="card mb-0">
+                            <div class="card-header" id="heading-Ten">
+                                <h5 class="m-0">
+                                    <a class="custom-accordion-title d-block py-1" data-bs-toggle="collapse" href="#collapse-Ten" aria-expanded="true" aria-controls="collapse-Ten">
+                                        Add File
+                                        <i class="mdi mdi-chevron-down accordion-arrow"></i>
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="collapse-Ten" class="collapse show" aria-labelledby="heading-Ten" data-bs-parent="#custom-accordion-three">
+                                <div>
+                                    <form asp-action="SaveFile" enctype="multipart/form-data" onsubmit="return setWaitCursor()">
+                                        <input hidden id="purOrdid" name="purOrdid" value="@Model.PurchaseOrderSingle.PurchaseOrderId" />
+                                        <label class="mt-2">File Name:</label>
+                                        <input type="text" id="fileName" name="fileName" class="form-control" placeholder="File Name...">
+                                        <label class="mt-2">Submit A File:</label>
+                                        <input id="upload" name="upload" onchange="filebutton()" class="form-control mb-2" type="file" style="color:white" accept="image/* | application/pdf">
+                                        <button type="submit" id="btnsubmit" style="display: none; float:right" class="btn btn-success m-1">Upload File</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-header" id="heading-Nine">
+                                <h5 class="m-0">
+                                    <a class="custom-accordion-title d-block py-1" data-bs-toggle="collapse" href="#collapse-Nine" aria-expanded="true" aria-controls="collapse-Nine">
+                                        Remove File <i class="mdi mdi-chevron-down accordion-arrow"></i>
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="collapse-Nine" class="collapse show" aria-labelledby="heading-Nine" data-bs-parent="#custom-accordion-three">
+                                <div>
+                                    <div class="card-body">
+                                        <table class="table dt-responsive webkit-nowrap w-100" id="file-datatable">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        File Name
+                                                    </th>
+                                                    <th>
+                                                        Action
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var items in Model.purchaseOrderFilesMappings)
+                                                {
+                                                    <tr>
+                                                        <td>
+
+                                                            <a target="_blank" href="@items.Files.FileUrl">
+                                                                @items.Files.FileName
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            <div class="form-group p-1">
+                                                                <div class="dropdown">
+                                                                    <i data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="mdi mdi-24px mdi-delete dropdown-toggle"></i>
+                                                                    <div class="dropdown-menu">
+                                                                        <center>
+                                                                            <div class="form-group p-1" style="padding: 20px; color: white">
+                                                                                <label>Confirm Delete?</label>
+                                                                                <div class="dropdown-divider"></div>
+                                                                                <input type="button" value="Cancel" class="btn btn-secondary btnClose" style="margin: 10px" />
+                                                                                <a asp-action="DeleteFile" asp-route-id="@items.PurchaseOrderFilesMappingId">
+                                                                                    <input type="button" onclick="return setWaitCursor()" value="Delete" class="btn btn-danger" />
+                                                                                </a>
+                                                                            </div>
+                                                                        </center>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <h1 class="m-3">PO Closed!</h1>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/pages/purchase-order-edit.min.js?"></script>
+    <script type="text/javascript">
+        function closeAllSelect() {
+            if ($("#selector-vendor").select2("isOpen")) {
+                $("#selector-vendor").select2("close");
+            }
+            if ($("#selector-product").select2("isOpen")) {
+                $("#selector-product").select2("close");
+            }
+            if ($("#selector-ship").select2("isOpen")) {
+                $("#selector-ship").select2("close");
+            }
+            if ($("#selector-ship-method").select2("isOpen")) {
+                $("#selector-ship-method").select2("close");
+            }
+        }
+        $('#btnaddproduct').keypress(function (event) {
+            if (event.which === 13) {
+                event.preventDefault(); 
+                $(this).click(); 
+            }
+        });
+
+        $('#next-product-button').keypress(function (event) {
+            if (event.which === 13) {
+                event.preventDefault();
+                saveStock($('#counter-helper').val())
+                if ($('#submit-btn').is(':visible')) {
+                    $('#submit-btn').focus();
+                }
+            }
+        });
+        $('#submit-btn').keypress(function (event) {
+            if (event.which === 13) {
+                event.preventDefault(); 
+                $(this).click(); 
+            }
+        });
+        $('#other-cost').keydown(function (event) {
+            if (event.key === "Tab") {
+                event.preventDefault();
+                $('#reference-number').focus();
+            }
+        });
+
+        $('#fileName').keydown(function (event) {
+            if (event.key === "Tab") {
+                event.preventDefault();
+                $('#upload').click();               
+            }
+        });
+       
+        document.addEventListener('keydown', function (event) {
+
+            if (event.key === "Escape") {
+                event.preventDefault();
+                if ($('#myModalWarn').hasClass('show')) { $('#myModalCloseBtn').trigger('click'); }
+                if ($('#myModalHelp').hasClass('show')) { $("#myModalHelpCloseBtn").trigger('click'); }
+            }
+            if (event.ctrlKey) {
+                event.preventDefault();
+                if (event.key === "k") {
+                    $("#myModalHelp").modal("show");
+
+                }
+                if (event.key === 'p') {
+                    event.preventDefault();
+                    $('#collapse-Four').collapse('show');
+                    var $input = $('input[tabindex="1"]');
+                    if ($input.length === 0) {
+                        $input = $('input[tabindex]').not('[tabindex=""]').first();
+                    }
+                    $input.focus();
+                }
+                if (event.key === 'a') {
+                    event.preventDefault();
+                    $('#collapse-Prod-Four').collapse('show');
+                    $("#selector-prod").select2("open");
+                    setTimeout(function () {
+                        window.scrollTo(0, document.body.scrollHeight);
+                    }, 100);
+                }
+                if (event.key === "l") {
+                    
+
+                    setTimeout(function () {
+                        $("#selector").select2("open");
+                        $('#lock-changes').click();
+                    }, 100);
+                    setTimeout(function () {
+                        window.scrollTo(0, document.body.scrollHeight);
+                    }, 100);
+                   
+                   
+                }
+                if (event.key === "b") {
+                    $('#btnbacktolist').click();
+                }
+                
+                if (event.key === "f") {
+                    setTimeout(function () {
+                        window.scrollTo(0, document.body.scrollHeight);
+                    }, 100);
+                    $("#fileName").focus();
+
+                }
+               
+                const table = document.getElementById('Product-datatable');
+                const rows = table.getElementsByTagName('tr');
+                const currentCell = document.activeElement.closest('td');
+                if (event.key === 'e') {
+                    $('#collapse-Five').collapse('show');
+                    navigateToCell(rows[1].cells[2]);
+                    setTimeout(function () {
+                        const windowHeight = window.innerHeight;
+                        const middleOfPage = document.body.scrollHeight / 2 - windowHeight / 2;
+                        window.scrollTo(0, middleOfPage);
+                    }, 100);
+                }
+                if (currentCell) {
+                    const currentRowIndex = currentCell.parentElement.rowIndex;
+                    const currentCellIndex = currentCell.cellIndex;
+
+                    switch (event.key) {
+                        case 'ArrowUp':
+                            if (currentRowIndex > 0) {
+                                navigateToCell(rows[currentRowIndex - 1].cells[currentCellIndex]);
+                            }
+                            break;
+                        case 'ArrowDown':
+                            if (currentRowIndex < rows.length - 1) {
+                                navigateToCell(rows[currentRowIndex + 1].cells[currentCellIndex]);
+                            }
+                            break;
+                        case 'ArrowLeft':
+                            if (currentCellIndex > 0) {
+                                navigateToCell(currentCell.parentElement.cells[currentCellIndex - 1]);
+                            }
+                            break;
+                        case 'ArrowRight':
+                            if (currentCellIndex < currentCell.parentElement.cells.length - 1) {
+                                navigateToCell(currentCell.parentElement.cells[currentCellIndex + 1]);
+                            }
+                            break;
+                        case 'd':
+                            const deleteButton = rows[currentRowIndex].cells[6].querySelector('.item-action-btn');
+                            const rowLength = rows.length;
+                            if (deleteButton) {
+                                deleteButton.click();
+
+                                if (currentRowIndex > 0) {
+                                    navigateToCell(rows[currentRowIndex - 1].cells[2]);
+                                }
+                                if (rowLength === 2) {
+
+                                    $("#selector-product").select2("open");
+
+
+                                }
+
+                            }
+                            break;
+
+                    }
+                }
+            }
+        });
+
+        function navigateToCell(cell) {
+            const input = cell.querySelector('input:not([readonly])');
+            if (input) {
+                input.focus();
+            }
+        }
+        $("#helpbtn").click(function () {
+            $("#myModalHelp").modal("show");
+        });
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !$(e.target).hasClass('form-check-input') && !$(e.target).is('#next-product-button') && !$(e.target).is('#btnsubmit')) {
+                event.preventDefault();
+                if ($('#myModalWarn').hasClass('show')) {
+                    $('#myModalBtn').trigger('click');
+                }
+                $('#myModalBtn').show();
+                var myDiv = document.getElementById("myModalWarnAlertBody");
+                myDiv.innerHTML = "Do you want to Save this purchase order?";
+                $('#myModalWarn').modal('show');
+                $('#modalHeaderWarn').show();
+            }
+        });
+
+        $(document).on("click", "#myModalBtn", function () {
+            $('#myModalWarn').modal('hide');
+            $("#savePO").trigger("click"); // click the submit button
+        });
+
+      
+
+        $(document).ready(function () {
+            $('#upload').change(function () {
+                if (this.files.length > 0) {
+                    $('#btnsubmit').focus();
+                }
+            });
+            $(".form-check-input").focus(function () {
+                $(this).on("keypress", function (event) {
+                    event.preventDefault();
+                    // Check if the pressed key is Enter (key code 13)
+                    if (event.which === 13) {
+                        
+                        // Toggle the checked state
+                        $(this).prop("checked", !$(this).prop("checked"));
+                    }
+                });
+            });
+            let keyboardEvent = false;
+            $(document).on('keydown', function () {
+                keyboardEvent = true;
+            });
+            $("#selector-ship-method").on("select2:close", function () {
+                if (keyboardEvent) {
+                    $("#PurchaseOrderSingle_IsActive").focus();
+                }
+            });
+            $("#date-picks").on("keydown", function (e) {
+                if (e.key === "Tab") { // Tab key
+                    e.preventDefault();
+                    $("#selector-ship").select2("open");
+                }
+            });
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                $('#helpbtn').hide();
+            }
+            $('.select2').select2();
+            // Initialize DataTables
+            initializeDataTables();
+            $("#id-shipping-meth").val($("#selector-ship-method").val());
+            $("#id-shipping-pro").val($("#selector-ship").val());
+            $(".btnClose").click(function () {
+                $(this).parents(".dropdown").find(".dropdown-toggle").dropdown("toggle");
+            });
+
+            //select list on change
+            $("#selector").on("select2:select", function (e) {
+                $("#tooltip-next").hide();
+                $("#next-button-decoy").hide();
+                $("#next-product-button").show();
+                $("#next-product-button").focus();
+                console.log(document.querySelector("#selector option:checked").parentElement.label);
+            });
+            $(document).ready(function () {
+                let keyboardEvent = false;
+                $(document).on('keydown', function () {
+                    keyboardEvent = true;
+                });
+                $("#selector-ship").on("select2:close", function () {
+                    if (keyboardEvent) {
+                        $("#selector-ship-method").select2();
+                        $("#selector-ship-method").select2("open");
+                    }
+                });
+                $('#date-picker').datepicker({
+                    autoclose: true,
+                    format: 'mm/dd/yyyy',
+                    singleDatePicker: true
+                });
+                var dateInput = $('#date-picks');
+                if (dateInput.val()) {
+                    var dateValue = new Date(dateInput.val());
+                    var formattedDate = dateValue.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
+                    dateInput.val(formattedDate);
+                }
+            });
+
+            //stops enter working on submit form for accidental early submit
+            $("#stop-space").on("keypress", function (event) {
+                var keyPressed = event.keyCode || event.which;
+                if (keyPressed === 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            $("#custom-accordion-prod").on("keypress", function (event) {
+                var keyPressed = event.keyCode || event.which;
+                if (keyPressed === 13) {
+                    event.preventDefault();
+                    //getTotalCost();
+                    return false;
+                }
+            });
+
+            $("#selector-prod").on("select2:select", function () {
+                add_fields();
+            });
+
+            $("#selector-ship").on("change", function (e) {
+                GetMethodsByShipPro(+$("#selector-ship").val());
+            });
+
+            $('.select2').select2();
+
+            const url = '/PurchaseOrders/GetProductsByVendorId/'
+            $.getJSON(url, { id: @ViewData["ProductsVendorId"]}).done(function (response) {
+                $('#selector-product').empty()
+                let s = ''
+                for (let i = 0; i < response.length; i++) {
+                    s += '<option value="' + response[i].product.productId + '">' + response[i].product.sku + ' | ' + response[i].vendorSku + ' | ' + response[i].product.description + '</option>'
+                }
+                $('#selector-product').html(s)
+            })
+        });
+
+        function setWaitCursor(){
+            $("button, a").prop("disabled", true);
+            $("input").css({ "background-color": "#f5f5f5", "color": "#999", "pointer-events": "none" });
+            $('body').css({"cursor": "wait" });
+            $('.wrapper').css({ "pointer-events": "none"});
+        }
+
+        function OnVendorChanged() {
+                const url = '../PurchaseOrders/GetProductsByVendorId/'
+            $.getJSON(url, { id: @ViewData["ProductsVendorId"] }).done(function (response) {
+                    $('#selector-product').empty()
+                    let s = ''
+                    for (let i = 0; i < response.length; i++) {
+                        s += '<option value="' + response[i].product.productId + '">' + response[i].product.sku + ' | ' + response[i].vendorSku + ' | ' + response[i].product.description + '</option>'
+                    }
+                    $('#selector-product').html(s)
+                })
+        }
+
+        function add_fields() {
+            const table = document.getElementById('product-datatable').getElementsByTagName('tbody')[0];
+            const rowIndex = table.rows.length;
+
+            const row = table.insertRow(table.length);
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2);
+            const cell4 = row.insertCell(3);
+            const cell5 = row.insertCell(4);
+            const cell6 = row.insertCell(5);
+            const cell7 = row.insertCell(6);
+            const url = '/PurchaseOrders/GetPVMDetails';
+
+            $.getJSON(url, { productId: parseInt($('#selector-product option:selected').val()), vendorId: parseInt('@ViewData["ProductsVendorId"]') }, function (response) {
+
+                cell1.innerHTML = "<input name='ProductPurchaseOrders[" + rowIndex + "].ProductVendorMappingId' type='hidden' value='" + response.productVendorMappingId + "' />" +
+                    "<input readonly class='form-control' type='text' value='" + $('#selector-product option:selected').text().split('|')[0] + "' />";
+                cell2.innerHTML = "<input readonly class='form-control product-cost-set' type='number' value='" + response.cost + "' />";
+                cell3.innerHTML = "<input name='ProductPurchaseOrders[" + rowIndex + "].CustomCost' type='number' class='form-control' step='0.0001' value='" + response.cost + "' onchange='getTotalCost()' />";
+                cell4.innerHTML = "<input name='ProductPurchaseOrders[" + rowIndex + "].TotalOrdered' type='number' class='form-control product-quantity' value='0' onchange='getTotalCost()' />";
+                cell5.innerHTML = "<input name='ProductPurchaseOrders[" + rowIndex + "].DiscountPercentage' type='number' class='form-control product-discount-percentage' step='0.01'  value='0' onchange='getTotalCost()' />";
+                cell6.innerHTML = "<input readonly class='form-control product-total-cost' name='ProductPurchaseOrders[" + rowIndex + "].TotalProductCost' type='number' value='0' />";
+                cell7.innerHTML = "<i class='mdi mdi-24px mdi-delete item-action-btn' tabindex='0' onclick='removeTableRow()'>";
+
+                const inputs = cell3.getElementsByTagName('input');
+                if (inputs.length > 0) {
+                    inputs[0].focus();
+                }
+            });
+        }
+
+        function getTotalCost() {
+            const els = document.getElementsByClassName('product-quantity')
+            const pcostside = document.getElementsByClassName('product-cost-set')
+            const pcosttotals = document.getElementsByClassName('product-total-cost')
+            const productDiscounts = document.getElementsByClassName('product-discount-percentage')
+
+            for (let i = 0; i < els.length; i++) {
+                var subTotal = (els[i].value * pcostside[i].value);
+                var discount = subTotal * (productDiscounts[i].value / 100);
+                pcosttotals[i].value = (subTotal - discount).toFixed(4);
+            }
+        }
+
+        $(document).on('click', '.item-action-btn', function (e) {
+            e.preventDefault()
+            const tr = $(this).closest('tr')
+            console.log(tr.children('td:first').attr('id'))
+            tr.remove()
+        });
+
+         function updateMiscTotal() {
+        const rows = document.querySelectorAll('#misc-item-datatable tbody tr');
+        rows.forEach(row => {
+            const quantity = row.querySelector('.miscproduct-quantity').value || 0;
+            const cost = row.querySelector('.miscproduct-cost-set').value || 0;
+            const discount = row.querySelector('.miscdiscount-percentage').value || 0;
+            const subtotal = quantity * cost;
+            const discountedTotal = subtotal - (subtotal * (discount / 100));
+            row.querySelector('.miscproduct-total-cost').value = discountedTotal.toFixed(2);
+        });
+    }
+
+    function addMiscItem() {
+        const tbody = document.getElementById('misc-table-body');
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><input type="text" class="form-control" placeholder="SKU"></td>
+            <td><input type="text" class="form-control" placeholder="Description"></td>
+            <td><input type="number" class="form-control miscproduct-cost-product" onchange="updateMiscTotal()"></td>
+            <td><input type="number" class="form-control miscproduct-cost-set" onchange="updateMiscTotal()"></td>
+            <td><input type="number" class="form-control miscproduct-quantity" onchange="updateMiscTotal()"></td>
+            <td><input type="number" class="form-control miscdiscount-percentage" onchange="updateMiscTotal()"></td>
+            <td><input type="text" class="form-control miscproduct-total-cost" readonly></td>
+            <td><input type="text" class="form-control expected-date" data-provide="datepicker"></td>
+            <td><button type="button" class="btn btn-danger" onclick="removeMiscTableRow(this)">Remove</button></td>
+        `;
+        document.getElementById('addMiscBtn').style.display = 'none';
+        document.getElementById('saveMiscBtn').style.display = 'inline-block';
+    }
+
+        function removeMiscTableRow(button, recordId) {
+            if (confirm("Are you sure you want to remove this record?")) {
+            $.ajax({
+                url: '/PurchaseOrders/DeleteMiscRecord',
+                type: 'POST',
+                data: { id: recordId },
+                success: function(response) {
+                    if (response.success) {
+                        $(button).closest('tr').remove();
+                        alert("Record deleted successfully.");
+                    } else {
+                        alert("Failed to delete record: " + response.message);
+                    }
+                },
+                error: function() {
+                    alert("An error occurred while deleting the record.");
+                }
+            });
+        }
+    }
+        function saveMiscItems() {
+            const purchaseOrderId = document.getElementById('purchaseOrderId').value;
+            const rows = document.querySelectorAll('#misc-table-body tr');
+            const miscItems = [];
+            rows.forEach(row => {
+                const item = {
+                        MiscProductId: row.getAttribute('data-id') || 0,
+                        PurchaseOrderId: purchaseOrderId,
+                        Sku: row.cells[0]?.querySelector('input')?.value || row.cells[0]?.textContent?.trim() || '',
+                        Description: row.cells[1]?.querySelector('input')?.value || row.cells[1]?.textContent?.trim() || '',
+                        ProductCost: parseFloat(row.cells[2]?.querySelector('input')?.value) || 0,
+                        CustomCost: parseFloat(row.cells[3]?.querySelector('input')?.value) || 0,
+                        Quantity: parseInt(row.cells[4]?.querySelector('input')?.value) || 0,
+                        DiscountPercentage: parseFloat(row.cells[5]?.querySelector('input')?.value) || 0,
+                        TotalCost: parseFloat(row.cells[6]?.querySelector('input')?.value) || 0,
+                        ExpectedDate: row.cells[7]?.querySelector('input')?.value || null
+                };
+                miscItems.push(item);
+            });
+
+            var data = JSON.stringify(miscItems);
+
+            $.ajax({
+                url: '/PurchaseOrders/UpdateMiscProducts',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded',
+                data: { MiscProducts: data }, // Send as a form field
+                success: function(response) {
+                    alert('Misc items updated successfully!');
+                },
+                error: function() {
+                    alert('Failed to update misc items.');
+                }
+            });
+    }
+       
+    </script>
+ }

@@ -1,0 +1,117 @@
+﻿@model ERPWebApp.Models.Company.ApplicationUser
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container-fluid text-white">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">User</a></li>
+            <li class="breadcrumb-item active" aria-current="page">New</li>
+        </ol>
+    </nav>
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title">Create new user</h2>
+                <div>
+                    @*<button type="submit" name="submit" class="action-button btn btn-primary"><span class="mdi mdi-18px mdi-content-save">&nbsp;Submit</span></button>*@
+                    <button type="button" class="btn btn-info" onclick="location.href='@Url.Action("Index")'">
+                        <span class="mdi mdi-18px mdi-arrow-top-left-thick">Back to List</span>
+                    </button>
+                </div>
+            </div>
+            <div class="justify-content-center">
+                <div class="card mb-4">
+                    <div class="card-body justify-content-center">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="UserName" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="UserName" class="form-control" />
+                                <span asp-validation-for="UserName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="Email" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="PhoneNumber" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="PhoneNumber" class="form-control" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="Password" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="Password" class="form-control" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="ConfirmPassword" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="ConfirmPassword" class="form-control" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        @* <div class="row">
+                            <div class="col-sm-3">
+                                <label class="control-label">User Profile picture</label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input type="file" id="ProfilePic" name="profilePic" multiple class="form-control" />
+                            </div>
+                        </div> *@
+                        <div class="d-flex justify-content-center mb-2 mt-3">
+                            <button type="submit" name="submit" class="action-button btn btn-primary"><span class="mdi mdi-18px mdi-content-save">&nbsp;Submit</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+ @*    <script>
+        $('#userImage').change((event) => {
+            var input = event.target;
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#user_Image').attr('src', e.target.result);
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        });
+    </script> *@
+}

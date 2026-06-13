@@ -1,0 +1,122 @@
+﻿@model ERPWebApp.Models.Mappings.ProductVendorMapping
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Delete</h1>
+<hr />
+<div class="container-fluid text-white">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Product Vendor Mapping</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Delete</li>
+        </ol>
+    </nav>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-title">Product Vendor Mapping</h2>
+            <div>
+                <form method="post" asp-action="Delete">
+                      <input type="hidden" asp-for="ProductVendorMappingId" />
+                    <button type="submit" class="btn btn-danger">
+                        <span class="mdi mdi-18px mdi-delete">&nbsp;Delete</span>
+                    </button>               
+                <a asp-action="Index">
+                    <button type="button" class="btn btn-info"><span class="mdi mdi-18px mdi-arrow-top-left-thick">&nbsp;Back to List</span></button>
+                </a>
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group">
+                        <label asp-for="Product.Sku" class="control-label"></label>
+                        @Html.TextBoxFor(model => model.Product.Sku, new { @class = "form-control", id="create-vendor-sku", type="text", @readonly = "readonly"})
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Product.Description" class="control-label"></label>
+                        @Html.TextBoxFor(model => model.Product.Description, new { @class = "form-control", id="create-vendor-sku", type="text", @readonly = "readonly"})
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Vendor.VendorName" class="control-label"></label>
+                        @Html.TextBoxFor(model => model.Vendor.VendorName, new { @class = "form-control", id="create-vendor-sku", type="text", @readonly = "readonly"})
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="VendorSku" class="control-label"></label>
+                        @Html.TextBoxFor(model => model.VendorSku, new { @class = "form-control", id="create-vendor-sku", type="text", @readonly = "readonly"})
+                    </div>
+                    <div class="form-group mt-2">
+                        <label asp-for="Cost" class="control-label"></label>
+                        @Html.TextBoxFor(model => model.Cost, new { @class = "form-control", id="create-vendor-sku", type="text", @readonly = "readonly"})
+                    </div>
+                    <div class="form-group mt-2">
+                        <label asp-for="MOQ" class="control-label"></label>
+                        @Html.TextBoxFor(model => model.MOQ, new { @class = "form-control", id="create-vendor-sku", type="text", @readonly = "readonly"})
+                    </div>
+                    <div class="form-group mt-2">
+                        <label asp-for="OrderMultiples" class="control-label"></label>
+                        @Html.TextBoxFor(model => model.OrderMultiples, new { @class = "form-control", id="create-vendor-sku", type="text", @readonly = "readonly"})
+                    </div>
+                    <div class="form-group mt-2">
+                        <label asp-for="LeadTime" class="control-label"></label>
+                        @Html.TextBoxFor(model => model.LeadTime, new { @class = "form-control", id="create-vendor-sku", type="text", @readonly = "readonly"})
+                    </div>
+                    <div class="form-group mt-2">
+                        <label asp-for="UnitofMeasure" class="control-label"></label>
+                        @Html.TextBoxFor(model => model.UnitofMeasure, new { @class = "form-control", id = "create-vendor-sku", type = "text", @readonly = "readonly" })
+                    </div>
+                    <div class="form-group mt-2">
+                        <label asp-for="isPrimaryVendor" class="control-label"></label>
+                        @if (@Model.isPrimaryVendor)
+                        {
+                            <input value="Yes" class="form-control" readonly />
+                        }
+                        else
+                        {
+                            <input value="No" class="form-control" readonly />
+                        }
+                    </div>
+                    <div class="form-group mt-2">
+                        <label asp-for="IsRawMaterial" class="control-label"></label>
+                        @if (@Model.IsRawMaterial)
+                        {
+                            <input value="Yes" class="form-control" readonly />
+                        }
+                        else
+                        {
+                            <input value="No" class="form-control" readonly />
+                        }
+                    </div>
+                    <div class="form-group mt-2">
+                        <label asp-for="IsActive" class="control-label"></label>
+                        @if (@Model.IsActive)
+                        {
+                            <input value="Yes" class="form-control" readonly />
+                        }
+                        else
+                        {
+                            <input value="No" class="form-control" readonly />
+                        }
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label asp-for="Notes">Notes</label>
+                        @Html.TextAreaFor(model =>model.Notes, new { @class = "form-control" , id="vendor-notes",rows="5"})
+                        @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+

@@ -1,0 +1,214 @@
+@model ERPWebApp.Models.Inventory.Product
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Product Summary</h5>
+        @if(User.IsInRole(RoleList.InventoryManager) || User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.Administrator))
+        {
+            <div>
+                <a asp-controller="Products" asp-action="Edit" asp-route-id="@Model.ProductId">
+                    <button type="button" class="btn btn-info"><span class="mdi mdi-18px mdi-arrow-top-left-thick">&nbsp;Edit</span></button>
+                </a>
+            </div>
+        }
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-2">
+                <div class="card">
+                    @{
+                        var defaultimage = Model.ProductImages.FirstOrDefault(x=>x.IsDefault);
+                        var src = defaultimage != null && defaultimage.FileUrl != "" ? defaultimage.FileUrl : "/Images/image.png";
+                    }
+                    <img src="@src" class="img-thumbnail" alt="Default Image">
+                </div>
+            </div>
+            <div class="col-5">
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.Sku)
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayFor(model => model.Sku)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.Description)
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayTextFor(model => model.Description)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">Departments</div>
+                    <div class="col-8">
+                        @{
+                            var departments = Model.Departments.Select(x=>x.DepartmentName).ToList();
+                            @string.Join(", ", departments);
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.AltItemNumber)
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayFor(model => model.AltItemNumber)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.AlternateProduct)
+                    </div>
+                    <div class="col-8">
+                        @if (Model.AlternateProduct != null) {
+                            <a href="/Products/Details/@Model.AlternateProduct.ProductId">@Html.DisplayFor(model => model.AlternateProduct.Sku)</a>
+                        }
+                    </div>
+                </div>
+                @if(User.IsInRole(RoleList.Manager) || User.IsInRole(RoleList.InventoryManager)){
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.FulfillmentCost)
+                        </div>
+                        <div class="col-8">
+                            @Html.DisplayFor(model => model.FulfillmentCost)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.Cost)
+                        </div>
+                        <div class="col-8">
+                            @Html.DisplayFor(model => model.Cost)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.OverseasCost)
+                        </div>
+                        <div class="col-8">
+                            @Html.DisplayFor(model => model.OverseasCost)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.LaborCost)
+                        </div>
+                        <div class="col-8">
+                            @Html.DisplayFor(model => model.LaborCost)
+                        </div>
+                    </div>
+                }
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ExternalViewer))
+                {
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.IsExternalProduct)
+                        </div>
+                        <div class="col-8">
+                            @if (@Html.ValueFor(model => model.IsExternalProduct) == "True")
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="col-5">
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.WeightAmount)
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayFor(model => model.WeightAmount)&nbsp;<strong>@Html.DisplayFor(model => model.WeightUnit)</strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.MinInventory)
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayFor(model => model.MinInventory)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.MaxInventory)
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayFor(model => model.MaxInventory)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.OnOrder)
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayFor(model => model.OnOrder)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.LeadTime)
+                        <a>(Days)</a>
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayFor(model => model.LeadTime)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.ModifyByUser)
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayFor(model => model.ModifyByUser)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        @Html.DisplayNameFor(model => model.ModifyDate)
+                    </div>
+                    <div class="col-8">
+                        @Html.DisplayFor(model => model.ModifyDate)
+                    </div>
+                </div>
+                <div class="card mt-2">
+                    <div class="card-header">
+                        <h5 class="card-title">Dimension(@Html.DisplayFor(model => model.DimensionalUnit))</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                @Html.DisplayNameFor(model => model.Length)
+                            </div>
+                            <div class="col-8">
+                                @Html.DisplayFor(model => model.Length)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                @Html.DisplayNameFor(model => model.Width)
+                            </div>
+                            <div class="col-8">
+                                @Html.DisplayFor(model => model.Width)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                @Html.DisplayNameFor(model => model.Height)
+                            </div>
+                            <div class="col-8">
+                                @Html.DisplayFor(model => model.Height)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

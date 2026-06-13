@@ -1,0 +1,102 @@
+﻿@using ERPWebApp.Models.Company;
+@model FinancialsViewModel
+
+@{
+    ViewData["Title"] = "Historical Trends";
+    var productSalesHeaders = new Dictionary<string, string>
+{
+{ "Sku", "Sku" },
+{ "Description", "Description" },
+{ "TotalQuantity", "Total Quantity" }
+};
+}
+<style>
+    #chart-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    #chart {
+        width: 100%;
+    }
+
+    #help-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    #help-info {
+        position: absolute;
+        top: 40px;
+        right: -200px;
+        width: 200px;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        z-index: 10;
+        padding: 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-family: Helvetica, Arial, sans-serif;
+        background: #FFF;
+        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+        color: #373d3f;
+    }
+</style>
+
+<div class="col-12" id="drac-historictrends">
+    <div class="card">
+        <div class="card-body">
+            <!--Flex div so that I can position the CSV button into the corner.-->
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="header-title d-inline-block">
+                        Historical Trends
+                    </h4>
+                    <button onclick="toggleHelpInfo('trends-info')"
+                        style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                        <i class="mdi mdi-information"></i>
+                    </button>
+                </div>
+                <div>
+                    <button id="exportTrendsButton" class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                </div>
+            </div>
+            <a id="downloadLink" style="display:none;"></a>
+            <div id="trends-info" class="hidden alert alert-info" role="alert">
+                <p>Tracks fulfillment cost totals & number of orders across a given period of time, organized by
+                    department name.</p>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-3 col-lg-2">
+                    <input type="text" id="DaysColumnChart" name="daysTrends" class="form-control" value="Last 30 Days"
+                        readonly>
+                </div>
+            </div>
+            <div id="column-chart-historical-trends" class="apex-charts" data-colors="#536de6,#e3eaef,#10c469,#35b8e0">
+            </div>
+            <div id="trendsLoadingMessage" style="display: none;">Loading...</div>
+            <div class="trends-fetching-container"
+                style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                <div id="trends-fetching" class="hidden"
+                    style="background-color: transparent; padding: 1rem; border-radius: 5px; text-align: center;">
+                    <p>Fetching...</p>
+                    <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

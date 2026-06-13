@@ -1,0 +1,761 @@
+﻿@using ERPWebApp.Models.Company;
+@model FinancialsViewModel
+
+@{
+    ViewData["Title"] = "Financials Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var productSalesHeaders = new Dictionary<string, string>
+{
+{ "Sku", "Sku" },
+{ "Description", "Description" },
+{ "TotalQuantity", "Total Quantity" }
+};
+}
+<style>
+    #chart-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    #chart {
+        width: 100%;
+    }
+
+    #help-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    #help-info {
+        position: absolute;
+        top: 40px;
+        right: -200px;
+        width: 200px;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        z-index: 10;
+        padding: 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-family: Helvetica, Arial, sans-serif;
+        background: #FFF;
+        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+        color: #373d3f;
+    }
+</style>
+
+<!--error message-->
+<div class="alert alert-danger d-flex align-items-center" role="alert" id="error-message"
+    style="display: none !important;">
+    <div>
+        An error occurred while saving the layout
+    </div>
+</div>
+<!--error message-->
+
+<div class="form-check form-switch mt-2 mb-2">
+    <label class="form-check-label" for="layout-editing-check" id="layout-editing-check-label">Enable Layout
+        Editing</label>
+    <input class="form-check-input" type="checkbox" id="layout-editing-check">
+</div>
+
+<div class="row" id="drac-finance-container">
+    <div class="col-12" id="drac-yearlyprofits">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <h4 class="header-title d-inline-block">
+                            Yearly Profits
+                        </h4>
+                        <button onclick="toggleHelpInfo('yearlyprofits-info')"
+                            style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                            <i class="mdi mdi-information"></i>
+                        </button>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label">Add Favourite </label>
+                        <input class="form-check-input" asp-for="YearlyProfit" type="checkbox" id="YearlyProfit"
+                            name="YearlyProfit">
+                    </div>
+
+                </div>
+                <div id="yearlyprofits-info" class="hidden alert alert-info" role="alert">
+                    <p>Displays profits for the current year vs the previous year, as well as items sold each day.</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <input type="text" id="DaysLineChart" name="daysYearlyProfits" class="form-control"
+                            value="Year-to-Date" readonly>
+                    </div>
+                    <div>
+                        <button id="exportYearlyProfitsButton"
+                            class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                    </div>
+                </div>
+                <div id="yearlyProfitsChart" class="apex-charts" data-colors="#536de6,#e3eaef,#10c469,#35b8e0"></div>
+                <div id="yearlyProfitsTotals" style="margin-top: 10px; text-align: center; font-weight: bold;"></div>
+                <div id="yearlyProfitsLoadingMessage" style="display: none;">Loading...</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12" id="drac-historictrends">
+        <div class="card">
+            <div class="card-body">
+                <!--Flex div so that I can position the CSV button into the corner.-->
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="header-title d-inline-block">
+                            Historical Trends
+                        </h4>
+                        <button onclick="toggleHelpInfo('trends-info')"
+                            style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                            <i class="mdi mdi-information"></i>
+                        </button>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label">Add Favourite </label>
+                        <input class="form-check-input" asp-for="HistoricalTrends" type="checkbox" id="HistoricalTrends"
+                            name="HistoricalTrends">
+                    </div>
+
+                </div>
+                <a id="downloadLink" style="display:none;"></a>
+                <div id="trends-info" class="hidden alert alert-info" role="alert">
+                    <p>Tracks fulfillment cost totals & number of orders across a given period of time, organized by
+                        department name.</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="col-12 col-md-3 col-lg-2">
+                        <input type="text" id="DaysColumnChart" name="daysTrends" class="form-control"
+                            value="Last 30 Days" readonly>
+                    </div>
+                    <div>
+                        <button id="exportTrendsButton" class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                    </div>
+                </div>
+                <div id="column-chart-historical-trends" class="apex-charts"
+                    data-colors="#536de6,#e3eaef,#10c469,#35b8e0"></div>
+                <div id="trendsLoadingMessage" style="display: none;">Loading...</div>
+                <div class="trends-fetching-container"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                    <div id="trends-fetching" class="hidden"
+                        style="background-color: transparent; padding: 1rem; border-radius: 5px; text-align: center;">
+                        <p>Fetching...</p>
+                        <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6" id="drac-totfulfilmentsales">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Same deal here, flex div in order to reposition CSV button -->
+                    <div>
+                        <h4 class="header-title d-inline-block">
+                            Total Fulfillment Sales
+                        </h4>
+                        <button onclick="toggleHelpInfo('fulfillment-info')"
+                            style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                            <i class="mdi mdi-information"></i>
+                        </button>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label">Add Favourite </label>
+                        <input class="form-check-input" asp-for="TotalFulfillmentSales" type="checkbox"
+                            id="TotalFulfillmentSales" name="TotalFulfillmentSales">
+                    </div>
+
+                </div>
+                <div id="fulfillment-info" class="hidden alert alert-info" role="alert">
+                    <p>Grabs the total fulfillment sales of all orders for the current day, organized by department
+                        total and store total.</p>
+                </div>
+                <div class="d-flex justify-content-end align-items-center">
+                    <button id="exportFulfillmentButton"
+                        class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                </div>
+                <!--Fallback message for if the chart data returns empty.-->
+                <div id="no-data-message" style="display: none;">No data available.</div>
+                <div id="grand-total"></div>
+                <div id="chart-container">
+                    <div id="chart"></div>
+                </div>
+                <div id="pie-chart-total-fulfillment-sales" class="apex-charts"
+                    data-colors="#536de6,#e3eaef,#10c469,#35b8e0"></div>
+                <div id="custom-tooltip" class="custom-tooltip"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6" id="drac-topproductsales">
+        <div class="card">
+            <div class="card-body position-relative">
+                <!--Dropdown goes here!-->
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="header-container">
+                        <h4 class="header-title">
+                            Top Product Sales
+                            <button onclick="toggleHelpInfo('sales-info')"
+                                style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                                <i class="mdi mdi-information"></i>
+                            </button>
+                        </h4>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label">Add Favourite </label>
+                        <input class="form-check-input" asp-for="TopProductSales" type="checkbox" id="TopProductSales"
+                            name="TopProductSales">
+                    </div>
+                </div>
+                <div id="sales-info" class="hidden alert alert-info" role="alert">
+                    <p>Tracks the top products by sales quantity within a specified timeframe. </p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <input type="text" id="product-sales-chart" name="productSales" class="form-control"
+                            value="Last 30 Days" readonly>
+                    </div>
+                    <div class="header-container d-flex justify-content-between align-items-center">
+                        <!-- Flex class is for repositioning buttons, so that the CSV button (and other buttons) are in the top right corner -->
+                        <div>
+                        </div>
+                        <div id="datatables-buttons-container">
+                            <!-- Sales datatable buttons go here! -->
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="sales-fetching-container"
+                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                        <div id="sales-fetching" class="hidden"
+                            style="background-color: #37404A; padding: 1rem; border-radius: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+                            <p>Fetching...</p>
+                            <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center w-100" style="min-height: 300px;">
+                        <table class="table dt-responsive webkit-nowrap w-100" id="productSalesTable">
+                            <thead>
+                                <tr>
+                                    @foreach (var header in productSalesHeaders)
+                                    {
+                                        <th>@header.Value</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ProductSalesInfo)
+                                {
+                                    <tr>
+                                        <td>@item.ProductSku</td>
+                                        <td>@item.Description</td>
+                                        <td>@item.TotalQuantity</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- end card body-->
+        </div>
+        <!-- end card -->
+    </div>
+    <!-- end col-->
+    <!-- end col-->
+</div>
+<!-- end row-->
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/js/pages/financials-trends-chart.min.js"></script>
+    <script src="~/js/pages/financials-fulfillment-chart.min.js"></script>
+    <script src="~/js/pages/financials-profits.min.js"></script>
+    <!-- for drag-n-drop -->
+    <script src="~/lib/hyper-assets/vendor/dragula/dragula.min.js"></script>
+
+
+    <script type="text/javascript">
+        var isTrendsInitialized = false;
+
+        $(document).ready(function () {
+            //initialize the drag and drop with Dragula
+            InitDragNDrop();
+
+            var currentYearProfitsData = @Html.Raw(Model.CurrentYearProfitsDataJson);
+            var lastYearProfitsData = @Html.Raw(Model.LastYearProfitsDataJson);
+            const chartContainer = document.querySelector('#yearlyProfitsChart');
+            renderYearlyProfitsChart(chartContainer, currentYearProfitsData, lastYearProfitsData);
+
+            async function fetchYearlyProfitsData(startDate, endDate) {
+                const response = await fetch(`/Financials/GetYearlyProfitsData?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`);
+                const data = await response.json();
+                return data;
+            }
+
+            $("#DaysLineChart").daterangepicker({
+                opens: 'left',
+                autoUpdateInput: false,
+                startDate: moment().startOf('year'), // Set default start date to the start of the year
+                endDate: moment(), // Set default end date to the current date
+                locale: {
+                    format: 'MM/DD/YYYY',
+                    cancelLabel: 'Clear'
+                },
+                ranges: {
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'Last 90 Days': [moment().subtract(89, 'days'), moment()],
+                    'Year to Date': [moment().startOf('year'), moment()]
+                }
+            }).on('apply.daterangepicker', async function (ev, picker) {
+                if (!picker) {
+                    return;
+                }
+                $("#DaysLineChart").val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                const startDate = picker.startDate.toDate();
+                const endDate = picker.endDate.toDate();
+                const data = await fetchYearlyProfitsData(startDate, endDate);
+
+                currentYearProfitsData = data.currentYearProfitsData.map(toPascalCase);
+                lastYearProfitsData = data.lastYearProfitsData.map(toPascalCase);
+                updateChartAndExportCSV(currentYearProfitsData, lastYearProfitsData, startDate, endDate);
+            });
+
+            // Trigger the apply.daterangepicker event to initialize the chart and CSV button with the default date range
+            $("#DaysLineChart").trigger('apply.daterangepicker');
+
+            //handle add favourite charts
+            $('#YearlyProfit').change(function () {
+                updateFavouriteStatus('YearlyProfit', $(this).is(':checked'));
+            });
+
+            $('#HistoricalTrends').change(function () {
+                updateFavouriteStatus('HistoricalTrends', $(this).is(':checked'));
+            });
+
+            $('#TotalFulfillmentSales').change(function () {
+                updateFavouriteStatus('TotalFulfillmentSales', $(this).is(':checked'));
+            });
+            $('#TopProductSales').change(function () {
+                updateFavouriteStatus('TopProductSales', $(this).is(':checked'));
+            });
+
+            // Handle the export button click event
+            document.getElementById("exportYearlyProfitsButton").addEventListener("click", function () {
+                const startDate = $("#DaysLineChart").data('daterangepicker').startDate.toDate();
+                const endDate = $("#DaysLineChart").data('daterangepicker').endDate.toDate();
+
+                const currentYearData = currentYearProfitsData.filter(item => new Date(item.Date) >= startDate && new Date(item.Date) <= endDate);
+
+                // Filter last year data based on original dates and then adjust the dates
+                const lastYearDataFiltered = lastYearProfitsData.filter(item => new Date(item.Date) >= new Date(startDate.getFullYear() - 1, startDate.getMonth(), startDate.getDate()) && new Date(item.Date) <= new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDate()));
+                const lastYearData = lastYearDataFiltered.map(item => {
+                    const itemDate = new Date(item.Date);
+                    const adjustedItemDate = new Date(itemDate.setFullYear(startDate.getFullYear()));
+                    return { ...item, Date: adjustedItemDate };
+                });
+
+                const csvContent = exportYearlyProfitsToCSV(currentYearData, lastYearDataFiltered);
+                downloadCSVFile(csvContent, 'Yearly_Profits.csv');
+            });
+
+
+            var pieChartDataJson = @Html.Raw(Model.PieChartDataJson);
+            fetch(`/Financials/OnGetDepartment`)
+                .then(response => response.json())
+                .then(departmentResult => {
+                    renderPieChart(pieChartDataJson, departmentResult);
+                })
+                .catch(error => {
+                    console.error('Error fetching department data:', error);
+                });
+
+            var daysTrendsChart;
+
+            window.toggleHelpInfo = function (id) {
+                var helpInfo = document.getElementById(id);
+                if (helpInfo) {
+                    helpInfo.classList.toggle('hidden');
+                }
+            }
+
+            async function trendsUpdate(startDate, endDate) {
+                globalStartDate = startDate;
+                globalEndDate = endDate;
+
+                const days = endDate.diff(startDate, 'days') + 1;
+
+                const productDays = document.getElementById("product-sales-chart").value;
+
+                updateUrl(days, productDays);
+
+                const chartContainer = document.getElementById("column-chart-historical-trends");
+
+
+                $(".trends-fetching-container").css("display", "flex");
+                $("#trends-fetching").removeClass("hidden");
+                chartContainer.style.display = "none";
+
+                const formattedStartDate = startDate.format('YYYY-MM-DD');
+                const formattedEndDate = endDate.format('YYYY-MM-DD');
+
+                const response = await fetch(`/Financials/HistoricalTrends?startDate=${formattedStartDate}&endDate=${formattedEndDate}`);
+                const departmentResult = await fetch(`/Financials/OnGetDepartment`);
+                const data = await response.json();
+                renderColumnChart(data, days, departmentResult);
+
+                $(".trends-fetching-container").css("display", "none");
+                $("#trends-fetching").addClass("hidden");
+
+                chartContainer.style.display = "block";
+            }
+
+
+            productSalesTable = $('#productSalesTable').DataTable({
+                pageLength: 10,
+                searching: false,
+                lengthChange: false,
+                order: [[2, 'desc']],
+
+                dom: 'Bfrtip',
+                buttons: [
+                    'csvHtml5',
+                    'excelHtml5',
+                    'print'
+                ]
+            });
+            $("#datatables-buttons-container").append($(".dt-buttons"));
+
+
+
+            async function productSalesUpdate(days) {
+                const productDays = document.getElementById("product-sales-chart").value;
+                const trendsDays = document.getElementById("DaysColumnChart").value;
+
+                updateUrl(trendsDays, days);
+
+                const chartContainer = document.getElementById("productSalesTable");
+
+                $(".sales-fetching-container").css("display", "flex");
+                $("#sales-fetching").removeClass("hidden");
+                //chartContainer.style.display = "none";
+
+                const response = await fetch(`/Financials/ProductSalesView?days=${days}`);
+                const updatedRowsHtml = await response.text();
+
+                productSalesTable.clear();
+
+                //Done so that it can be done without reloading the page.
+                const tempElement = document.createElement('tbody');
+                tempElement.innerHTML = updatedRowsHtml;
+
+                Array.from(tempElement.querySelectorAll('tr')).forEach(row => {
+                    const rowData = Array.from(row.querySelectorAll('td')).map(cell => cell.innerHTML);
+                    productSalesTable.row.add(rowData);
+                });
+
+                productSalesTable.draw();
+
+                $(".sales-fetching-container").css("display", "none");
+                $("#sales-fetching").addClass("hidden");
+                //chartContainer.style.display = "block";
+            }
+
+            function updateFavouriteStatus(propertyName, value) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdateFavouriteStatus", "MyDash")',
+                    data: {
+                        propertyName: propertyName,
+                        value: value
+                    },
+                    success: function (response) {
+                        console.log('Update successful');
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('Update failed');
+                    }
+                });
+            }
+
+            //Function for updating the URL, as well as allowing 
+            function updateUrl(trendsDays, productDays) {
+                const baseUrl = "https://cwa.completeful.com/Financials";
+                //Using relative URL, so that it works for both local dev as well as live site.
+                const url = new URL(window.location.href);
+
+                if (trendsDays) {
+                    url.searchParams.set("TrendsChartDays", trendsDays);
+                }
+
+                if (productDays) {
+                    url.searchParams.set("ProductSalesChartDays", productDays);
+                }
+
+                history.replaceState(null, "", url.toString());
+            }
+
+            function setLoadingMessage(message) {
+                const loadingMessageElement = document.getElementById('loadingMessage');
+                loadingMessageElement.textContent = message;
+            }
+            async function fetchAndUpdateTrendsData(days) {
+                const response = await fetch(`/Financials/HistoricalTrends?days=${days}`);
+                const trendsData = await response.json();
+                updateTrendsDisplay(trendsData);
+            }
+            //Exports
+            $("#exportFulfillmentButton").on("click", function () {
+                //setLoadingMessage('Preparing CSV...');
+                window.location.href = "/Financials/ExportFulfillmentToCSV";
+                //setLoadingMessage('');
+            });
+            $("#exportTrendsButton").on("click", async function () {
+                //setLoadingMessage('Preparing CSV...');
+
+                const formattedStartDate = globalStartDate.format('YYYY-MM-DD');
+                const formattedEndDate = globalEndDate.format('YYYY-MM-DD');
+
+                window.location.href = `/Financials/ExportTrendsToCSV?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+                //setLoadingMessage('');
+            });
+
+
+
+            //Date handling for Historical Trends & Product Sales
+            let globalStartDate;
+            let globalEndDate;
+
+            var defaultStart = moment().subtract(29, 'days');
+            var defaultEnd = moment();
+
+            var defaultDays = defaultEnd.diff(defaultStart, 'days');
+            trendsUpdate(defaultStart, defaultEnd);
+            productSalesUpdate(-defaultDays);
+
+            //Date range info for Historical Trends
+            $('#DaysColumnChart').daterangepicker({
+                startDate: defaultStart,
+                endDate: defaultEnd,
+                autoUpdateInput: true,
+                opens: 'bottom',
+                showCustomRangeLabel: true,
+                alwaysShowCalendars: true,
+                ranges: {
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'Last 60 Days': [moment().subtract(59, 'days'), moment()],
+                    'Last 90 Days': [moment().subtract(89, 'days'), moment()]
+                }
+            });
+
+            //Date range info for Product Sales
+            $('#product-sales-chart').daterangepicker({
+                startDate: defaultStart,
+                endDate: defaultEnd,
+                autoUpdateInput: false,
+                opens: 'bottom',
+                showCustomRangeLabel: false,
+                alwaysShowCalendars: false,
+                ranges: {
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'Last 90 Days': [moment().subtract(89, 'days'), moment()]
+                }
+            });
+
+
+            //Date range application for trends chart.
+            $('#DaysColumnChart').on('apply.daterangepicker', async function (ev, picker) {
+                var startDate = picker.startDate;
+                var endDate = picker.endDate;
+                var selectedRangeLabel = ev.chosenLabel || Object.keys(picker.ranges).find(rangeLabel => {
+                    var range = picker.ranges[rangeLabel];
+                    return range[0].isSame(picker.startDate) && range[1].isSame(picker.endDate);
+                });
+
+                if (selectedRangeLabel) {
+                    $(this).val(selectedRangeLabel);
+                }
+
+                await trendsUpdate(startDate, endDate);
+            });
+
+            //Date range application for sales chart.
+            $('#product-sales-chart').on('apply.daterangepicker', async function (ev, picker) {
+                var days = picker.endDate.diff(picker.startDate, 'days');
+                var selectedRangeLabel = ev.chosenLabel || Object.keys(picker.ranges).find(rangeLabel => {
+                    var range = picker.ranges[rangeLabel];
+                    return range[0].isSame(picker.startDate) && range[1].isSame(picker.endDate);
+                });
+
+                if (selectedRangeLabel) {
+                    $(this).val(selectedRangeLabel);
+                }
+
+                await productSalesUpdate(-days);
+            });
+
+            //Hide calendar for sales chart.
+            $('#product-sales-chart').on('show.daterangepicker', function () {
+                $('.daterangepicker .calendar').css('display', 'none');
+                $('.daterangepicker .ranges ul').css('width', '100%');
+            });
+        });
+
+
+        function InitDragNDrop() {
+
+            //#region dragula drag-n-drop implementation
+
+            //listen to the drag n drop controller checkbox event and change the label text
+            $("#layout-editing-check").on('change', function () {
+                $('#layout-editing-check-label').html($(this).is(':checked') ? 'Disable Layout Editing' : 'Enable Layout Editing');
+            });
+
+            //get main dragula container
+            let dracContainer = $('#drac-finance-container');
+            //get error message element
+            let errorMsg = $('#error-message');
+
+            //get the item order from the DB and parse in to a javascript array
+            var elementPositions = @Html.Raw(Json.Serialize(Model.DashboardLayouts is null ? new object[] { } : Model.DashboardLayouts));
+            //dasboard's name
+            var dashboardName = '@DashboardNames.DashboardFinancials.ToString()';
+
+            var ongoingAjax;
+            var isAjaxPending = false;
+
+            //if nothing received from the server (previous data is empty), get the current element positions
+            if (!elementPositions || !Array.isArray(elementPositions) || elementPositions.length == 0) {
+                elementPositions = [];
+                dracContainer.children("div").each((i, elem) => {
+                    elementPositions.push({ position: i, elemId: elem.id });
+                });
+            }
+
+            dragula([document.getElementById('drac-finance-container')], {
+                isContainer: function (el) {
+                    return false; // only elements in drake.containers will be taken into account
+                },
+                moves: function (el, source, handle, sibling) {
+                    return $('#layout-editing-check').is(':checked'); //enable or disable drag n drop according to the user preference
+                },
+                accepts: function (el, target, source, sibling) {
+                    return true; // elements can be dropped in any of the `containers` by default
+                },
+                invalid: function (el, handle) {
+                    return false; // don't prevent any drags from initiating by default
+                },
+                direction: 'vertical',             // Y axis is considered when determining where an element would be dropped
+                copy: false,                       // elements are moved by default, not copied
+                copySortSource: false,             // elements in copy-source containers can be reordered
+                revertOnSpill: false,              // spilling will put the element back where it was dragged from, if this is true
+                removeOnSpill: false,              // spilling will `.remove` the element, if this is true
+                mirrorContainer: document.body,    // set the element that gets mirror elements appended
+                ignoreInputTextSelection: true,     // allows users to select input text, see details below
+                slideFactorX: 0,               // allows users to select the amount of movement on the X axis before it is considered a drag instead of a click
+                slideFactorY: 0,               // allows users to select the amount of movement on the Y axis before it is considered a drag instead of a click
+            })
+                .on('drop', function (el, target, source, sibling) {
+                    //when the item dropped succesfully, prepare the new element order to save in the DB
+                    let newPositionsArr = [];
+                    dracContainer.children("div").each((i, elem) => {
+                        newPositionsArr.push({ Position: i, ElemId: elem.id });
+                    });
+
+                    //abort pending ajax calls
+                    if (isAjaxPending && ongoingAjax) {
+                        ongoingAjax.abort();
+                    }
+
+                    isAjaxPending = true;//mark as ajax is started
+
+                    var data = { Name: dashboardName, Layouts: newPositionsArr };
+                    ongoingAjax = $.ajax({
+                        url: "/UserPreference/SaveLayout",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(data),
+                        dataType: "json",
+                        success: function (data) {
+                            errorMsg.attr('style', 'display:none !important');
+                            isAjaxPending = false;
+                        },
+                        error: function (error) {
+                            if (error && error.statusText && error.statusText != 'abort') {
+                                errorMsg.show();
+                            }
+
+                            isAjaxPending = false;
+
+                            //if in error, reset the view to the prvious order
+                            dracContainer.empty();//remove the existing child elements from main dragula container
+
+                            //add the elements back with the previously persisted order
+                            elementPositions.forEach((item, i) => {
+                                dracContainer.append(item.elem);
+                            });
+
+                            isAjaxBeingAborted = false;
+                        }
+                    });
+                });
+
+            //#endregion
+
+            //#region dragular drag-n-drop set initial positions
+
+            if (dracContainer.children.length == 0) {
+                return;
+            }
+
+            elementPositions.sort((a, b) => a.position - b.position);//sort the retrived previously persisted element order array
+
+            //add the dom elements to the retrived array
+            dracContainer.children("div").each((i, elem) => {
+                elementPositions.forEach((item, j) => {
+                    if (elem.id == item.elemId) {
+                        elementPositions[j]["elem"] = elem;
+                    }
+                });
+            });
+
+            dracContainer.empty();//remove the existing child elements from main dragula container
+
+            //add the elements back with the previously persisted order
+            elementPositions.forEach((item, i) => {
+                dracContainer.append(item.elem);
+            });
+
+            dracContainer.show();
+
+            //#endregion
+
+        }
+
+    </script>
+}

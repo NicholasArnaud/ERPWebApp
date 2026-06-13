@@ -1,0 +1,11 @@
+﻿@model IEnumerable<ERPWebApp.Data.DTOModels.ProductSalesInfoDto>
+
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td>@item.ProductSku</td>
+        <td>@item.Description</td>
+        <td>@item.TotalQuantity</td>
+    </tr>
+}  

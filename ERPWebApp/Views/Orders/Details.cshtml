@@ -1,0 +1,798 @@
+﻿@using ERPWebApp.Data.DTOModels
+@using ERPWebApp.Models.Orders
+@model Order
+
+@{
+    ViewData["Title"] = "Details";
+    IEnumerable<AvailableShipmentCarrier> AvailableShipmentCarriers = ViewData["AvailableShipmentCarriers"] as IEnumerable<AvailableShipmentCarrier>;
+}
+<style>
+    .pinkBoldFont {
+        font-size: x-large;
+        font-weight: bolder;
+        color: #e70d7a !important;
+    }
+</style>
+<form asp-action="StraightToOrder" method="get" id="straight-to-order" hidden>
+    <label asp-for="orderNumber" class="control-label"></label>
+    <input type="text" asp-for="orderNumber" name="OrderNumber" class="form-control" id="quickOrderNumberSearch" />
+    <button type="submit"></button>
+</form>
+<form id="modal-form" asp-controller="Orders">
+    <input id="cwaorderid-hidden" type="hidden" asp-for="ERPOrderId" />
+    <input id="orderId-hidden" type="hidden" asp-for="orderId" />
+    <input id="orderKey-hidden" type="hidden" asp-for="orderKey" />
+    <input id="orderNumber-hidden" type="hidden" asp-for="orderNumber" />
+    <div id="OrderShipping-offcanvas" class="offcanvas offcanvas-end" data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="offcanvas-header border-0">
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-hidden="true"></button>
+        </div>
+        <div class="offcanvas-body p-4">
+            <div class="d-flex flex-column">
+                <div class="text-center">
+                    <i class="ri-information-line h1 text-info"></i>
+                    <h4 class="mt-2">Heads up!</h4>
+                    <p class="mt-3">Please ensure the weight and dimensions are accurate.</p>
+                </div>
+            </div>
+            <div id="preset-buttons" class="text-center mb-3">
+                <div class="btn-group mb-2">
+                    <div class="btn-group">
+                        <button type="button" class="btn dropdown-toggle" style="height: 60px; width: 80px; color: #f063bb; border-color: #f063bb; display: flex; align-items: center; justify-content: center;" data-bs-toggle="dropdown" aria-expanded="false">
+                            Polymailer
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="setDimensions(6, 9, 1)">0</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setDimensions(9, 12, 1)">1</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setDimensions(10, 13, 1)">2</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setDimensions(12, 15.5, 1)">4</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setDimensions(11, 15, 1)">5</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setDimensions(14, 17, 1)">6</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setDimensions(19, 24, 1)">8</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setDimensions(20, 24, 1)">10</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setDimensions(24, 36, 1)">12</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn ms-1" style="height: 60px; width: 80px; color: #f063bb; border-color: #f063bb; display: flex; align-items: center; justify-content: center;" onclick="setDimensions(20, 14, 4)">20x14x4</button>
+                    <button type="button" class="btn ms-1" style="height: 60px; width: 80px; color: #f063bb; border-color: #f063bb; display: flex; align-items: center; justify-content: center;" onclick="setDimensions(12.25,12,8.5)">12.25x12x 8.5</button>
+                    <button type="button" class="btn ms-1" style="height: 60px; width: 80px; color: #f063bb; border-color: #f063bb; display: flex; align-items: center; justify-content: center;" onclick="setDimensions(8, 8, 8)">8x8x8</button>
+                    @* <button type="button" class="btn" style="height: 60px; width: 80px; color: #ccc; border-color: #ccc; display: flex; align-items: center; justify-content: center;" disabled>Fed Ex Envelope</button> *@
+                </div>
+                <div class="btn-group mb-2">
+                    <button type="button" class="btn" style="height: 60px; width: 80px; color: #f063bb; border-color: #f063bb; display: flex; align-items: center; justify-content: center;" onclick="setDimensions(18, 6, 6)">18x6x6</button>
+                    <button type="button" class="btn ms-1" style="height: 60px; width: 80px; color: #f063bb; border-color: #f063bb; display: flex; align-items: center; justify-content: center;" onclick="setDimensions(24, 8, 8)">24x8x8</button>
+                    <button type="button" class="btn ms-1" style="height: 60px; width: 80px; color: #f063bb; border-color: #f063bb; display: flex; align-items: center; justify-content: center;" onclick="setDimensions(10, 10, 10)">10x10x10</button>
+                    <button type="button" class="btn ms-1" style="height: 60px; width: 80px; color: #f063bb; border-color: #f063bb; display: flex; align-items: center; justify-content: center;" onclick="setDimensions(5, 5, 5)">5x5x5</button>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6 col-sm-12">
+                    <label asp-for="weight.value" class="form-label">Weight</label>
+                    <input asp-for="weight.value" type="number" class="form-control" id="weight-value-input" value="@(Model?.weight.value)" step="1" min="1" />
+                    <span asp-validation-for="weight.value" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <label asp-for="weight.units" class="form-label">Units</label>
+                    <select class="form-control form-select" data-toggle="dropdown" asp-for="weight.units" asp-items="Html.GetEnumSelectList<Order.OrderWeight.Units>()" id="weight-unit-dropdown"></select>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6 col-sm-12">
+                    <label asp-for="dimensions.length" class="form-label">Length</label>
+                    <input asp-for="dimensions.length" type="number" class="form-control" id="length-value-input" value="" step="1" min="1" max="50" />
+                    <span asp-validation-for="dimensions.length" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <label asp-for="dimensions.width" class="form-label">Width</label>
+                    <input asp-for="dimensions.width" type="number" class="form-control" id="width-value-input" value="" step="1" min="1" max="50" />
+                    <span asp-validation-for="dimensions.width" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6 col-sm-12">
+                    <label asp-for="dimensions.height" class="form-label">Height</label>
+                    <input asp-for="dimensions.height" type="number" class="form-control" id="height-value-input" value="" step="1" min="1" max="50" />
+                    <span asp-validation-for="dimensions.height" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 col-sm-12">
+                    <label asp-for="dimensions.units" class="form-label">Dim Units</label>
+                    <select class="form-control form-select" data-toggle="dropdown" asp-for="dimensions.units" asp-items="Html.GetEnumSelectList<Order.OrderDimensions.Units>()" id="dimensional-unit-dropdown"></select>
+                </div>
+            </div>
+            <span id="weight-warning" class="text-danger"></span>
+            <span id="volume-warning" class="text-danger"></span>
+            <div class="row mb-1 mt-2">
+                <div class="col-2">
+                </div>
+                <div class="col-4">
+                    <button type="button" id="get-estimates-btn" class="btn btn-dark btn-sm" data-action="GetRateEstimate">
+                        <span id="get-estimates-btn-text">Get Estimates</span>
+                        <div id="get-estimates-spinner" class="spinner-border text-primary" style="display: none;"></div>
+                    </button>
+                </div>
+                <div class="col-2">
+                </div>
+                <div class="col-4">
+                    <button type="button" id="create-shipment-btn" class="btn btn-dark btn-sm" data-action="CreateShipment">Create Shipment</button>
+                </div>
+            </div>
+            <br />
+            @*TODO::REIMPLEMENT WHEN WE CAN PROVIDE QUICK LOAD TIMES ON DETAILS PAGE*@
+            @*  <div class="row">
+                <div class="col-12">
+                    <h4>Initial Estimates</h4>
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Carrier</th>
+                                <th>Service</th>
+                                <th>Est.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (AvailableShipmentCarriers != null && AvailableShipmentCarriers.Any())
+                            {
+                                @foreach (var item in AvailableShipmentCarriers)
+                                {
+                                    <tr>
+                                        <td>@item.CarrierCode</td>
+                                        <td>@item.ServiceCode</td>
+                                        <td>@item.TotalShipmentEstimate</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3">No initial valid shipping services found. Must update dimensions or weight.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+ *@
+        </div>
+    </div>
+</form>
+
+<form asp-action="AddOrRemoveTag" method="post" id="AddOrRemoveTag-form">
+    <input type="hidden" name="ERPOrderId" asp-for="ERPOrderId" />
+    <input type="hidden" name="addOrRemove" id="addOrRemove" />
+    <div id="AddOrRemoveTag-model" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-body p-4">
+                    <div class="d-flex flex-column">
+                        <div class="text-center">
+                            <i class="ri-information-line h1 text-info"></i>
+                            <h4 class="mt-2">Heads up!</h4>
+                            <p class="mt-3">This action may take a moment</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" multiple="multiple" data-placeholder="Choose ..."
+                                asp-for="@ViewData["TagIds"]" name="TagIds"
+                                asp-items="ViewBag.Tags">
+                        </select>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="addRemoveToggle" checked data-switch="bool">
+                            <label for="addRemoveToggle" data-on-label="Add" data-off-label="Remove"></label>
+                        </div>
+
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-light" id="AddOrRemoveTag-btn">Continue</button>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</form>
+<!-- ShipmentEstimate Modal -->
+<div id="ShipmentEstimate-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="ShipmentEstimate-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="ShipmentEstimate-modal-label">Shipment Estimate</h4>
+            </div>
+            <div class="modal-body">
+                <p>Carrier ID: <span id="carrierId"></span></p>
+                <p>Carrier Code: <span id="carrierCode"></span></p>
+                <p>Carrier Nickname: <span id="carrierNickname"></span></p>
+                <p>Service Code: <span id="serviceCode"></span></p>
+                <p>Estimated Shipment Cost: <span id="estimatedShipmentCost"></span></p>
+                <p>Package Code: <span id="packageCode"></span></p>
+                <p>Ship From: <address id="shipFrom"></address></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- Error Modal -->
+<div id="error-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="error-modal" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content modal-filled bg-danger">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="ri-close-circle-line h1"></i>
+                    <h4 class="mt-2">Oh snap!</h4>
+                    <p class="mt-3" id="error-modal-message"></p>
+                    <button type="button" class="btn btn-light my-2" data-bs-dismiss="modal">Continue</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+<h1>@Html.DisplayFor(model => model.advancedOptions.storeName): #@Html.DisplayFor(model => model.orderNumber)</h1>
+<h3>
+    @if (Model.Tags != null)
+    {
+        foreach (var tag in Model.Tags)
+        {
+            <span class="badge badge-dark-lighten">
+                @Html.DisplayFor(model => tag.name)
+                <span class="dot ms-1" style="background-color:@tag.color;height: 10px; width: 10px; border-radius: 50%; border-radius: 50%; display: inline-block;">
+                </span>
+            </span>
+        }
+    }
+</h3>
+<!-- Order Status -->
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-md-10 col-sm-11">
+        <div class="horizontal-steps mt-4 mb-4 pb-5" id="tooltip-container">
+            <div class="horizontal-steps-content">
+                <div class="step-item">
+                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="@Html.DisplayFor(model => model.orderDate)">Order Placed</span>
+                </div>
+                <div class="step-item @(Model.orderStatus != Order.OrderStatus.shipped && ViewData["BatchTime"].ToString() ==""? "current" : "")">
+                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="@ViewData["BatchTime"]">Batched</span>
+                </div>
+                @if (Model.orderStatus != Order.OrderStatus.shipped)
+                {
+                    <div class="step-item @(Model.orderStatus != Order.OrderStatus.shipped && ViewData["BatchTime"].ToString() !=""? "current" : "")">
+                        <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="@Html.DisplayFor(model => model.modifyDate)">
+                            @Html.DisplayFor(model => model.orderStatus)
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <div class="step-item @(Model.orderStatus != Order.OrderStatus.shipped && ViewData["BatchTime"].ToString() !=""? "current" : "")">
+                        <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="@Html.DisplayFor(model => model.modifyDate)">
+                            Awaiting Fulfillment
+                        </span>
+                    </div>
+                }
+                <div class="step-item @(Model.orderStatus == Order.OrderStatus.shipped && ViewData["ScanOutTime"].ToString() ==""? "current" : "")">
+                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="@ViewData["ScanOutTime"]">Packed</span>
+                </div>
+                <div class="step-item @(Model.orderStatus == Order.OrderStatus.shipped && ViewData["ScanOutTime"].ToString() !="" ? "current" : "")">
+                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="@Html.DisplayFor(model => model.shipDate)">Shipped</span>
+                </div>
+                <div class="step-item">
+                    <span>Delivered</span>
+                </div>
+            </div>
+
+            @if (Model.orderStatus == Order.OrderStatus.shipped && ViewData["ScanOutTime"]?.ToString() != "")
+            //Condition that an order was marked shipped and scanned out
+            {
+                <div class="process-line" style="width: 100%;"></div>
+            }
+            //Condition that an order was marked shipped but not scanned out
+            else if (Model.orderStatus == Order.OrderStatus.shipped)
+            {
+                <div class="process-line" style="width: 80%;"></div>
+            }
+            //Condition that a batch was created and the order is not shipped
+            else if (Model.orderStatus != Order.OrderStatus.shipped && ViewData["BatchTime"].ToString() != "")
+            {
+                <div class="process-line" style="width: 60%;"></div>
+            }
+            //Condition that a batch was created and was cancelled or on hold
+            else if (Model.orderStatus != Order.OrderStatus.shipped && ViewData["BatchTime"].ToString() == "")
+            {
+                <div class="process-line" style="width: 40%;"></div>
+            }
+            //Condition that an order has no batch created and awaiting shipment
+            else if (Model.orderStatus == Order.OrderStatus.awaiting_shipment && ViewData["BatchTime"].ToString() == "")
+            {
+                <div class="process-line" style="width: 20%;"></div>
+            }
+            //Order was just created
+            else
+            {
+                <div class="process-line" style="width: 0%;"></div>
+            }
+        </div>
+    </div>
+</div>
+<!-- end row -->
+
+
+<div class="row">
+    <div class="col-8">
+        <div class="button-group">
+            @if ((User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.ShippingManager)) || !(Model.orderFulfillments.Any(x => !x.voided) || Model.orderShipments.Any(x => !x.voided)))
+            {
+                <button type="button" class="btn btn-primary mb-2" data-bs-toggle="offcanvas" data-bs-target="#OrderShipping-offcanvas" role="button">Shipping</button>
+            }
+            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#AddOrRemoveTag-model">Add Or Remove Tags</button>
+            @if ((User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.ShippingManager)))
+            {
+                <a class="btn btn-primary mb-2" target="_blank" asp-controller="Orders" asp-action="Duplicate" asp-route-id="@Model.ERPOrderId">Duplicate Order</a>
+            }
+            <a class="btn btn-primary mb-2" asp-controller="Orders" asp-action="Index">Return to Orders</a>
+        </div>
+        <!-- Order Details -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <h4 class="header-title mb-3">Order Details</h4>
+                            <p class="mb-2"><span class="fw-bold me-2">@Html.DisplayNameFor(model => model.customerNotes):</span>@Html.Raw(Model.customerNotes)</p>
+                            <p class="mb-2"><span class="fw-bold me-2">@Html.DisplayNameFor(model => model.giftMessage):</span>@Html.DisplayFor(model => model.giftMessage)</p>
+                            <p class="mb-2"><span class="fw-bold me-2">@Html.DisplayNameFor(model => model.internalNotes):</span>@Html.DisplayFor(model => model.internalNotes)</p>
+                            <p class="mb-2"><span class="fw-bold me-2">@Html.DisplayNameFor(model => model.advancedOptions.customField1):</span>@Html.Raw(Model.advancedOptions.customField1)</p>
+                            <p class="mb-2"><span class="fw-bold me-2">@Html.DisplayNameFor(model => model.advancedOptions.customField2):</span>@Html.Raw(Model.advancedOptions.customField2)</p>
+                            <p class="mb-2"><span class="fw-bold me-2">@Html.DisplayNameFor(model => model.advancedOptions.customField3):</span>@Html.Raw(Model.advancedOptions.customField3)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Order Items -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="header-title mb-3">Items from Order: @Html.DisplayFor(model => model.orderNumber)</h4>
+                        <div class="table-responsive">
+                            @if (Model.items != default)
+                            {
+                                <table class="table table-sm table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th data-label="Image">Image</th>
+                                            <th scope="col" data-label="Sku">Sku</th>
+                                            @if (Model.items.Any(i => i.sku.Contains("UVP")))
+                                            {
+                                                <th scope="col" data-label="Design Name">Design Name</th>
+                                            }
+                                            <th scope="col" data-label="Description">Description</th>
+                                            <th scope="col" data-label="Qty">Qty</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.items)
+                                        {
+                                            <tr data-bs-placement="left" data-bs-toggle="popover" data-bs-trigger="hover"
+                                                data-bs-content='&lt;img alt="@item.name" src="@item.imageUrl" width="150" height="150" /&gt;' data-bs-html="true">
+                                                <td>
+                                                    <img src="@item.imageUrl" class="img-fluid" style="max-height: 150px; width: auto;" />
+                                                </td>
+                                                @if (item.Product != default)
+                                                {
+                                                    <td>
+                                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@item.Product.ProductId">
+                                                            @item.Product.Sku
+                                                        </a>
+                                                        @item.sku
+                                                    </td>
+                                                    @if (item.sku.Contains("UVP"))
+                                                    {
+                                                        int startIndex = item.sku.IndexOf("UVP");
+                                                        <td scope="col">@item.sku.Substring(startIndex)</td>
+                                                    }
+                                                    else if (Model.items.Any(i => i.sku.Contains("UVP")))
+                                                    {
+                                                        <td></td>
+                                                    }
+                                                    <td>@item.Product.Description</td>
+                                                }
+                                                else if (item.Bundle != default)
+                                                {
+                                                    <td>
+                                                        @item.Bundle.BundleName
+                                                        @item.sku
+                                                    </td>
+                                                    <td>
+                                                        <table class="table table-bordered">
+                                                            <tr>
+                                                                <th>@Html.DisplayNameFor(model => item.Product)</th>
+                                                                <th>@Html.DisplayNameFor(model => item.name)</th>
+                                                                <th>@Html.DisplayNameFor(model => item.quantity)</th>
+                                                            </tr>
+                                                            <tr>
+                                                                @foreach (var bundleItem in item.Bundle.BundleItems)
+                                                                {
+                                                                    <td>
+                                                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@bundleItem.ProductId">
+                                                                            @bundleItem.Product.Sku
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>
+                                                                        @bundleItem.Product.Description
+                                                                    </td>
+                                                                    <td>
+                                                                        @bundleItem.Quantity
+                                                                    </td>
+                                                                }
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@item.sku</td>
+                                                    @if (item.sku.Contains("UVP"))
+                                                    {
+                                                        int startIndex = item.sku.IndexOf("UVP");
+                                                        <td>@item.sku.Substring(startIndex)</td>
+                                                    }
+                                                    else if (Model.items.Any(i => i.sku.Contains("UVP")))
+                                                    {
+                                                        <td></td>
+                                                    }
+                                                    <td>@item.name</td>
+                                                }
+                                                <td class='@(item.quantity > 1 ? "pinkBoldFont" : "" )'>@item.quantity</td>
+                                            </tr>
+                                            @if (item.options.Any())
+                                            {
+                                                <tr>
+                                                    <td colspan="4">
+                                                        <table class="table table-sm table-centered table-bordered mb-0">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col">Option Name</th>
+                                                                    <th scope="col">Option Value</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach (var option in item.options)
+                                                                {
+                                                                    <tr>
+                                                                        <td>@option.Name</td>
+                                                                        @if (Uri.TryCreate(option.value.Trim().Replace(" ", ""), UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+                                                                        {
+                                                                            <td data-bs-placement="left" data-bs-toggle="popover" data-bs-trigger="hover"
+                                                                                data-bs-content='&lt;img alt="@option.Name" src="@option.value" width="150" height="150" /&gt;' data-bs-html="true">
+                                                                                <a type="button" class="btn btn-link" href="@option.value" target="_blank">Custom Link</a>
+                                                                            </td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td>
+                                                                                @Html.Raw(@option.value.Replace(Environment.NewLine, "<br />"))
+                                                                            </td>
+                                                                        }
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                        <!-- end table-responsive -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- end col -->
+    <div class="col-lg-4">
+        <!-- Shipping Information -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="header-title mb-3">Shipping Information</h4>
+
+                        <h5>@Html.DisplayFor(model => model.shipTo.name)</h5>
+
+                        <address class="mb-0 font-14 address-lg">
+                            @Html.DisplayFor(model => model.shipTo.street1) @Html.DisplayFor(model => model.shipTo.street2) @Html.DisplayFor(model => model.shipTo.street3)<br>
+                            @Html.DisplayFor(model => model.shipTo.city), @Html.DisplayFor(model => model.shipTo.state) @Html.DisplayFor(model => model.shipTo.postalCode)<br>
+                            <abbr title="Phone">P:</abbr> @Html.DisplayFor(model => model.shipTo.phone)
+                        </address>
+
+                    </div>
+                </div>
+            </div><!-- end col -->
+        </div>
+
+
+        <!-- Delivery Information -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="header-title mb-3">Delivery Information</h4>
+                        <div class="text-center">
+                            <i class="mdi mdi-truck-fast h2 text-muted"></i>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>@Html.DisplayNameFor(model => model.orderShipments)</tr>
+                                        <tr>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderShipments.FirstOrDefault().carrierCode)</th>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderShipments.FirstOrDefault().serviceCode)</th>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderShipments.FirstOrDefault().shipmentCost)</th>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderShipments.FirstOrDefault().trackingNumber)</th>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderShipments.FirstOrDefault().voided)</th>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderShipments.FirstOrDefault().createDate)</th>
+                                            <th scope="col">@Html.DisplayNameFor(Model => Model.orderShipments.FirstOrDefault().ERPModifyByUserId)</th>
+                                            <th><a>Actions</a></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var shipment in Model.orderShipments)
+                                        {
+                                            <tr>
+                                                <td>@shipment.carrierCode</td>
+                                                <td>@shipment.serviceCode</td>
+                                                <td>@shipment.shipmentCost</td>
+                                                <td>@shipment.trackingNumber</td>
+                                                <td>
+                                                    @if (shipment.voided)
+                                                    {
+                                                        <a>Yes</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a>No</a>
+                                                    }
+                                                </td>
+                                                <td>@shipment.createDate</td>
+                                                <td>@shipment.ERPModifyByUserId</td>
+                                                <td class="table-action">
+
+
+                                                    @if (shipment.labelData != null)
+                                                    {
+                                                        //"Labels-" is needed here to allow a third-party printer software to detect the pdf label file in the downloads folder and auto print
+                                                        <a href="@shipment.labelData" class="btn btn-icon-only" download="Labels-@Model.orderNumber" onclick="this.blur();">
+                                                            <i class="mdi mdi-24px mdi-download"></i>
+                                                        </a>
+                                                    }
+                                                    @if (!shipment.voided && (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.ShippingManager)))
+                                                    {
+                                                        <form asp-controller="Orders" asp-action="Void" enctype="application/x-www-form-urlencoded">
+                                                            <input type="hidden" name="OrderShipmentId" value="@shipment.OrderShipmentId" />
+                                                            <input type="hidden" name="ERPOrderId" value="@shipment.ERPOrderId" />
+                                                            <input type="hidden" name="ShipEngineShipmentId" value="@shipment.ShipEngineShipmentId" />
+                                                            <a class="btn btn-icon-only" onclick="event.preventDefault(); this.parentElement.submit(); this.parentElement.blur();">
+                                                                <i class="mdi mdi-24px mdi-cancel"></i>
+                                                            </a>
+                                                        </form>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>@Html.DisplayNameFor(model => model.orderFulfillments)</tr>
+                                        <tr>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderFulfillments.FirstOrDefault().carrierCode)</th>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderFulfillments.FirstOrDefault().fulfillmentFee)</th>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderFulfillments.FirstOrDefault().trackingNumber)</th>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderFulfillments.FirstOrDefault().voided)</th>
+                                            <th scope="col">@Html.DisplayNameFor(model => model.orderFulfillments.FirstOrDefault().createDate)</th>
+                                            <th><a>Actions</a></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var fulfillment in Model.orderFulfillments)
+                                        {
+                                            <tr>
+                                                <td>@fulfillment.carrierCode</td>
+                                                <td>@fulfillment.fulfillmentFee</td>
+                                                <td>@fulfillment.trackingNumber</td>
+                                                <td>
+                                                    @if (fulfillment.voided)
+                                                    {
+                                                        <a>Yes</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a>No</a>
+                                                    }
+                                                </td>
+                                                <td>@fulfillment.createDate</td>
+                                                <td class="table-action">
+                                                    @if (!fulfillment.voided && (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ProductionManager) || User.IsInRole(RoleList.ShippingManager)))
+                                                    {
+                                                        <form asp-controller="Orders" asp-action="VoidFulfillment"
+                                                              enctype="application/x-www-form-urlencoded">
+                                                            <input type="hidden" name="OrderFulfillmentId" asp-for="@fulfillment.OrderFulfillmentId" />
+                                                            <input type="hidden" name="ERPOrderId" asp-for="@fulfillment.ERPOrderId" />
+                                                            <a class="btn btn-icon-only" onclick="event.preventDefault(); this.parentElement.submit(); this.parentElement.blur();">
+                                                                <i class="mdi mdi-24px mdi-cancel"></i>
+                                                            </a>
+                                                        </form>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- end col -->
+</div>
+<!-- end row -->
+@if (ViewData["BatchNumbers"] is List<string> batchNumbers && batchNumbers.Any())
+{
+    <div class="row">
+        <div class="col-8">
+        </div> <!-- end col -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="header-title mb-3">Batch Numbers</h4>
+
+                    <ul class="card-text">
+                        @foreach (var batch in batchNumbers)
+                        {
+                            <li>
+                                <a href="/BatchView?batchNumber=@batch">@batch</a>
+                            </li>
+                            <hr />
+                        }
+                    </ul>
+
+                </div>
+            </div>
+        </div> <!-- end col -->
+    </div>
+}
+<!-- end row -->
+<div class="row">
+    <div class="col-lg-8">
+    </div> <!-- end col -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title mb-3">Order Summary</h4>
+
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>@Html.DisplayNameFor(model => model.amountPaid):</td>
+                                <td>@Html.DisplayFor(model => model.amountPaid)</td>
+                            </tr>
+                            <tr>
+                                <td>@Html.DisplayNameFor(model => model.shippingAmount):</td>
+                                <td>@Html.DisplayFor(model => model.shippingAmount)</td>
+                            </tr>
+                            <tr>
+                                <td>@Html.DisplayNameFor(model => model.taxAmount):</td>
+                                <td>@Html.DisplayFor(model => model.taxAmount)</td>
+                            </tr>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.orderTotal):</th>
+                                <th>@Html.DisplayFor(model => model.orderTotal)</th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- end table-responsive -->
+
+            </div>
+        </div>
+    </div> <!-- end col -->
+</div>
+<!-- end row -->
+
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.ERPOrderId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript" src="~/js/pages/Orders/Details.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let code = "";
+            let reading = false;
+
+            document.addEventListener('keypress', e => {
+                if (e.key === 'Enter' && code.length > 0) {
+                    $('#straight-to-order').submit();
+                    code = "";
+                    $('#quickOrderNumberSearch').val(code);
+                }
+                else {
+                    code += e.key;
+                    $('#quickOrderNumberSearch').val(code);
+                }
+                if(!reading) {
+                    reading = true;
+                    setTimeout(() => {
+                        code = "";
+                        $('#quickOrderNumberSearch').val(code);
+                        reading = false;
+                    }, 400);
+                }
+            });
+            if ("@Model.orderStatus" === "@Order.OrderStatus.awaiting_shipment"
+                && ("@User.IsInRole(RoleList.ShippingBasic)" ==="true" || "@User.IsInRole(RoleList.ShippingManager)" === "true")
+            ) {
+                $('#OrderShipping-offcanvas').modal('show');
+            }
+            if("@Model.orderStatus" === "@Order.OrderStatus.shipped" && "@Model.orderShipments.Any(x => !x.voided)" === "true")
+            {
+                $('#create-shipment-btn').hide();
+            }
+
+            let actions = {
+                RateEstimateAction : '@Url.Action("GetRateEstimate", "Orders")',
+                GenerateLabelAction : '@Url.Action("GenerateLabelAndShip", "Orders")',
+                Order : '@Url.Action("Index", "Orders")'
+            };
+
+            initialize_OrderDetails(actions);
+
+            let viewData = getViewData();
+            updateUI(viewData);
+
+            $("#weight-value-input, #length-value-input, #width-value-input, #height-value-input, #weight-unit-dropdown, #dimensional-unit-dropdown").on("change", ()=>{
+                let viewData = getViewData();
+                updateUI(viewData);
+            });
+        });
+
+        const getViewData = () => {
+            return {
+                orderWeight: parseFloat('@ViewData["OrderWeight"]') || 0,
+                orderVolume: parseFloat('@ViewData["OrderVolume"]') || 0,
+                zeroWeightSkus: @Html.Raw(Json.Serialize(ViewData["ZeroWeightSkus"])) || [],
+                zeroVolumeSkus: @Html.Raw(Json.Serialize(ViewData["ZeroVolumeSkus"])) || [],
+                weightUnit: '@(Model.items.FirstOrDefault()?.Product?.WeightUnit ?? 0)',
+                dimensionalUnit: '@(Model.items.FirstOrDefault()?.Product?.DimensionalUnit ?? 0)'
+            };
+        }
+
+        function setDimensions(length, width, height)
+        {
+            document.getElementById('length-value-input').value = length;
+            document.getElementById('width-value-input').value = width;
+            document.getElementById('height-value-input').value = height;
+            let viewData = getViewData();
+            updateUI(viewData);
+        }
+    </script>
+}

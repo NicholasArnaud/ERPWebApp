@@ -1,0 +1,93 @@
+﻿@using ERPWebApp.Models.Company;
+@model FinancialsViewModel
+
+@{
+    ViewData["Title"] = "Total Fulfillment Sales";
+    var productSalesHeaders = new Dictionary<string, string>
+{
+{ "Sku", "Sku" },
+{ "Description", "Description" },
+{ "TotalQuantity", "Total Quantity" }
+};
+}
+<style>
+    #chart-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    #chart {
+        width: 100%;
+    }
+
+    #help-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    #help-info {
+        position: absolute;
+        top: 40px;
+        right: -200px;
+        width: 200px;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        z-index: 10;
+        padding: 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-family: Helvetica, Arial, sans-serif;
+        background: #FFF;
+        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+        color: #373d3f;
+    }
+</style>
+<div id="drac-totfulfilmentsales">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Same deal here, flex div in order to reposition CSV button -->
+                <div>
+                    <h4 class="header-title d-inline-block">
+                        Total Fulfillment Sales
+                    </h4>
+                    <button onclick="toggleHelpInfo('fulfillment-info')"
+                        style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                        <i class="mdi mdi-information"></i>
+                    </button>
+                </div>
+                <div>
+                    <button id="exportFulfillmentButton"
+                        class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                </div>
+            </div>
+            <div id="fulfillment-info" class="hidden alert alert-info" role="alert">
+                <p>Grabs the total fulfillment sales of all orders for the current day, organized by department total
+                    and store total.</p>
+            </div>
+            <!--Fallback message for if the chart data returns empty.-->
+            <div id="no-data-message" style="display: none;">No data available.</div>
+            <div id="grand-total"></div>
+            <div id="chart-container">
+                <div id="chart"></div>
+            </div>
+            <div id="pie-chart-total-fulfillment-sales" class="apex-charts"
+                data-colors="#536de6,#e3eaef,#10c469,#35b8e0"></div>
+            <div id="custom-tooltip" class="custom-tooltip"></div>
+        </div>
+    </div>
+</div>

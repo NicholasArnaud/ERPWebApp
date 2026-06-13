@@ -1,0 +1,170 @@
+﻿@model ERPWebApp.Models.HelpRequestForm
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Review & Edit</h1>
+
+<h4>Help Request Ticket</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form id="form1" asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="HelpRequestFormId" />
+            <input id="currentUser" type="hidden" value="@ViewBag.CurrentUser" />
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label asp-for="Urgency" class="control-label"></label>
+                    <input readonly asp-for="Urgency" class="form-control" />
+                    <span asp-validation-for="Urgency" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label class="control-label">Requested By</label>
+                    <input readonly value="@ViewBag.Emp" class="form-control" />
+                </div>
+                <div hidden class="form-group col-md-4">
+                    <label asp-for="RequestingEmployeeId" class="control-label"></label>
+                    <input readonly asp-for="RequestingEmployeeId" class="form-control" />
+                    <span asp-validation-for="RequestingEmployeeId" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label asp-for="RequestedByUser" class="control-label"></label>
+                    <input readonly id="requestinguser" asp-for="RequestedByUser" class="form-control" />
+                    <span asp-validation-for="RequestedByUser" class="text-danger"></span>
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label asp-for="Subject" class="control-label"></label>
+                <input readonly id="subject" asp-for="Subject" class="form-control" />
+                <span asp-validation-for="Subject" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea id="description" readonly asp-for="Description" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <hr>
+            <p></p>
+            <ul>
+                <li>
+                    <p>Not your area of expertise? Perhaps pass this ticket on to someone more knowledgeable on the topic. </p>
+                    <ul>
+                        <li>
+                            <p>Select their name from the dropdown below & click 'Save & Send'</p>
+                        </li>
+                    </ul>
+
+                </li>
+
+                <li>
+                    <p>Decided to accept this quest? Give it a priority and 'Save'</p>
+                    <ul>
+                        <li>
+                            <p>Don't forget to come back when you're finished to mark the job 'Complete'</p>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="form-group">
+                <label class="control-label"> Helpful Employee</label>
+                <select id="helper" asp-for="HelperEmployeeId" class="form-control select2" data-toggle="select2" asp-items="ViewBag.HelperEmployeeId"></select>
+                <span asp-validation-for="HelperEmployeeId" class="text-danger"></span>
+            </div>
+            <div hidden class="form-group">
+                <label asp-for="CreatedDate" class="control-label"></label>
+                <input asp-for="CreatedDate" class="form-control" />
+                <span asp-validation-for="CreatedDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Priority" class="control-label"></label>
+                <select id="priority-dropdown" asp-for="Priority" class="form-control select2" data-toggle="select2">
+                    <option value="1">1 - No Priority(Deferral)</option>
+                    <option value="2">2 - Low Priority(Discretionary)</option>
+                    <option value="3">3 - Medium Priority(Routine)</option>
+                    <option value="4">4 - High Priority</option>
+                    <option value="5">5 - Urgent</option>
+                    <option value="6">6 - Emergency</option>
+                </select>
+                <span asp-validation-for="Priority" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check pt-2">
+                <label class="form-check-label">
+                    <input id="denied-checkbox" class="form-check-input" asp-for="IsDenied" /> @Html.DisplayNameFor(model => model.IsDenied)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input id="complete-checkbox" class="form-check-input" asp-for="IsComplete" /> @Html.DisplayNameFor(model => model.IsComplete)
+                </label>
+            </div>
+            <div hidden class="form-group">
+                <label asp-for="CompletedDate" class="control-label"></label>
+                <input asp-for="CompletedDate" class="form-control" />
+                <span asp-validation-for="CompletedDate" class="text-danger"></span>
+            </div>
+            <div class="btn-group pt-2">
+                <div class="btn-group">
+                    <button type="submit" value="Save" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">Save Options<span class="caret"></span></button>
+                    <div class="dropdown-menu">
+                        <input id="save" type="submit" value="Save" class="dropdown-item" />
+                        <input disabled id="saveSend" type="submit" value="____" class="dropdown-item" asp-action="SaveAndSend" asp-route-id="@Html.ValueFor(model => model.HelpRequestFormId)" />
+                    </div>
+                </div>
+                <a class="p-2" asp-action="Index">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        var previousHelper = 0;
+
+        $(document).ready(function () {
+            previousHelper = document.getElementById("helper").value;
+        });
+        $("#helper").on('change', function () {
+            
+            console.log(previousHelper);
+            var currentHelper = document.getElementById("helper").value;
+            var saveButton = document.getElementById("save");
+            var saveSendButton = document.getElementById("saveSend");
+
+            if (currentHelper != previousHelper) {
+                saveButton.disabled = true;
+                saveButton.value = "____";
+                saveSendButton.value = "Save & Send";
+                saveSendButton.disabled = false;
+            }
+            else {
+                saveButton.disabled = false;
+                saveButton.value = "Save";
+                saveSendButton.disabled = true;
+                saveSendButton.value = "____";
+            }
+        });
+
+        $("#denied-checkbox").on('change', function () {
+            if (document.getElementById("denied-checkbox").checked == true) {
+                document.getElementById("complete-checkbox").checked = true;
+                document.getElementById("priority-dropdown").disabled = true;
+
+            }
+            else {
+                document.getElementById("complete-checkbox").checked = false;
+                document.getElementById("priority-dropdown").disabled = false;
+            }
+        });
+    </script>
+}
+

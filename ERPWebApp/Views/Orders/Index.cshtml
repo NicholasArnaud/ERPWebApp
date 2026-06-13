@@ -1,0 +1,926 @@
+﻿@using ERPWebApp.Models.Orders
+@model ERPWebApp.Data.DTOModels.OrderViewModel
+
+@{
+    ViewData["Title"] = "Orders";
+}
+@await Html.PartialAsync("Batching")
+
+<style>
+    .green-outline {
+        border: 2px solid green;
+    }
+
+    .dt-buttons {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+    }
+
+    .dataTables_filter {
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .dataTables_wrapper .row:first-child {
+        align-items: center;
+    }
+</style>
+
+<form asp-action="StraightToOrder" method="get" id="straight-to-order" hidden>
+    <label asp-for="OrderNumber" class="control-label"></label>
+    <input type="text" asp-for="OrderNumber" name="OrderNumber" class="form-control" id="quickOrderNumberSearch" />
+    <button type="submit"></button>
+</form>
+<!-- GetOrderUpdatesBulk Modal -->
+<form asp-action="GetOrderUpdatesBulk" method="post" id="OrderUpdatesBulk-form">
+    <input type="hidden" name="ERPOrderIdsJson" id="selectedOrderIds-OrderUpdatesBulk" />
+    <div id="OrderUpdatesBulk-model" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-body p-4">
+                    <div class="text-center">
+                        <i class="ri-information-line h1 text-info"></i>
+                        <h4 class="mt-2">Heads up!</h4>
+                        <p class="mt-3">
+                            Running a bulk Action can take some time depending on how many rows were
+                            selected. Please exercise patience until the page has reloaded otherwise the selected action
+                            will not complete.
+                        </p>
+                        <p class="mt-3">Some orders when updated, may no longer apply to current filters.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-light" id="OrderUpdatesBulk-btn">Continue</button>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</form>
+<!-- GetRateEstimateBulk Modal -->
+@* <form asp-action="GetRateEstimateBulk" method="post" id="RateEstimateBulk-form">
+    <input type="hidden" name="ERPOrderIdsJson" id="selectedOrderIds-EstimateBulk" />
+    <div id="RateEstimateBulk-model" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body p-4">
+                    <div class="text-center">
+                        <i class="ri-information-line h1 text-info"></i>
+                        <h4 class="mt-2">Heads up!</h4>
+                        <p class="mt-3">
+                            Running a bulk Action can take some time depending on how many rows were
+                            selected. Please exercise patience until the page has reloaded otherwise the selected action
+                            will not complete.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-light" id="RateEstimateBulk-btn">Continue</button>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</form> *@
+<!-- AddOrRemoveTag Modal -->
+<form asp-action="AddOrRemoveTagBulk" method="post" id="AddOrRemoveTag-form">
+    <input type="hidden" name="ERPOrderIdsJson" id="selectedOrderIds-TagBulk" />
+    <input type="hidden" name="addOrRemove" id="addOrRemove" />
+    <div id="AddOrRemoveTag-model" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-body p-4">
+                    <div class="d-flex flex-column">
+                        <div class="text-center">
+                            <i class="ri-information-line h1 text-info"></i>
+                            <h4 class="mt-2">Heads up!</h4>
+                            <p class="mt-3">
+                                Running a bulk Action can take some time depending on how many rows were
+                                selected. Please exercise patience until the page has reloaded otherwise the selected
+                                action will not complete.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" multiple="multiple"
+                                data-placeholder="Choose ..." asp-for="@Model.TagIds" name="TagIds" asp-items="Model.Tags">
+                        </select>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="addRemoveToggle" checked
+                                   data-switch="bool">
+                            <label for="addRemoveToggle" data-on-label="Add" data-off-label="Remove"></label>
+                        </div>
+
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-light" id="AddOrRemoveTagBulk-btn">Continue</button>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</form>
+<!-- FindMissingOrder Modal -->
+<form asp-action="FindMissingOrder" method="post" id="FindMissingOrder-form">
+    <div id="FindMissingOrder-model" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-body p-4">
+                    <div class="d-flex flex-column">
+                        <div class="text-center">
+                            <i class="ri-information-line h1 text-info"></i>
+                            <h4 class="mt-2">Heads up!</h4>
+                            <p class="mt-3">
+                                If searching for a single order ensure the search requirements are exact for Store and Order Number. The searched order will
+                                automatically bring you into its details page.
+                                Alternatively, select a tag to pull in and update all orders with the selected tag.
+                            </p>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <div class="form-group">
+                                    <label asp-for="OrderNumber">Order Number</label>
+                                    <input asp-for="OrderNumber" type="text" class="form-control" name="OrderNumber" placeholder="Search..." />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="StoreId">Store</label>
+                                    <select class="select2 form-control" id="FindMissingOrder-select-store" data-toggle="select2"
+                                            asp-for="@Model.StoreId" name="StoreId" asp-items="@Model.StoreNames">
+                                        <option value="0" selected></option>
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="form-group">
+                                    <label asp-for="OrderTagId">Order Tags</label>
+                                    <select class="select2 form-control" id="FindMissingOrder-select-tag" data-toggle="select2"
+                                            asp-for="@Model.OrderTagId" name="TagId" asp-items="@Model.Tags">
+                                    </select>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-light" id="FindMissingOrder-btn">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</form>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Orders</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-3 col-md-2 mb-2">
+                        <div id="selectedCount" class="my-1"><span>Selected rows: 0</span></div>
+                    </div>
+                    <div class="col-6 col-md-2 mb-2">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle w-100" type="button" id="actionsDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Actions
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                       data-bs-target="#OrderUpdatesBulk-model">Get Order Updates</a>
+                                </li>
+                                @* <li>
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                       data-bs-target="#RateEstimateBulk-model">Get Rate Estimates</a>
+                                </li> *@
+                                <li>
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                       data-bs-target="#AddOrRemoveTag-model">Add Or Remove Tags</a>
+                                </li>
+                                <!-- Add more available actions as needed -->
+                                <li>
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                       data-bs-target="#CreateBatch-model">Create a Batch</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                       data-bs-target="#AddOrderToBatch-modal">Add Order to Batch</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-3 col-md-2 mb-2">
+                        <button class="btn btn-secondary w-100" type="button" data-bs-toggle="modal"
+                                data-bs-target="#FindMissingOrder-model" aria-expanded="false">
+                            Missing Order?
+                        </button>
+                    </div>
+                </div>
+                <form asp-action="Index" method="get" id="search-form">
+                    <div class="row">
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="text-ordernumber-id">Order Number</label>
+                            <input type="text" class="form-control filter-element" asp-for="@Model.OrderNumber"
+                                   name="OrderNumber" placeholder="Search..." id="text-ordernumber-id" />
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="OrderStatus">Order Status </label>
+                            <select class="select2 form-control select2-multiple filter-element" data-toggle="select2"
+                                    multiple asp-for="OrderStatus" name="OrderStatus"
+                                    asp-items="(List<SelectListItem>)Html.GetEnumSelectList<Order.OrderStatus>()">
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="StoreId">Store</label>
+                            <select class="select2 form-control filter-element" data-toggle="select2" tabindex="1"
+                                    asp-for="@Model.StoreId" name="StoreId" asp-items="@Model.StoreNames">
+                                <option value="0" selected>Any</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="DepartmentIds">Department</label>
+                            <select class="select2 form-control select2-multiple filter-element" data-toggle="select2"
+                                    multiple tabindex="2" asp-for="@Model.DepartmentIds" name="DepartmentIds"
+                                    asp-items="@Model.Departments">
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="ProductIds">Product</label>
+                            <select class="select2 form-control select2-multiple filter-element" data-toggle="select2"
+                                    multiple tabindex="3" asp-for="@Model.ProductIds" name="ProductIds"
+                                    asp-items="@Model.Products">
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="OrderBatchId">Batch</label>
+                            <select class="select2 form-control filter-element" data-toggle="select2" tabindex="5"
+                                    asp-for="@Model.OrderBatchId" name="OrderBatchId" asp-items="@Model.OrderBatches">
+                                <option value="" selected>Any</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 mb-2">
+                            <label for="OrderTagId">Product Tags</label>
+                            <select class="select2 form-control select2-multiple filter-element" data-toggle="select2"
+                                    tabindex="4" asp-for="@Model.OrderTagId" name="OrderTagId" asp-items="@Model.Tags">
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 mb-2">
+                            <label for="ExcludeItemNames">Exclude Items With Name</label>
+                            <select class="select2 form-control select2-multiple filter-element" data-toggle="select2"
+                                    tabindex="6" multiple="multiple" data-tags="true" asp-for="@Model.ExcludeItemNames"
+                                    name="ExcludeItemNames">
+                                @if (Model.ExcludeItemNames != null)
+                                {
+                                    foreach (var value in Model.ExcludeItemNames)
+                                    {
+                                        <option value="@value" selected>@value</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 mb-2">
+                            <div class="form-group form-check form-switch">
+                                <input type="checkbox" class="form-check-input" asp-for="@Model.AutoEnterDetails" />
+                                <label class="form-check-label" asp-for="@Model.AutoEnterDetails">Auto Enter Details on Exact Match</label>
+                            </div>
+                            <div class="form-group form-check form-switch">
+                                <input type="checkbox" class="form-check-input" asp-for="@Model.IncludeBatchedOrders" />
+                                <label class="form-check-label" asp-for="@Model.IncludeBatchedOrders">Include Orders in Batches</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row  custom-bb">
+                        <div class="col-12 col-md-4 mb-2">
+                            <label asp-for="ItemName">Item Name</label>
+                            <input asp-for="ItemName" type="text" class="form-control" name="ItemName" id="ItemName" placeholder="Search..." />
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <input type="hidden" asp-for="@Model.OrderStartDate" name="OrderStartDate"
+                                   id="orderStartDate" value="@Model.OrderStartDate" />
+                            <input type="hidden" asp-for="@Model.OrderEndDate" name="OrderEndDate" id="orderEndDate"
+                                   value="@Model.OrderEndDate" />
+                            <label class="form-label">Order Date Range</label>
+                            <div id="orderdate-range" class="form-control" data-toggle="date-picker-range"
+                                 data-target-display="#selected-orderdate" data-cancel-class="btn-light" tabindex="5">
+                                <i class="mdi mdi-calendar"></i>&nbsp;
+                                <span id="selected-orderdate"></span>
+                                <i class="mdi mdi-menu-down"></i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label class="form-label" asp-for="@Model.ShipByDate">Ship By Date</label>
+                            <input type="date" asp-for="@Model.ShipByDate" name="ShipByDate" class="form-control" id="shipByDate-picker" value="@Model.ShipByDate" />
+                        </div>
+                        <div class="col-12 col-md-2 mb-2 d-flex align-items-end">
+                            <input type="submit" value="Search" class="btn btn-light w-100" tabindex="7" />
+                        </div>
+                        <div class="col-12 col-md-2 mb-2 d-flex align-items-end">
+                            <button type="button" id="reset-filters" class="btn btn-light w-100" tabindex="8">
+                                Reset
+                                Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Modal for Column Selection -->
+                <div class="modal fade" id="columnManagementModal" tabindex="-1" role="dialog" aria-labelledby="columnManagementLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="columnManagementLabel">Manage Columns</h5>
+                                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="columnManagementForm">
+                                    <div id="columnList"></div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="saveColumnSettings">Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="container-fluid">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-centered dt-responsive" id="orders-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>
+                                                <input type="checkbox" id="selectAll" />
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.orderNumber)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.orderDate)
+                                            </th>
+                                            <th>
+                                                Order Age
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.shipByDate)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.Tags)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.orderStatus)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.orderTotal)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.advancedOptions.storeName)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.shipDate)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.estimatedShipmentCost)
+                                            </th>
+                                            <th>
+                                                Batch Number
+                                            </th>
+                                            <th>
+                                                Item Sku
+                                            </th>
+                                            <th>
+                                                Quantity
+                                            </th>
+                                            <th>
+                                                Item Name
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.IsDuplicated)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.duplicationReason)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Order.ParentERPOrderId)
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script language="javascript" type="text/javascript">
+        let code = "";
+        let reading = false;
+
+        document.addEventListener('keypress', e => {
+           if (e.key === 'Enter' && code.length > 0) {
+               $('#straight-to-order').submit();
+                    code = "";
+                    $('#quickOrderNumberSearch').val(code);
+
+            } else {
+                code += e.key;
+                $('#quickOrderNumberSearch').val(code);
+            }
+            if(!reading) {
+                reading = true;
+                setTimeout(() => {
+                    code = "";
+                    $('#quickOrderNumberSearch').val(code);
+                    reading = false;
+                }, 400);
+            }
+        });
+        var orderIds = @Html.Raw(Json.Serialize(Model.OrderTagId is null ? new int[] { } : Model.OrderTagId));
+        var getAllActiveSkusUrl = '@Url.Action("GetAllActiveSkus", "Orders")';
+        var getAllActiveDepartmentsUrl = '@Url.Action("GetActiveDepartments", "Orders")';
+        var batchCreationUrl = '@Url.Action("BatchCreation", "Orders")';
+        var addOrdersToBatchUrl = '@Url.Action("AddOrdersToBatch", "Orders")';
+        var productIds = @Html.Raw(Json.Serialize(Model.ProductIds is null ? new int[] { } : Model.ProductIds));
+        var departmentIds = @Html.Raw(Json.Serialize(Model.DepartmentIds is null ? new int[] { } : Model.DepartmentIds));
+        var orderStatus = @Html.Raw(Json.Serialize(Model.OrderStatus is null ? new Order.OrderStatus[] { } : Model.OrderStatus));
+
+        function updateFilterOutline() {
+            $(".filter-element").each(function () {
+                var $element = $(this);
+                var isSelect2 = $element.hasClass("select2");
+                var isMultiSelect = $element.attr("multiple") === "multiple";
+                var $container = isSelect2 ? $element.next(".select2-container") : $element;
+                var value = $element.val();
+
+                // Moving this to value and a toggle to clear up space.
+                var shouldOutline = (isMultiSelect && Array.isArray(value) && value.length > 0) ||
+                    (!isMultiSelect && value !== "" && value !== "0" && value !== null);
+
+                $container.toggleClass("green-outline", shouldOutline);
+            });
+            $("#orderdate-range").addClass("green-outline");
+            $("#shipByDate-picker").addClass("green-outline");
+        }
+
+        function resetFilters(skipBatchFilter) {
+            // Reset all filters with the 'filter-element' class
+
+            // Reset Order Status filter
+            $("#OrderStatus").val("1").trigger("change");
+
+            if (!skipBatchFilter) {
+                // Reset Order Batch filter and update outline
+                var currentValue = $("#OrderBatchId").val();
+                $("#OrderBatchId").val("").trigger("change");
+                if (currentValue !== $("#OrderBatchId").val()) {
+                    updateFilterOutline();
+                }
+            }
+
+            // Reset Order Date Range filter
+            var defaultStartDate = moment().subtract(29, "days").format("MM/DD/YYYY");
+            var defaultEndDate = moment().format("MM/DD/YYYY");
+            $("#orderStartDate").val(defaultStartDate);
+            $("#orderEndDate").val(defaultEndDate);
+            $("#shipByDate").val("");
+            $("#orderdate-range").data("daterangepicker").setStartDate(defaultStartDate);
+            $("#orderdate-range").data("daterangepicker").setEndDate(defaultEndDate);
+            $("#shipByDate-picker").val("");
+
+            // Trigger a new search
+            $("#search-form").submit();
+        }
+
+        $("form#search-form input, form#search-form select").on("change", function () {
+            updateFilterOutline();
+        });
+
+        $("#reset-filters").on("click", function () {
+            resetFilters();
+            updateFilterOutline();
+        });
+
+        $("#OrderBatchId").on("change", function () {
+            resetFilters(true);
+        });
+
+        //This select2 text box doesn't work without the below code
+        $("#FindMissingOrder-select-store").select2({
+            dropdownParent: $("#FindMissingOrder-model")
+        });
+        // Get the start and end dates from View Model or use a default date range
+        var defaultStartDate = '@Model.OrderStartDate' || moment().subtract(29, "days").format("MM/DD/YYYY");
+        var defaultEndDate = '@Model.OrderEndDate' || moment().format("MM/DD/YYYY");
+        var selectedDateRangeText = defaultStartDate + " - " + defaultEndDate;
+        $("#selected-orderdate").text(selectedDateRangeText);
+
+        // Convert the start and end dates to moment objects
+        defaultStartDate = moment(defaultStartDate, "MM/DD/YYYY");
+        defaultEndDate = moment(defaultEndDate, "MM/DD/YYYY");
+
+        var orderDateRangePicker = $("#orderdate-range").daterangepicker({
+            startDate: defaultStartDate,
+            endDate: defaultEndDate,
+            ranges: {
+                "Today": [moment(), moment()],
+                "Yesterday": [moment().subtract(1, "days"), moment().subtract(1, "days")],
+                "Last 7 Days": [moment().subtract(6, "days"), moment()],
+                "Last 30 Days": [moment().subtract(29, "days"), moment()],
+                "This Month": [moment().startOf("month"), moment().endOf("month")],
+                "Last Month": [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")]
+            }
+        });
+
+        orderDateRangePicker.on("apply.daterangepicker", function (ev, picker) {
+            var startDate = picker.startDate.format("MM/DD/YYYY");
+            var endDate = picker.endDate.format("MM/DD/YYYY");
+            var selectedDateRangeText = startDate + " - " + endDate;
+            $("#selected-orderdate").text(selectedDateRangeText);
+            $("#orderStartDate").val(startDate);
+            $("#orderEndDate").val(endDate);
+        });
+        updateActionsButtonState();
+        updateAddOrRemoveValue();
+
+        function renderTags(Tags) {
+            return Tags.map(function (Tag) {
+                return "<span class=\"badge badge-dark-lighten\">" + Tag.name + "<span class=\"dot ms-1\" style=\"background-color:" + Tag.color + ";height: 10px; width: 10px; -ms-border-radius: 50%; border-radius: 50%; display: inline-block;\"></span></span>";
+            }).join("");
+        }
+
+        $("#OrderUpdatesBulk-form").on("submit", function () {
+            // Update the button's text and disable it
+            $("#OrderUpdatesBulk-btn").prop("disabled", true);
+            $("#OrderUpdatesBulk-btn").html("<span class=\"spinner-border spinner-border-sm mr-2\" role=\"status\" aria-hidden=\"true\"></span>Processing...");
+            // Allow the form to be submitted
+            return true;
+        });
+
+        // $("#RateEstimateBulk-form").on("submit", function () {
+        //     // Update the button's text and disable it
+        //     $("#RateEstimateBulk-btn").prop("disabled", true);
+        //     $("#RateEstimateBulk-btn").html("<span class=\"spinner-border spinner-border-sm mr-2\" role=\"status\" aria-hidden=\"true\"></span>Processing...");
+        //     // Allow the form to be submitted
+        //     return true;
+        // });
+
+        $("#AddOrRemoveTagBulk-form").on("submit", function () {
+            // Update the button's text and disable it
+            $("#AddOrRemoveTagBulk-btn").prop("disabled", true);
+            $("#AddOrRemoveTagBulk-btn").html("<span class=\"spinner-border spinner-border-sm mr-2\" role=\"status\" aria-hidden=\"true\"></span>Processing...");
+            // Allow the form to be submitted
+            return true;
+        });
+
+        $("#CreateBatch-form").on("submit", function () {
+            $("#CreateBatch-btn").prop("disabled", true);
+            $("#CreateBatch-btn").html("<span class=\"spinner-border spinner-border-sm mr-2\" role=\"status\" aria-hidden=\"true\"></span>Processing...");
+            return true;
+        });
+
+        // Save column settings
+        $("#saveColumnSettings").on("click", function () {
+            $(".column-checkbox").each(function () {
+                const columnIndex = $(this).data("column-index");
+                const isVisible = $(this).is(":checked");
+                ordersTable.column(columnIndex).visible(isVisible);
+            });
+            $("#columnManagementModal").modal("hide");
+        });
+
+        $("a.dropdown-item[data-bs-target='#CreateBatch-model']").on("click", function () {
+            // Get the selected order numbers and ERP order Ids
+            var selectedOrderNumbers = [];
+            var selectedERPOrderIds = [];
+            $(".row-select:checked").each(function () {
+                var row = ordersTable.row($(this).closest("tr")).data();
+                selectedOrderNumbers.push(row.orderNumber);
+                selectedERPOrderIds.push(row.cwaOrderId);
+            });
+
+            // Update the content of the "selectedOrderNumbers" element using line breaks
+            $("#selectedOrderNumbers").html("<strong>Selected Order Numbers:</strong><br>" + selectedOrderNumbers.join("<br>"));
+
+            // Update the hidden input field with the selected ERP order Ids
+            $("#selectedOrderIds-BatchCreation").val(JSON.stringify(selectedERPOrderIds));
+
+            $.ajax({
+                url: '@Url.Action("CheckForDuplicateBatches", "Orders")',
+                type: "GET",
+                data: { ERPOrderIdsJson: JSON.stringify(selectedERPOrderIds) },
+                success: function (response) {
+                    if (response.status === "duplicate_batches") {
+                        // Get the duplicate batch number and order number pairs from the response
+                        var duplicateBatchAndOrderNumbers = response.duplicateBatchInfos.map(function (info) {
+                            return info.batchNumber + ': ' + info.orderNumber;
+                        });
+
+                        // Display the error message in the modal with the duplicate batch and order numbers
+                        var errorMessage = "Duplicate orders were found in existing/previous batches.<br>" + duplicateBatchAndOrderNumbers.join("<br>");
+                        $("#duplicateBatchErrorCreation").html(errorMessage);
+                    } else {
+                        // Clear the error message
+                        $("#duplicateBatchErrorCreation").text("");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+        let selectedOrders = [];
+
+        function getSelectedOrders() {
+            let selectedOrders = [];
+            $(".row-select:checked").each(function () {
+                let row = ordersTable.row($(this).closest("tr")).data(); // Assuming you have stored order data in the row
+                selectedOrders.push(row);
+            });
+            return selectedOrders;
+        }
+
+        // Function to enable/disable the "Actions" button
+        function updateActionsButtonState() {
+            var selectedRowCount = $(".row-select:checked").length;
+            if (selectedRowCount > 0) {
+                $("#actionsDropdown").prop("disabled", false);
+            } else {
+                $("#actionsDropdown").prop("disabled", true);
+            }
+        }
+
+        // Function to update the selected order IDs in the hidden input field
+        function updateSelectedOrderIds() {
+            var selectedOrderIds = [];
+            $(".row-select:checked").each(function () {
+                selectedOrderIds.push($(this).data("order-id"));
+            });
+
+            $("#selectedOrderIds-OrderUpdatesBulk").val(JSON.stringify(selectedOrderIds));
+            $("#selectedOrderIds-EstimateBulk").val(JSON.stringify(selectedOrderIds));
+            $("#selectedOrderIds-TagBulk").val(JSON.stringify(selectedOrderIds));
+        }
+        // Function to update the displayed number of selected rows
+        function updateSelectedCount() {
+            var selectedRowCount = $(".row-select:checked").length;
+            $("#selectedCount").text("Selected rows: " + selectedRowCount);
+        }
+
+        function updateAddOrRemoveValue() {
+            var isChecked = $("#addRemoveToggle").is(":checked");
+            $("#addOrRemove").val(isChecked);
+        }
+
+        $("#addRemoveToggle").on("change", function () {
+            updateAddOrRemoveValue();
+        });
+
+        // Update the selected order IDs and count whenever a row is selected or deselected
+        $("body").on("click", ".row-select", function () {
+            updateSelectedOrderIds();
+            updateActionsButtonState();
+            updateSelectedCount();
+        });
+
+        // Update the selected order IDs and count when 'select all' is clicked
+        $("#selectAll").on("click", function () {
+            var isChecked = $(this).is(":checked");
+            // Select only the checkboxes within the visible rows of the DataTable
+            var visibleRowCheckboxes = ordersTable.rows({ page: "current" }).nodes().to$().find(".row-select");
+            visibleRowCheckboxes.prop("checked", isChecked);
+
+            // Update the selected order IDs, actions button state, and selected count
+            updateSelectedOrderIds();
+            updateActionsButtonState();
+            updateSelectedCount();
+        });
+
+        function newexportaction(e, dt, button, config) {
+            var self = this;
+            var oldStart = dt.settings()[0]._iDisplayStart;
+            dt.one('preXhr', function (e, s, data) {
+                // Just this once, load all data from the server
+                data.start = 0;
+                data.length = 2147483647;
+                dt.one('preDraw', function (e, settings) {
+                    // Call the original action function
+                    if (button[0].className.indexOf('buttons-copy') >= 0) {
+                        $.fn.dataTable.ext.buttons.copyHtml5.action.call(self, e, dt, button, config);
+                    } else if (button[0].className.indexOf('buttons-excel') >= 0) {
+                        $.fn.dataTable.ext.buttons.excelHtml5.available(dt, config) ? $.fn.dataTable.ext.buttons.excelHtml5.action.call(self, e, dt, button, config) : $.fn.dataTable.ext.buttons.excelFlash.action.call(self, e, dt, button, config);
+                    } else if (button[0].className.indexOf('buttons-csv') >= 0) {
+                        $.fn.dataTable.ext.buttons.csvHtml5.available(dt, config) ? $.fn.dataTable.ext.buttons.csvHtml5.action.call(self, e, dt, button, config) : $.fn.dataTable.ext.buttons.csvFlash.action.call(self, e, dt, button, config);
+                    } else if (button[0].className.indexOf('buttons-pdf') >= 0) {
+                        $.fn.dataTable.ext.buttons.pdfHtml5.available(dt, config) ? $.fn.dataTable.ext.buttons.pdfHtml5.action.call(self, e, dt, button, config) : $.fn.dataTable.ext.buttons.pdfFlash.action.call(self, e, dt, button, config);
+                    } else if (button[0].className.indexOf('buttons-print') >= 0) {
+                        $.fn.dataTable.ext.buttons.print.action(e, dt, button, config);
+                    }
+                    dt.one('preXhr', function (e, s, data) {
+                        // DataTables thinks the first item displayed is index 0, but we're not drawing that.
+                        // Set the property to what it was before exporting.
+                        settings._iDisplayStart = oldStart;
+                        data.start = oldStart;
+                    });
+                    // Reload the grid with the original page. Otherwise, API functions like table.cell(this) don't work properly.
+                    setTimeout(dt.ajax.reload, 0);
+                    // Prevent rendering of the full data to the DOM
+                    return false;
+                });
+            });
+            // Requery the server with the new one-time export settings
+            dt.ajax.reload();
+        }
+
+        var ordersTable = $("#orders-table").DataTable({
+            "processing": true,
+            "serverSide": true,
+            "scrollY": "1080px",
+            "scrollCollapse": true,
+            "paging": true,
+            "info": true,
+            "searching": false,
+            "pageLength": 50,
+            "lengthMenu": [[50, 100, 250, 500], [50, 100, 250, 500]],
+            "dom": "<'row d-flex align-items-center justify-content-between'<'col-md-7'l><'col-md-2 d-flex  align-items-center justify-content-end gap-2'Bf>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            "buttons": [
+                {
+                    text: 'Manage Columns',
+                    className: 'btn-primary',
+                    action: function (e, dt, node, config) {
+
+                        $("#columnManagementModal").modal("show");
+
+                        const columnList = $("#columnList");
+                        columnList.empty();
+                        dt.columns().every(function (index) {
+                            const column = this;
+                            const title = column.header().innerText || `Column ${index + 1}`;
+                            const isVisible = column.visible();
+                            columnList.append(`
+                                    <div class="form-check">
+                                        <input class="form-check-input column-checkbox" type="checkbox"
+                                               data-column-index="${index}" ${isVisible ? "checked" : ""}>
+                                        <label class="form-check-label">${title}</label>
+                                    </div>
+                                `);
+                        });
+                    }
+                },
+                {
+                extend: 'collection', text: 'Export', buttons: [{
+                    "extend": 'copy', "titleAttr": 'Copy', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }, {
+                    "extend": 'excel', "titleAttr": 'Excel', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }, {
+                    "extend": 'csv', "titleAttr": 'CSV', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }, {
+                    "extend": 'pdf', "titleAttr": 'PDF', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }, {
+                    "extend": 'print', "titleAttr": 'Print', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }]
+            }],
+            "ajax": {
+                "url": '@Url.Action("GetOrders", "Orders")',
+                "type": "POST",
+                "data": function (d) {
+                    d.excludeItemNames = $('#ExcludeItemNames').val() || [];
+                    d.orderNumber = '@Model.OrderNumber';
+                    d.orderStatus = orderStatus;
+                    d.storeId = '@Model.StoreId';
+                    d.departmentIds = departmentIds;
+                    d.productIds = productIds;
+                    d.orderTagId = orderIds;
+                    d.orderColumn = d.order[0].column;
+                    d.orderDir = d.order[0].dir;
+                    d.orderStartDate = '@Model.OrderStartDate';
+                    d.orderEndDate = '@Model.OrderEndDate';
+                    d.shipByDate = '@Model.ShipByDate';
+                    d.orderBatchId = $('#OrderBatchId').val();
+                    d.itemName = '@Model.ItemName';
+                    d.autoEnterDetails = '@Model.AutoEnterDetails';
+                    d.includeBatchedOrders = '@Model.IncludeBatchedOrders';
+                },
+                //check for single order, if so go to details page
+                "dataSrc": function (json) {
+                    if (json.recordsTotal == 1 && '@Model.OrderNumber' != '' && '@Model.AutoEnterDetails' == 'True') {
+                        var singleOrder = json.data[0];
+                        if (singleOrder != null) {
+                            window.location.href = `/Orders/Details/${singleOrder.cwaOrderId}`;
+                        }
+                    }
+                    return json.data;
+                }
+            },
+            "columns": [
+                {
+                    // Add the new column for row selection
+                    "data": null,
+                    "orderable": false,
+                    "searchable": false,
+                    "render": function (data, type, row) {
+                        return "<input type=\"checkbox\" class=\"row-select\" data-order-id=\"" + row.cwaOrderId + "\">";
+                    }
+                },
+                {
+                    "data": "orderNumber",
+                    "render": function (data, type, row) {
+                        return type === "display"
+                            ? "<a href=\"/Orders/Details/" + row.cwaOrderId + "\">" + data + "</a>"
+                            : data;
+                    }
+                },
+                { "data": "orderDate" },
+                { "data": "orderAge" },
+                { "data": "shipByDate" },
+                {
+                    "data": "tags",
+                    "name": "Tags",
+                    "orderable": false,
+                    "searchable": false,
+                    "render": function (data, type) {
+                        return type === "display" ? renderTags(data) : data.map(function (Tag) { return Tag.name; }).join(", ");
+                    }
+                },
+                {
+                    "data": "orderStatus",
+                    "name": "OrderStatus",
+                    "orderable": true,
+                    "searchable": true,
+                    "render": function (data, type, row) {
+                        return type === "display" ? data : row.orderStatus.replace(/<[^>]*>/g, "");
+                    }
+                },
+                { "data": "orderTotal" },
+                { "data": "storeName" },
+                { "data": "shipDate" },
+                { "data": "estimatedShipmentCost" },
+                { "data": "batchNumber" },
+                { "data": "itemSku" },
+                { "data": "itemQuantity" },
+                { "data": "itemName" },
+                {
+                    "orderable": false,
+                    "searchable": false,
+                    "data": "isDuplicated"
+                },
+                {
+                    "orderable": false,
+                    "searchable": false,
+                    "data": "reason"
+                },
+                {
+                    "orderable": false,
+                    "searchable": false,
+                    "data": "parentOrder",
+                    "render": function (data, type, row) {
+                        if (!data || data == '') { return ''; }
+
+                        return type === "display"
+                            ? "<a href=\"/Orders/Details/" + data + "\">#" + data + "</a>"
+                            : data;
+                    }
+                }
+            ],
+            "language": {
+                "paginate": {
+                    "previous": "<i class='mdi mdi-chevron-left'>",
+                    "next": "<i class='mdi mdi-chevron-right'>"
+                }
+            },
+            "drawCallback": function () {
+                $(".dataTables_paginate > .pagination").addClass("pagination-rounded");
+            },
+        });
+        updateFilterOutline();
+    </script>
+    <script src="~/js/pages/batching.min.js"></script>
+}

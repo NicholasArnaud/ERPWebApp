@@ -1,0 +1,283 @@
+﻿@model ERPWebApp.Models.ShippingScanoutViewModel
+@using ERPWebApp.Controllers
+@using ERPWebApp.Data.DTOModels.ShippingScanout
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var activeTab = ViewData["ActiveTab"]?.ToString() ?? "scanout";
+}
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Shipment Scan Out</h3>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs nav-bordered mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a href="@Url.Action("Index", new { activeTab = "scanout" })"
+                           class="nav-link @(activeTab == "scanout" ? "active" : "")"
+                           id="scanout-tab"
+                           aria-selected="@(activeTab == "scanout")"
+                           role="tab">
+                            Scanouts
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="@Url.Action("Index", new { activeTab = "search" })"
+                           class="nav-link @(activeTab == "search" ? "active" : "")"
+                           id="search-tab"
+                           aria-selected="@(activeTab == "search")"
+                           role="tab">
+                            Search
+                        </a>
+                    </li>
+                    @if (this.User.IsInRole(RoleList.ShippingManager) || this.User.IsInRole(RoleList.Administrator))
+                    {
+                        <li class="nav-item" role="presentation">
+                            <a href="@Url.Action("Index", new { activeTab = "manifest" })"
+                               class="nav-link @(activeTab == "manifest" ? "active" : "")"
+                               id="manifest-tab"
+                               aria-selected="@(activeTab == "manifest")"
+                               role="tab">
+                                Generate Manifest
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("Index", new { activeTab = "openshipments" })"
+                               class="nav-link @(activeTab == "openshipments" ? "active" : "")"
+                               id="manifest-tab"
+                               aria-selected="@(activeTab == "openshipments")"
+                               role="tab">
+                                Open Shipments
+                            </a>                
+                        </li>
+                        <li>
+                            <a href="@Url.Action("Index", new { activeTab = "closedshipments" })"
+                               class="nav-link @(activeTab == "closedshipments" ? "active" : "")"
+                               id="manifest-tab"
+                               aria-selected="@(activeTab == "closedshipments")"
+                               role="tab">
+                                Closed Shipments
+                            </a>                
+                        </li>
+                    }
+                </ul>
+                @if (ViewData["LastScannedTrackingNumber"] != null)
+                {
+                    <div class="row" id="success-adding-tracking">
+                        <div class="col-6">
+                            <div class="alert alert-success" role="alert">
+                                <h4 class="alert-heading">Tracking Number Added!</h4>
+                                <p>Tracking number @ViewData["LastScannedTrackingNumber"] has been added.</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="tab-content">
+                    <div class="tab-pane @(activeTab == "scanout" ? "active show" : "")" id="scanout">
+                        <div class="row">
+                            <div class="col-6">
+                                <form method="post" asp-action="PerformScanAction">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    @if (!ViewData.ModelState.IsValid && Model.AudioAlerts)
+                                    {
+                                        <audio autoplay id="audio-track" onloadeddata="var audioPlayer = this; setTimeout(function() { audioPlayer.pause();}, 3000)">
+                                            <source type="audio/wav" src="~/media/AirHorn.wav">
+                                        </audio>
+                                    }
+                                    <div class="row mt-3">
+                                        <div class="col-6">
+                                            <input id="input-scan-id" type="text" asp-for="CurrentScan.ScannedTrackingNumber" class="form-control" tabindex="1" placeholder="Label Scan/Tracking #" />
+                                            <span asp-validation-for="CurrentScan.ScannedTrackingNumber" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-2">
+                                            <a>
+                                                <input type="hidden" asp-for="ActionType" value="@( (int)ScanActionType.Add )" />
+                                                <input name="addButton" class="form-control" tabindex="2" type="submit" value="Add" style="background-color: white; color: black;" />
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-6">
+                                            <div class="form-group form-check">
+                                                <label class="form-check-label">
+                                                    <input type="checkbox" asp-for="AudioAlerts" id="Audio-Alerts" />
+                                                    @Html.DisplayNameFor(model => model.AudioAlerts)
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane @(activeTab == "search" ? "active show" : "")" id="search">
+                        <div class="row">
+                            <div class="col-6">
+                                <form asp-action="GetScan">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <div class="form-group">
+                                        <label asp-for="TrackingNumber" class="control-label"></label>
+                                        <input asp-for="TrackingNumber" class="form-control" />
+                                        <span asp-validation-for="TrackingNumber" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="submit" value="Search" class="btn btn-primary mt-2" />
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-6">
+                                <div>
+                                    <hr />
+                                    <dl class="row">
+                                        <dt class="col-sm-2">
+                                            @Html.DisplayNameFor(model => model.SearchedScanned.TrailerNumber)
+                                        </dt>
+                                        <dd class="col-sm-10">
+                                            @Html.DisplayFor(model => model.SearchedScanned.TrailerNumber)
+                                        </dd>
+                                        <dt class="col-sm-2">
+                                            @Html.DisplayNameFor(model => model.SearchedScanned.ScannedTrackingNumber)
+                                        </dt>
+                                        <dd class="col-sm-10">
+                                            @Html.DisplayFor(model => model.SearchedScanned.ScannedTrackingNumber)
+                                        </dd>
+                                        <dt class="col-sm-2">
+                                            @Html.DisplayNameFor(model => model.SearchedScanned.CreateDate)
+                                        </dt>
+                                        <dd class="col-sm-10">
+                                            @Html.DisplayFor(model => model.SearchedScanned.CreateDate)
+                                        </dd>
+                                        <dt class="col-sm-2">
+                                            @Html.DisplayNameFor(model => model.SearchedScanned.CreatedBy)
+                                        </dt>
+                                        <dd class="col-sm-10">
+                                            @Html.DisplayFor(model => model.SearchedScanned.CreatedBy)
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @if (this.User.IsInRole(RoleList.ShippingManager) || this.User.IsInRole(RoleList.Administrator))
+                    {
+                        <div class="tab-pane @(activeTab == "manifest" ? "active show" : "")" id="manifest">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="row">
+                                        <form method="post" asp-action="PerformScanAction">
+                                            <div class="row">
+                                                <div class="col-6 mb-3">
+                                                    <input type="text" asp-for="CurrentScan.TrailerNumber" class="form-control" placeholder="Trailer #"/>
+                                                    <span asp-validation-for="CurrentScan.TrailerNumber" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-4">
+                                                    <a>
+                                                        <input type="hidden" asp-for="ActionType" value="@((int)ScanActionType.Submit)"/>
+                                                        <input name="submitButton" class="form-control" type="submit" value="Submit" id="submit-tracking-id" style="background-color: blue; color: white;"/>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="row">
+                                        @await Html.PartialAsync("GenerateManifest", new ManifestGenerateRequest("", ""))
+                                    </div>                                 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane @(activeTab == "openshipments" ? "active show" : "")" id="openshipments">
+                            <div class="row">
+                                <table class="table table-responsive">
+                                    <thead>
+                                    <tr>
+                                        <th>Carrier</th>
+                                        <th>Shipment Count</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @if (ViewData["ShipmentsCountByCarrier"] is IReadOnlyCollection<ShipmentsCountByCarrier> tableData)
+                                    {
+                                        @foreach (var item in tableData)
+                                        {
+                                            <tr>
+                                                <td>@item.Carrier</td>
+                                                <td>@item.Count</td>
+                                            </tr>
+                                        }
+                                    }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane @(activeTab == "closedshipments" ? "active show" : "")" id="closedShipments_tab">
+                            <div class="d-flex align-items-end gap-3 flex-wrap">
+                                <div class="form-group col-3">
+                                    <label class="control-label">Warehouse</label>
+                                    <select class="form-control select2" data-toggle="select2" id="warehouse_select"
+                                            asp-items="ViewBag.Warehouses" name="warehouseId">
+                                        <option value="" selected disabled hidden>--Select a Warehouse--</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-3">
+                                    <label class="control-label">Carrier</label>
+                                    <select class="form-control select2" data-toggle="select2" id="carrier_select"
+                                            asp-items="ViewBag.Carriers" name="carrierId">
+                                        <option value="" selected disabled hidden>--Select a Carrier--</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Ship date</label>
+                                    <input class="form-control datepicker" type="date" id="shipDate"/>
+                                </div>
+                                <div class="form-group">
+                                    <button id="btnSearch" class="btn btn-primary d-flex align-items-center gap-2">
+                                        <i class="mdi mdi-cloud-search"></i> Search
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row mt-2 table-responsive">
+                                <table class="table table-sm table-dark" id="closedShipments">
+                                    <thead>
+                                    <tr>
+                                        <th> Carrier</th>
+                                        <th> Warehouse</th>
+                                        <th> Number of Shipments </th>
+                                        <th> Closed Date</th>
+                                        <th> Ship Date </th>
+                                        <th> Manifest File </th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    #loading-spinner {
+        display: none;
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/pages/ShippingScanout/index.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            console.log("Focus");
+            setTimeout(function() {
+                $("#input-scan-id").focus();
+            }, 500)
+        });
+    </script>
+}

@@ -1,0 +1,101 @@
+﻿@model IEnumerable<ERPWebApp.Models.Company.Security.AccessPlan>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Access Plans</h3>
+            </div>
+            <div class="card-body">
+                @if (!this.User.IsInRole(RoleList.SecurityBasic))
+                {
+                    <ul class="nav nav-tabs nav-bordered mb-3">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-action="Create">
+                                <span>Create</span>
+                            </a>
+                        </li>
+                    </ul>
+                }
+
+                <table class="table dt-responsive webkit-nowrap w-100" id="access-plan-datatable">
+                    <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.AccessPlanName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.IsActive)
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AccessPlanName)
+                            </td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <a>Yes</a>
+                                }
+                                else
+                                {
+                                    <a>No</a>
+                                }
+                            </td>
+                            <td class="table-action">
+                                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager) || this.User.IsInRole(RoleList.SecurityManager) || this.User.IsInRole(RoleList.Developer))
+                                {
+                                    <a class="action-icon" asp-action="Edit" asp-route-id="@item.AccessPlanId">
+                                        <i class="mdi mdi-24px mdi-pencil"></i>
+                                    </a>
+                                }
+                                <a class="action-icon" asp-action="Details" asp-route-id="@item.AccessPlanId">
+                                    <i class="mdi mdi-24px mdi-book-information-variant"></i>
+                                </a>
+                                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager) || this.User.IsInRole(RoleList.SecurityManager) || this.User.IsInRole(RoleList.Developer))
+                                {
+                                    <a class="action-icon" asp-action="Delete" asp-route-id="@item.AccessPlanId">
+                                        <i class="mdi mdi-24px mdi-delete"></i>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+        <script type="text/javascript">
+        $(document).ready(function () {
+            $("#access-plan-datatable").DataTable({
+                keys: !0, language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                    },
+
+                }, drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                }
+            });
+        });
+    </script>
+
+    }
+}

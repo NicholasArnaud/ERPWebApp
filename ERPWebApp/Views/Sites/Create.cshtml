@@ -1,0 +1,106 @@
+﻿@model ERPWebApp.Models.Inventory.Site
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+
+        <div class="card">
+
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-9 col-sm-7 col-xs-12 card-title">
+                        <h3>Create</h3>
+                        <h5>Site</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-5 col-md-8 col-sm-12 col-xs-12">
+
+                        <div class="row">
+
+                            <form asp-action="Create">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label asp-for="SiteName" class="control-label"></label>
+                                        <input asp-for="SiteName" class="form-control" />
+                                        <span asp-validation-for="SiteName" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label asp-for="SiteDescription" class="control-label"></label>
+                                        <input asp-for="SiteDescription" class="form-control" />
+                                        <span asp-validation-for="SiteDescription" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group p-1">
+                                        <label asp-for="SiteVolume" class="control-label"></label>
+                                        <input asp-for="SiteVolume" min="0" class="form-control" />
+                                        <span asp-validation-for="SiteVolume" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 p-1">
+                                    <div class="form-group form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" asp-for="IsActive" checked /> @Html.DisplayNameFor(model => model.IsActive)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 p-1">
+                                    <div class="form-group form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" asp-for="IsRestricted" /> @Html.DisplayNameFor(model => model.IsRestricted)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 p-1">
+                                    <div class="form-group form-check" @(User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ExternalViewer) ? "" : "hidden")>
+                                        <label class="form-check-label">
+                                            <input class="form-check-input"
+                                                   asp-for="IsExternal"
+                                                   checked="@User.IsInRole(RoleList.ExternalUser)" />
+                                            @Html.DisplayNameFor(model => model.IsExternal)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 p-1">
+                                    <div class="form-group">
+                                        <input type="submit" value="Create" class="btn btn-primary" />
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="col-12 p-1">
+                                <a asp-action="Index">Back to List</a>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,96 @@
+﻿@model IEnumerable<ERPWebApp.Models.ProductionVsLaborCostHistory>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ElectroplatingItemCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmbroideryItemCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EngravingItemCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MetalTotalItemCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UVPTotalItemCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ElectroplatingProdCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmbroideryProdCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EngravingProdCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MetalTotalProdCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UVPTotalProdCost)
+            </th>
+            <th><a>Actions</a></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date)
+            </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ElectroplatingItemCost)
+                </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EmbroideryItemCost)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EngravingItemCost)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MetalTotalItemCost)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UVPTotalItemCost)
+            </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ElectroplatingProdCost)
+                </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EmbroideryProdCost)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EngravingProdCost)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MetalTotalProdCost)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UVPTotalProdCost)
+            </td>
+            <td class="table-action">
+                <a class="action-icon" asp-action="Edit" asp-route-id="@item.ProductionVsLaborCostHistoryId">Edit</a> |
+                <a class="action-icon" asp-action="Details" asp-route-id="@item.ProductionVsLaborCostHistoryId">Details</a> |
+                <a class="action-icon" asp-action="Delete" asp-route-id="@item.ProductionVsLaborCostHistoryId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

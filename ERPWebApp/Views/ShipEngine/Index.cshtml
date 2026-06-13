@@ -1,0 +1,93 @@
+﻿<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Label Finder</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div id="error-banner" class="alert alert-danger alert-dismissible bg-danger text-white border-0 fade" role="alert">
+                            <strong>Error - </strong> <span id="error-text"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="input-group">
+                            <label for="simpleinput" class="form-label"></label>
+                            <input type="text" id="text-tracking-number" class="form-control" placeholder="Enter Tracking Number">
+                            <button type="button" class="btn btn-primary" id="search-tracking-number">Search</button>
+                        </div>
+                    </div>
+                    <div class="col-4"></div>
+                    <div class="col-1 p-1">
+                        <a id="download-pdf" class="btn btn-primary float-end" download="label-pdf"><i class="mdi mdi-cloud-download"></i> Download</a>
+                    </div>
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.CustomerSupportManager))
+                    {
+                        <div class="col-1 p-1">
+                            <button id="void-label-modaltoggle" class="btn btn-danger float-end" data-bs-toggle="modal" data-bs-target="#void-label-modal"><i class="mdi mdi-delete"></i>Void Label</button>
+                        </div>
+                    }
+                </div>
+                <br>
+                <div class="row justify-content-center">
+                    <div class="col-lg-7 col-md-10 col-sm-11">
+                        <div class="horizontal-steps mt-4 mb-4 pb-5" id="tooltip-container">
+                            <div class="horizontal-steps-content">
+                                <div id="Tracking-Status-Ordered" class="step-item">
+                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">Order Placed</span>
+                                </div>
+                                <div id="Tracking-Status-Accepted" class="step-item">
+                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">Accepted</span>
+                                </div>
+                                <div id="Tracking-Status-InTransit" class="step-item">
+                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">In Transit</span>
+                                </div>
+                                <div id="Tracking-Status-Delivered" class="step-item">
+                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">Delivered</span>
+                                </div>
+                            </div>
+                            <div id="Tracking-Status-ProgressBar" class="process-line" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col-6">
+                        <img id="show-image" src="/Images/ERPLogo.png" class="img-fluid" alt="Responsive image">
+                    </div>
+                    <div class="col-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="void-label-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="void-label-modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header modal-colored-header bg-danger">
+                <h4 class="modal-title" id="danger-header-modalLabel">Void Label</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+            </div>
+            <div class="modal-body">
+                Warning this process can not be undone. Are you sure?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button id="confirm-void-label" type="button" class="btn btn-danger">Void</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<span id="label-id" hidden=""></span>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/js/pages/label-finder.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.2/dist/sweetalert2.all.min.js"></script>
+    }
+}

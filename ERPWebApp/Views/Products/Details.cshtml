@@ -1,0 +1,631 @@
+﻿@model ERPWebApp.Data.DTOModels.ProductDTO
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.8.2/css/lightbox.min.css">
+<style>
+    .display_Value::before {
+        content: ": ";
+    }
+</style>
+
+<div class="container-fluid text-white">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Products</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Details</li>
+        </ol>
+    </nav>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="card-title">Summary</h5>
+            <div>
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.ProductId">
+                        <button type="button" class="btn btn-primary"><span
+                                class="mdi mdi-18px mdi-book-edit">&nbsp;Edit</span></button>
+                    </a>
+                }
+
+                <button type="button" id="backbutton" class="btn btn-info"><span
+                        class="mdi mdi-18px mdi-arrow-top-left-thick">&nbsp;Back to List</span></button>
+
+            </div>
+
+        </div>
+        <div class="card-body">
+            <div class="row">
+
+                <div class="col-2">
+                    <div class="card">
+                        @{
+                            var defaultimage = Model.ProductImages.FirstOrDefault(x => x.IsDefault);
+                            var src = defaultimage != null && defaultimage.FileUrl != "" ? defaultimage.FileUrl :
+                            "/Images/image.png";
+                        }
+                        <img src="@src" class="img-thumbnail" alt="Default Image">
+                    </div>
+                </div>
+                <div class="col-5">
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.Sku)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.Sku)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.Description)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayTextFor(model => model.Description)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">Departments</div>
+                        <div class="col-8 display_Value">
+                            @{
+                                var departments = Model.Departments.Select(x => x.DepartmentName).ToList();
+                                            @string.Join(", ", departments)
+                                ;
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.AltItemNumber)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.AltItemNumber)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.AlternateProduct)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @if (Model.AlternateProduct != null)
+                            {
+                                <a href="/Products/Details/@Model.AlternateProduct.ProductId">@Html.DisplayFor(model =>
+                                model.AlternateProduct.Sku)</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.FulfillmentCost)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.FulfillmentCost)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.Cost)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.Cost)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.OverseasCost)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.OverseasCost)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.LaborCost)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.LaborCost)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.IsEmbroidery)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @if (@Html.ValueFor(model => model.IsEmbroidery) == "True")
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.IsEngraving)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @if (@Html.ValueFor(model => model.IsEngraving) == "True")
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.IsMetal)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @if (@Html.ValueFor(model => model.IsMetal) == "True")
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.IsUv)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @if (@Html.ValueFor(model => model.IsUv) == "True")
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.IsActive)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @if (@Html.ValueFor(model => model.IsActive) == "True")
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </div>
+                    </div>
+                    @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ExternalViewer))
+                    {
+                        <div class="row">
+                            <div class="col-4">
+                                @Html.DisplayNameFor(model => model.IsExternalProduct)
+                            </div>
+                            <div class="col-8 display_Value">
+                                @if (@Html.ValueFor(model => model.IsExternalProduct) == "True")
+                                {
+                                    <a>Yes</a>
+                                }
+                                else
+                                {
+                                    <a>No</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="col-5">
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.WeightAmount)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.WeightAmount)&nbsp;<strong>@Html.DisplayFor(model =>
+                                model.WeightUnit)</strong>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.MinInventory)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.MinInventory)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.MaxInventory)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.MaxInventory)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.OnOrder)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.OnOrder)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.LeadTime)
+                            <a>(Days)</a>
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.LeadTime)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.ModifyByUser)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.ModifyByUser)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.ModifyDate)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @Html.DisplayFor(model => model.ModifyDate)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            @Html.DisplayNameFor(model => model.ProductTags)
+                        </div>
+                        <div class="col-8 display_Value">
+                            @if (Model.ProductTags != null && Model.ProductTags.Any())
+                            {
+                                @string.Join(", ", Model.ProductTags.Select(x=>x.Description).ToArray())
+                            }
+                            else
+                            {
+                                <span>No tags available</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="card mt-2">
+                        <div class="card-header">
+                            <h5 class="card-title">Dimension(@Html.DisplayFor(model => model.DimensionalUnit))</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.Length)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.Length)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.Width)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.Width)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.Height)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.Height)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mt-2">
+                        <div class="card-header">
+                            <h5 class="card-title">Shipping Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.ShippingLength)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.ShippingLength)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.ShippingWidth)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.ShippingWidth)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.ShippingHeight)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.ShippingHeight)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.ShippingWeightUnit)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.ShippingWeightUnit)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.ShippingWeightAmount)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.ShippingWeightAmount)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.ExpectedShipmentCost)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.ExpectedShipmentCost)
+                                </div>
+                            </div>
+                                                        <div class="row">
+                                <div class="col-4">
+                                    @Html.DisplayNameFor(model => model.IsShippingContainer)
+                                </div>
+                                <div class="col-8 display_Value">
+                                    @Html.DisplayFor(model => model.IsShippingContainer)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        @{
+            await Html.RenderPartialAsync("HistoryPartialView");
+        }
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title">Product Vendors</h5>
+            <div>
+                <a type="button" target="_blank" href="/ProductVendorMapping?product=@Model.ProductId"
+                    class="btn btn-success"><span class="mdi mdi-18px mdi-plus">&nbsp;Add</span></a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-dark">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Vendor</th>
+                        <th scope="col">SKU</th>
+                        <th scope="col">Cost</th>
+                        <th scope="col">Lead Time</th>
+                        <th scope="col">Primary Vendor</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.ProductVendors.Count; i++)
+                    {
+                        var ProductVendor = Model.ProductVendors[i];
+                        <tr>
+                            <th scope="row">@(i + 1)</th>
+                            <td><a>@Html.DisplayFor(modelItem => ProductVendor.Vendor.VendorName)</a></td>
+                            <th> @Html.DisplayFor(modelItem => ProductVendor.VendorSku)</th>
+                            <td>@Html.DisplayFor(modelItem => ProductVendor.Cost)</td>
+                            <td> @Html.DisplayFor(modelItem => ProductVendor.LeadTime)</td>
+                            <td> @(ProductVendor.isPrimaryVendor ? "Yes" : "No")</td>
+                            <td>
+                                <a class="action-icon" target="_blank"
+                                    href="/ProductVendorMapping/Details/@ProductVendor.ProductVendorMappingId"><i
+                                        class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                                <a class="action-icon" target="_blank"
+                                    href="/ProductVendorMapping/Edit/@ProductVendor.ProductVendorMappingId"><i
+                                        class="mdi mdi-24px mdi-pencil"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @if (Model.PurchaseOrders != null && Model.PurchaseOrders.Count > 0)
+    {
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Active Purchase Orders</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-dark">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Order Number</th>
+                            <th scope="col">Refrence</th>
+                            <th scope="col">Order Date</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.PurchaseOrders.Count; i++)
+                        {
+                            var order = Model.PurchaseOrders[i];
+                            <tr>
+                                <th scope="row">@(i + 1)</th>
+                                <td>@order.PurchaseOrderNumber</td>
+                                <td>@order.ReferenceNumber</td>
+                                <td>@order.OrderDate</td>
+                                <td>
+                                    @if (@order.POStatus == ERPWebApp.Models.PurchaseOrders.Status.Draft)
+                                    {
+                                        <span class="badge rounded-pill bg-primary" style="font-size: 1.1em">Draft</span>
+                                    }
+                                    @if (@order.POStatus == ERPWebApp.Models.PurchaseOrders.Status.Cancelled)
+                                    {
+                                        <span class="badge rounded-pill bg-danger" style="font-size: 1.1em">Cancelled</span>
+                                    }
+                                    @if (@order.POStatus == ERPWebApp.Models.PurchaseOrders.Status.Close)
+                                    {
+                                        <span class="badge rounded-pill bg-success" style="font-size: 1.1em">Closed</span>
+                                    }
+                                    @if (@order.POStatus == ERPWebApp.Models.PurchaseOrders.Status.InProgress)
+                                    {
+                                        <span class="badge rounded-pill bg-warning" style="font-size: 1.1em">In Progress</span>
+                                    }
+                                    @if (@order.POStatus == ERPWebApp.Models.PurchaseOrders.Status.FullyReceived)
+                                    {
+                                        <span class="badge rounded-pill purplepill" style="font-size: 1.1em">Fully Received</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a class="action-icon" target="_blank"
+                                        href="/PurchaseOrders/Details/@order.PurchaseOrderId"><i
+                                            class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    @if (Model.ProductImages != null && Model.ProductImages.Any(x => !x.IsDefault))
+    {
+        var productImages = Model.ProductImages.Where(x => !x.IsDefault).ToList();
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Product Images</h5>
+            </div>
+            <div class="card-body lightbox-gallery">
+                <div class="row photos">
+                    @foreach (var image in productImages)
+                    {
+                        <div class="col item">
+                            <a href="@image.FileUrl" data-lightbox="photos">
+                                <img class="img-fluid" src="@image.FileUrl" alt="@image.Files.FileName" style="height: 200px;">
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.8.2/js/lightbox.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#backbutton').click(function () {
+            if (document.referrer) {
+                window.location.href = document.referrer;
+            } else {
+                window.history.back();
+            }
+        });
+
+            let generateURL = '/GetTableData';
+            $('#movementHistory-datatable').DataTable({
+                "processing": true, // for show progress bar
+                "serverSide": true, // for process server side
+                "filter": true, // this is for disable filter (search box)
+                "orderMulti": false, // for disable multiple column at once
+                "scrollY": "500px",
+                "scrollCollapse": true,
+                searchDelay: 500,
+                fixedHeader: true,
+                lengthMenu: [
+                    [10, 25, 100],
+                    [10, 25, 100]
+                ],
+                order: [[5, 'desc']],
+                "ajax": {
+                    "url": generateURL,
+                    "type": "POST",
+                    "datatype": "json",
+                    "data": function (d) {
+                        d.productsku = "@Model.Sku";
+                    }
+                },
+                keys: !0,
+                language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>",
+                        next: "<i class='mdi mdi-chevron-right'>"
+                    },
+
+                },
+                drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                },
+                "columns": [
+                    {
+                        "data": "movementType",
+                        "name": "MovementType",
+                        "autoWidth": true,
+                        "defaultContent": "",
+                    },
+                    { "data": "sku", "name": "SKU", "autoWidth": true },
+                    {
+                        "data": "fromLocation",
+                        "name": "From",
+                        "autoWidth": true,
+                        "defaultContent": ""
+                    },
+                    { "data": "fromLocationRunningBalance", "name": "FromRunningBalance", "autoWidth": true },
+                    {
+                        "data": "toLocation",
+                        "name": "To",
+                        "autoWidth": true,
+                        "defaultContent": ""
+                    },
+                    { "data": "toLocationRunningBalance", "name": "ToRunningBalance", "autoWidth": true },
+                    { "data": "actionQuantity", "name": "Quantity", "autoWidth": true },
+                    {
+                        "data": "performedOn",
+                        "name": "DateTime",
+                        "autoWidth": true,
+                        "defaultContent": "",
+                        "render": function (data) {
+                            let date = new Date(data);
+                            let month = date.getMonth() + 1;
+                            let day = date.getDate();
+                            let hour = date.getHours();
+                            let minute = date.getMinutes();
+                            let second = date.getSeconds();
+                            return (month.toString().length > 1 ? month : "0" + month) + "/" +
+                                (day.toString().length > 1 ? day : "0" + day) + "/" +
+                                date.getFullYear() + " " +
+                                (hour.toString().length > 1 ? hour : "0" + hour) + ":" +
+                                (minute.toString().length > 1 ? minute : "0" + minute) + ":" +
+                                (second.toString().length > 1 ? second : "0" + second);
+                        }
+                    },
+                    { "data": "performedBy", "name": "EmployeeName", "autoWidth": true, "defaultContent": "" },
+                    { "data": "action", "name": "Action", "autoWidth": true, "defaultContent": "" }
+                ],
+            });
+    });
+
+</script>
+
+}

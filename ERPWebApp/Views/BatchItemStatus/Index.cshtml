@@ -1,0 +1,183 @@
+﻿@model IEnumerable<BatchItemStatus>
+@using ERPWebApp.Models.Company;
+@using ERPWebApp.Models.Orders
+@{
+    ViewData["Title"] = "Batch Item Status";
+}
+
+<h2>Batch Item Status</h2>
+
+<div class="row">
+    <div class="col-md-6" style="border-right: 1px solid #dee2e6; padding-right: 20px;">
+        <h3>Status Creation</h3>
+        <form asp-action="CreateBatchItemStatus" method="post">
+            <div class="form-group mb-3">
+                <label for="StatusName">Status Name</label>
+                <input type="text" class="form-control" id="StatusName" name="StatusName" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="DepartmentId">Department</label>
+                <select class="form-control" id="DepartmentId" name="DepartmentId" required>
+                    @foreach (var department in ViewBag.Departments as List<Department>)
+                    {
+                        <option value="@department.DepartmentId">@department.DepartmentName</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-dark">Create</button>
+        </form>
+    </div>
+    <div class="col-md-6" style="padding-left: 20px;">
+        <h3>Department Status</h3>
+        <div style="margin-bottom: 20px;">
+            <label for="filterDepartment">Filter by Department</label>
+            <select class="form-control" id="filterDepartment">
+                @foreach (var department in ViewBag.Departments as List<Department>)
+                {
+                    <option value="@department.DepartmentId">@department.DepartmentName</option>
+                }
+            </select>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Execution Order</th>
+                    <th>Status Name</th>
+                    <th>Department</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewData["BatchItemStatuses"] != null)
+                {
+                    foreach (var item in (IEnumerable<BatchItemStatus>)ViewData["BatchItemStatuses"])
+                    {
+    <tr data-execution-sequence="@item.ExecutionSequence" class="@(item.StatusName == "Open" || item.StatusName == "Completed" ? "fixed-status" : "")">  
+                            <td>@item.ExecutionSequence</td>
+                            <td>@item.StatusName</td>
+                            <td data-department-id="@item.Department.DepartmentId">@item.Department.DepartmentName</td>
+                            <td>
+                                <input type="hidden" class="status-id" value="@item.BatchItemStatusId" />
+                                @if (item.IsDeletable == true)
+                                {
+                                    <button class="btn btn-danger btn-sm delete-status" data-status-id="@item.BatchItemStatusId">Delete</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="2">No data available.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('tbody').sortable({
+                items: 'tr:not(.fixed-status)', // Exclude fixed-status rows from being sortable
+                cancel: '.fixed-status', // Prevent fixed-status rows from being sortable
+                beforeStop: function (event, ui) {
+                    var firstRow = $('tbody tr:visible:first');
+                    var lastRow = $('tbody tr:visible:last');
+
+                    if (ui.placeholder.index() === 0 || ui.placeholder.index() === lastRow.index()) {
+                        return false; // Cancel the sorting if the user tries to drop the item in the first or last position
+                    }
+                },
+                update: function (event, ui) {
+                    // Get the updated execution order
+                    var newExecutionOrder = $('tbody tr:visible').map(function (index, row) {
+                        var deleteButton = $(row).find('.delete-status');
+                        var hiddenField = $(row).find('.status-id');
+                        var statusId = hiddenField.val();
+
+                        return {
+                            statusId: statusId,
+                            executionSequence: index + 1
+                        };
+                    }).toArray();
+                    console.table(newExecutionOrder);
+
+                    $.ajax({
+                        url: '@Url.Action("UpdateExecutionOrder", "BatchItemStatus")',
+                        type: 'POST',
+                        data: { newExecutionOrder: newExecutionOrder },
+                        success: function () {
+                            newExecutionOrder.forEach(function (item) {
+                                var row = $('tbody tr:visible .status-id[value="' + item.statusId + '"]').closest('tr');
+                                row.find('td:first-child').text(item.executionSequence);
+                            });
+                        },
+                        error: function () {
+                            alert('Error updating the execution order.');
+                        }
+                    });
+                }
+            });
+
+            $('#DepartmentId').select2();
+            $('#filterDepartment').select2();
+
+            function sortTableRows() {
+                $('tbody tr').sort(function (a, b) {
+                    return parseInt($(a).data('execution-sequence')) - parseInt($(b).data('execution-sequence'));
+                }).appendTo('tbody');
+            }
+
+            $('.delete-status').on('click', function () {
+                var statusId = $(this).data('status-id');
+                if (confirm('Are you sure you want to delete this status?')) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteBatchItemStatus", "BatchItemStatus")',
+                        type: 'POST',
+                        data: { id: statusId },
+                        success: function () {
+                            location.reload();
+                        },
+                        error: function () {
+                            alert('Error deleting the status.');
+                        }
+                    });
+                }
+            });
+
+            $('#filterDepartment').on('change', function () {
+                // Updates the Department dropdown value. These is to make sure both dropdowns are linked together.
+                $('#DepartmentId').val($(this).val()).trigger('change.select2');
+
+                // Filters the table based on the selected department
+                var selectedDepartmentId = parseInt($(this).val());
+                $('tbody tr').each(function () {
+                    var departmentId = parseInt($(this).find('td:eq(2)').data('department-id'));
+                    if (departmentId === selectedDepartmentId) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+
+                // Sorts the table rows based on ExecutionSequence
+                sortTableRows();
+            });
+
+            $('#DepartmentId').on('change', function () {
+                // Makes sure that the two dropdowns are linked together.
+                $('#filterDepartment').val($(this).val()).trigger('change.select2').trigger('change');
+            });
+
+            // Trigger the change event to filter and sort the table initially
+            $('#filterDepartment').trigger('change');
+        });
+    </script>
+}

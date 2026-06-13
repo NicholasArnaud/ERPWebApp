@@ -1,0 +1,268 @@
+﻿@model IEnumerable<ERPWebApp.Models.ShipStationOrderedHistory>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    /* Override DataTables styling for Bootstrap 5 background colors */
+    .dataTables_wrapper .table .table-danger,
+    .dataTables_wrapper .table .table-danger > td {
+        background-color: #dc3545 !important;
+        color: #ffffff !important;
+    }
+
+    .dataTables_wrapper .table .table-success,
+    .dataTables_wrapper .table .table-success > td {
+        background-color: #198754 !important;
+        color: #ffffff !important;
+    }
+</style>
+
+
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">ShipStation Ordered History</h3>
+            </div>
+            <div class="card-body">
+
+                <form method="get" asp-action="">
+
+                    <div class="row">
+
+                        <div class="form-group p-1 col-xs-12 col-md-3">
+                            <label class="control-label"> Select Department</label>
+                            <select class="select2 form-control" data-toggle="select2" data-placeholder="Choose ..." asp-items="ViewBag.DepartmentList"
+                                    name="DepartmentId" id="department-select-id">
+                                <option selected>All</option>
+                            </select>
+                        </div>
+
+                        <div class="col-xs-12 col-md-3 max-auto d-grid p-3">
+                            <button class="action-button btn btn-primary" type="submit">Filter</button>
+                        </div>
+
+                    </div>
+
+                </form>
+
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <!--Table-->
+                        <table class="table mb-0 table-responsive" id="shipstation-ordered-history-datatable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Sku)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Description)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.TotalFromAllLocations)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.OnOrder)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.LeadTime)
+                                        <a>(Days)</a>
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.OrderedIn24Hours)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.OrderedIn3Days)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.OrderedIn7Days)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.OrderedIn15Days)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.OrderedIn30Days)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.OrderedIn90Days)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.SalesTrend) <i class="mdi mdi-24px mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="left" title="Based on a 3 vs 30 day average"></i>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Sku)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Description)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.TotalFromAllLocations)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.OnOrder)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.LeadTime)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.OrderedIn24Hours)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.OrderedIn3Days)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.OrderedIn7Days)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.OrderedIn15Days)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.OrderedIn30Days)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.OrderedIn90Days)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.SalesTrend)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#reloading-banner").hide();
+
+
+            //setup department list seletct component
+            $('#department-select-id').select2();
+            $('#department-select-id').val('@ViewBag.SelectedDepartmentId');
+            $('#department-select-id').trigger('change');
+
+
+            //Table
+            $("#shipstation-ordered-history-datatable").DataTable({
+                "scrollX": true,
+                fixedHeader: true,
+                "dom": "<'row'<'col-sm-12 col-md-7'l><'col-sm-12 col-md-4'f><'col-sm-12 col-md-1'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                pageLength: 100,
+                createdRow: function (row, data, index) {
+                    if (data[11] >= 10.0) {
+                        $('td:eq(11)', row).addClass('table-success');
+                    } else if (data[11] <= -10.0) {
+                        $('td:eq(11)', row).addClass('table-danger');
+                    }
+                    //Conditional Highlighting
+                    var set = false;
+                    if (data[11] >= 10.0) {
+                        $(row).children(":nth-child(12)").addClass('table-success');
+                        $(row).children(":nth-child(12)").append("% <span class='mdi mdi-arrow-up-bold'></span>");
+                    }
+                    else if (data[11] <= -10.0) {
+                        $(row).children(":nth-child(12)").addClass('table-danger');
+                        $(row).children(":nth-child(12)").append("% <span class='mdi mdi-arrow-down-bold'></span>");
+                    }
+                    else {
+
+                        $(row).children(":nth-child(12)").append("% <span class='mdi mdi-tilde'></span>");
+                    }
+                    // 3-Days
+                    if (Number(data[2]) <= Number(data[6]) || (Number(data[2]) <= Number(data[6]) && Number(data[3]) <= 3) /*Days*/) {
+                        set = true;
+                        $(row).children(":nth-child(7)").addClass('table-danger');
+                    }
+                    // 7-Days
+                    if (Number(data[2]) <= Number(data[7]) || (Number(data[2]) <= Number(data[7]) && Number(data[3]) <= 7) /*Days*/) {
+                        set = true;
+                        $(row).children(":nth-child(8)").addClass('table-danger');
+                    }
+                    //  15-Days
+                    if (Number(data[2]) <= Number(data[8]) || (Number(data[2]) <= Number(data[8]) && Number(data[3]) <= 15) /*Days*/) {
+                        set = true;
+                        $(row).children(":nth-child(9)").addClass('table-danger');
+                    }
+                    //  30-Days
+                    if (Number(data[2]) <= Number(data[9]) || (Number(data[2]) <= Number(data[9]) && Number(data[3]) <= 30) /*Days*/) {
+                        set = true;
+                        $(row).children(":nth-child(10)").addClass('table-danger');
+                    }
+                    //  90-Days
+                    if (Number(data[2]) <= Number(data[10]) || (Number(data[2]) <= Number(data[10]) && Number(data[3]) <= 90) /*Days*/) {
+                        set = true;
+                        $(row).children(":nth-child(11)").addClass('table-danger');
+                    }
+                    if (set == true) {
+                        $(row).children(":nth-child(1)").addClass('table-danger');
+                    }
+                },
+                keys: !0,
+                language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>",
+                        next: "<i class='mdi mdi-chevron-right'>"
+                    },
+                },
+                drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                },
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export',
+                        buttons: [
+                            'copy',
+                            'excel',
+                            'csv',
+                            'pdf',
+                            'print'
+                        ]
+                    }
+                ]
+            });
+
+        });
+
+        //Update table
+        $("#refresh-table-btn").on("click", function () {
+            $("#reloading-banner").show();
+            $("#refresh-table-btn").addClass("disabled");
+
+            var now = new Date().getTime();
+            setInterval(function () {
+                var difference = new Date().getTime() - now;
+                var minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                document.getElementById("timer").innerHTML = minutes + "m " + seconds + "s ";
+            }, 1000)
+
+            $.post("/ShipStationOrderedHistories/Reload", function (data) {
+                window.location.reload();
+            });
+        });
+    </script>
+    }

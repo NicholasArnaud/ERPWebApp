@@ -1,0 +1,144 @@
+﻿@using ERPWebApp.Controllers
+@using ERPWebApp.Models.NirfForms
+@model IEnumerable<ERPWebApp.Models.NirfForms.NirfProductMapping>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h2>New Item Request Forms</h2>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs nav-bordered mb-3">
+                    <li class="nav-item mb-1">
+                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                        {
+                            <a class="nav-link" asp-action="Create">
+                                <div typeof="button" class="btn btn-dark">Create</div>
+                            </a>
+                        }
+                    </li>
+                </ul>
+                <table class="table dt-responsive webkit-nowrap w-100" id="NirfTable">
+                    <thead>
+                    <tr>
+                        <th>
+                            SKU
+                        </th>
+                        <th>
+                            SellerSku
+                        </th>
+                        <th>
+                            Description
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            Started Date
+                        </th>
+                        <th>
+                            Completed Date
+                        </th>
+                        <th>
+                            Actions
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Product.Sku</td>
+                            <td>@item.NirfForm.SellersProductSku</td>
+                            <td>@item.Product.Description</td>
+
+                            @if (@item.NirfForm.NirfStatus == NirfForm.Status.InProgress)
+                            {
+                                <td>
+                                    <span class="badge rounded-pill bg-primary" style="font-size: 1.1em">In Progress</span>
+                                </td>
+                            }
+                            @if (@item.NirfForm.NirfStatus == NirfForm.Status.Cancelled)
+                            {
+                                <td>
+                                    <span class="badge rounded-pill bg-danger" style="font-size: 1.1em">Cancelled</span>
+                                </td>
+                            }
+                            @if (@item.NirfForm.NirfStatus == NirfForm.Status.Completed)
+                            {
+                                <td>
+                                    <span class="badge rounded-pill bg-success" style="font-size: 1.1em">Completed</span>
+                                </td>
+                            }
+
+                            <td>@item.NirfForm.StartedDate.ToShortDateString()</td>
+                            @if (@item.NirfForm.CompletedDate.ToShortDateString().Equals("1/1/0001"))
+                            {
+                                <td>Not Completed</td>
+                            }
+                            else
+                            {
+                                <td>@item.NirfForm.CompletedDate.ToShortDateString()</td>
+                            }
+
+                            <td>
+                                @if (@item.NirfForm.CompletedDate.ToShortDateString().Equals("1/1/0001"))
+                                {
+                                    @if (User.IsInRole(RoleList.CustomerSupportManager) || User.IsInRole(RoleList.Administrator))
+                                    {
+                                        <a class="action-icon" asp-action="Edit" asp-route-id="@item.NirfFormId">
+                                            <i class="mdi mdi-24px mdi-pencil"></i>
+                                        </a>
+                                    }
+                                }
+                                <a class="action-icon" asp-action="Details" asp-route-id="@item.NirfFormId">
+                                    <i class="mdi mdi-24px mdi-information-outline"></i>
+                                </a>
+
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/js/pages/date-euro.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#NirfTable').DataTable( {
+                    "dom": "<'row'<'col-sm-12 col-md-7'l><'col-sm-12 col-md-5'f>>" +
+                                        "<'row'<'col-sm-12'tr>>" +
+                                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                        keys: !0, language: {
+                            paginate: {
+                                previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                            },
+
+                        }, drawCallback: function () {
+                            $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                        },
+                    "oLanguage": {
+                      "sLengthMenu": '<select class="btn btn-light">'+
+                        '<option value="10">10</option>'+
+                        '<option value="20">20</option>'+
+                        '<option value="30">30</option>'+
+                        '<option value="40">40</option>'+
+                        '<option value="50">50</option>'+
+                        '<option value="-1">All</option>'+
+                        '</select>'}
+                });
+            });
+        </script>
+    }
+}

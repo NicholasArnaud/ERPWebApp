@@ -1,0 +1,69 @@
+﻿@model IEnumerable<ERPWebApp.Models.DepartmentRoleMappingViewModel>
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<head>
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+    <link rel="stylesheet" type="text/css" href="~/css/sliderbutton.css">
+</head>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">            
+                    <h3 class="card-title">Department Role Mapping</h3>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="custom-bb">  
+                <a class="btn btn-dark" asp-action="Create">Create New</a>   
+        </div>
+    </div>
+    <div class="row">
+        <div class="table-responsive" style="overflow-x: hidden;">
+            <table class="table dt-responsive webkit-nowrap w-100" id="department-role-dataTable">
+                <thead>
+                    <tr>
+                        <th>
+                            Department
+                        </th>
+                        <th>
+                           Default Roles
+                        </th>
+                        <th>
+                            <a>Actions</a>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var department in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => department.DepartmentName)
+                            </td>
+                            <td>
+                                @string.Join(", ", department.UserRoleIds)
+                            </td>
+                            <td class="table-action">
+                                <a class="action-icon" asp-action="Details" asp-route-id="@department.DepartmentId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager) || this.User.IsInRole(RoleList.InventoryManager))
+                                {
+                                    <a class="action-icon" asp-action="Edit" asp-route-id="@department.DepartmentId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                                }
+                                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.HRManager) || this.User.IsInRole(RoleList.InventoryManager))
+                                {
+                                    <a class="action-icon" asp-action="Delete" asp-route-id="@department.DepartmentId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,21 @@
+﻿<!-- Status Change Confirmation Modal -->
+<div class="modal fade" id="statusChangeConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="statusChangeConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="post" asp-action="ChangeEmailAlertStatus" asp-controller="EmailAlerts">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusChangeConfirmationModalLabel">Change Email Alert Status</h5>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to <span id="statusAction"></span> this alert?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <input type="hidden" id="emailAlertIdToChangeStatus" name="emailAlertId" value="" />
+                    <input type="hidden" id="newStatus" name="newStatus" value="" />
+                    <button type="submit" class="btn btn-primary" id="confirmStatusChange">Yes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>  

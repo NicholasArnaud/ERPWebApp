@@ -1,0 +1,828 @@
+﻿@model ERPWebApp.Models.Inventory.Product
+@namespace ERPWebApp.Models.Inventory
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.8.2/css/lightbox.min.css">
+<style>
+    #department-error {
+        color: #ff5b5b;
+    }
+</style>
+<h1>Edit</h1>
+
+<h4>Product</h4>
+<hr />
+<!--Product SKus-->
+<form asp-action="Edit" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input id="id" type="hidden" asp-for="ProductId" />
+    <div class="panel panel-default mt-3">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                Product SKUS
+            </h3>
+        </div>
+
+        <div class="panel-body">
+            <div class="row">
+                <input id="editid" value="@Model.ProductId" type="hidden" />
+                <div class="col-md-3 mt-2 mt-md-0">
+                    <label for="sku-category">Sku Category</label>
+                    <select id="sku-category" class="form-control select2" data-toggle="select2">
+                        <option value="">Category</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mt-3 mt-md-0">
+                    <label for="sku-UOM">Unit of Measure</label>
+                    <select id="sku-UOM" class="form-control select2" data-toggle="select2">
+                        <option value="">Unit Of Measure</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mt-3 mt-md-0">
+                    <label for="sku-color">Color</label>
+                    <select id="sku-color" class="form-control select2" data-toggle="select2">
+                        <option value="">Color</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mt-3 mt-md-0">
+                    <label for="sku-set-number">Set Quantity</label>
+                    <input id="sku-set-number" class="form-control" type="number" min="1" value="1">
+                </div>
+            </div>
+            <div class="row mt-md-2">
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="Sku" class="control-label"></label>
+                        <input asp-for="Sku" class="form-control" id="full-sku" />
+                        <span asp-validation-for="Sku" class="text-danger"></span>
+                    </div>
+                </div>
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.FinancialManager))
+                {
+                    <div class="col-md-2 mt-3 mt-md-0">
+                        <div class="form-group p-1">
+                            <label asp-for="FulfillmentCost" class="control-label"></label>
+                            <input asp-for="FulfillmentCost" class="form-control" />
+                            <span asp-validation-for="FulfillmentCost" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mt-3 mt-md-0">
+                        <div class="form-group p-1">
+                            <label asp-for="Cost" class="control-label"></label>
+                            <input asp-for="Cost" class="form-control" />
+                            <span asp-validation-for="Cost" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mt-3 mt-md-0">
+                        <div class="form-group p-1">
+                            <label asp-for="OverseasCost" class="control-label"></label>
+                            <input asp-for="OverseasCost" class="form-control" step=".0001" />
+                            <span asp-validation-for="OverseasCost" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-2 mt-3 mt-md-0">
+                        <div class="form-group p-1">
+                            <label asp-for="FulfillmentCost" class="control-label"></label>
+                            <input asp-for="FulfillmentCost" class="form-control" disabled />
+                            <span asp-validation-for="FulfillmentCost" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mt-3 mt-md-0">
+                        <div class="form-group p-1">
+                            <label asp-for="Cost" class="control-label"></label>
+                            <input asp-for="Cost" class="form-control" disabled />
+                            <span asp-validation-for="Cost" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mt-3 mt-md-0">
+                        <div class="form-group p-1">
+                            <label asp-for="OverseasCost" class="control-label"></label>
+                            <input asp-for="OverseasCost" class="form-control" step=".0001" disabled />
+                            <span asp-validation-for="OverseasCost" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
+                <div class="col-md-2 mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="LaborCost" class="control-label"></label>
+                        <input asp-for="LaborCost" class="form-control" />
+                        <span asp-validation-for="LaborCost" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>  
+    </div>
+    
+    <!--Product Description-->
+    <div class="panel panel-default mt-4">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                Product Description
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="form-group p-1 mt-1 mt-md-0">
+                    <label asp-for="Description">Description</label>
+                    <textarea asp-for="Description" id="vendor-notes" rows="4" class="form-control" maxlength="400"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                    <div class="wizard-form-error"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!--Product Selection-->
+    <div class="panel panel-default mt-4">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                Product Selection
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-3 mt-1 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="AltItemNumber" class="control-label"></label>
+                        <input asp-for="AltItemNumber" class="form-control" />
+                        <span asp-validation-for="AltItemNumber" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-3 mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label class="control-label"> Alternate Product</label>
+                        <select id="alternate-product" class="form-control" name="AlternateProductId">
+                            @* <option value="">Select a product</option> *@
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mt-3 mt-md-0" @(User.IsInRole(RoleList.ExternalUser) ? "hidden" : "")>
+                    <div class="form-group p-1">
+                        <label class="control-label"> Select Departments</label>
+
+                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                data-placeholder="Choose ..." id="DepartmentList" name="DepartmentList"
+                                asp-items="ViewBag.DepartmentList" asp-for="DepartmentList" multiple="multiple">
+                            @if (User.IsInRole((RoleList.ExternalUser)))
+                            {
+                                <option selected value="@ViewData["ExternalDeptId"]"></option>
+                            }
+                        </select>
+                        <label id="department-error" class="control-label">No Department Selected</label>
+                    </div>
+                </div>
+                <div class="col-md-3 mt-3 mt-md-0" @(User.IsInRole(RoleList.ExternalUser) ? "hidden" : "")>
+                    <div class="form-group p-1">
+                        <label class="control-label"> Product Sub Category</label>
+                        <select class="select2 form-control select2" data-toggle="select2" id="SubCategoryList"
+                                name="SubCategoryId" asp-items="ViewBag.SubCategoryList">
+                            <option value="none" selected disabled hidden>--Select a Sub Category--</option>
+                            <option value=""></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!--Product Specification-->
+    <div class="panel panel-default mt-4">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                Product Specifications
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="row d-flex flex-md-row flex-column">
+                <div style="flex: 1;" class="mt-1 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="OnOrder" class="control-label"></label>
+                        <input asp-for="OnOrder" class="form-control" min="0" />
+                        <span asp-validation-for="OnOrder" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-1 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="LeadTime" class="control-label"></label><a>(Days)</a>
+                        <input asp-for="LeadTime" class="form-control" min="0" />
+                        <span asp-validation-for="LeadTime" class="text-danger"></span>
+                    </div>
+                </div>
+                @if (ViewBag.IsPrimaryVendor == "yes")
+                {
+                    <div style="flex: 1;" class="mt-1 mt-md-0">
+                        <div class="form-group p-1">
+
+                            <input id="cost-update" type="button" class="btn btn-secondary mt-3" value="Sync Product"
+                                   onclick="UpdateCostAndLeadTime()">
+                            <p id="success-cost-update" class="mt-1" style="display:none; color:lime">Success</p>
+
+
+                        </div>
+                    </div>
+                }
+                <div style="flex: 1;" class="mt-1 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="WeightAmount" class="control-label"></label>
+                        <input asp-for="WeightAmount" class="form-control" />
+                        <span asp-validation-for="WeightAmount" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="WeightUnit" class="control-label"></label>
+                        <select asp-for="WeightUnit" asp-items="@Html.GetEnumSelectList<WeightUnit>()"
+                                class="form-control"></select>
+                        <span asp-validation-for="WeightUnit" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="MinInventory" class="control-label"></label>
+                        <input asp-for="MinInventory" min="0" class="form-control" />
+                        <span asp-validation-for="MinInventory" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row d-flex flex-md-row flex-column mt-md-2">
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="MaxInventory" class="control-label"></label>
+                        <input asp-for="MaxInventory" min="0" class="form-control" />
+                        <span asp-validation-for="MaxInventory" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="Length" class="control-label"></label>
+                        <input asp-for="Length" class="form-control" />
+                        <span asp-validation-for="Length" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="Width" class="control-label"></label>
+                        <input asp-for="Width" class="form-control" />
+                        <span asp-validation-for="Width" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="Height" class="control-label"></label>
+                        <input asp-for="Height" class="form-control" />
+                        <span asp-validation-for="Height" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="DimensionalUnit" class="control-label"></label>
+                        <select asp-for="DimensionalUnit" asp-items="@Html.GetEnumSelectList<DimensionalUnit>()"
+                                class="form-control"></select>
+                        <span asp-validation-for="DimensionalUnit" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Product Images-->
+    <div class="panel panel-default mt-4">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                Product Images
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="row d-flex flex-md-row flex-column mt-md-2">
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    @if (Model.ProductImages != null && Model.ProductImages.Any(x => x.IsDefault))
+                    {
+
+                        var defaultImage = Model.ProductImages.FirstOrDefault(x => x.IsDefault);
+                        <div class="row" style="margin-left: 10px;margin-bottom: 15px;">
+                            <div class="form-group p-1">
+                                <label class="control-label">Default Image</label>
+                                <input type="file" id="defaultImage" name="defaultImage" class="form-control"
+                                       accept="image/png, image/jpeg" />
+                                <span>*inserting a new image will replace the previous one*</span>
+                            </div>
+                            <img src="@defaultImage.FileUrl" id="default_Image" class="rounded float-left" style="height: 15em; width: auto;" alt="@defaultImage.Files.FileName">
+                        </div>
+
+                    }
+                    else
+                    {
+                        <div style="flex: 1;" class="mt-3 mt-md-0">
+                            <div class="form-group p-1">
+                                <label class="control-label">Image</label>
+                                <input type="file" id="defaultImage" name="defaultImage" class="form-control"
+                                       accept="image/png, image/jpeg" />
+                                <span>*inserting a new image will replace the previous one*</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="row" style="margin-left: 10px;margin-bottom: 15px;">
+                        <div class="form-group p-1">
+                            <label class="control-label">Images</label>
+                            <input type="file" id="Image" name="uploads" multiple class="form-control"
+                                   accept="image/png, image/jpeg" />
+                        </div>
+                    </div>
+                    @if (Model.ProductImages != null && Model.ProductImages.Any())
+                    {
+                        var images = Model.ProductImages.Where(x => !x.IsDefault).ToList();
+                        <div class="lightbox-gallery">
+                            <div class="container">
+                                <div class="row photos">
+                                    @foreach (var image in images)
+                                    {
+                                        <div class="col-sm-6 col-md-4 col-lg-3 item">
+                                            <a href="@image.FileUrl" data-lightbox="photos">
+                                                <img class="img-fluid" src="@image.FileUrl" alt="@image.Files.FileName" style="height:160px;">
+                                            </a>
+                                            <div class="card-body">
+                                                <button type="button" data-action="/Products/DeleteImage?imageId=@image.ProductImageId" class="btn btn-danger deleteButton">Delete</button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="row p-1">
+                        <label class="control"> Product Tag</label>
+                        <div class="row">
+                            <div class="col-8">
+                                <select class="select2 form-control productTag" data-placeholder="Select or Enter new Tag" data-toggle="select2" id="productTag" name="productTag">
+                                    <option value=""></option>
+                                    @if (ViewData["Tags"] != null)
+                                    {
+                                        @foreach (var tag in (List<ProductTagsRegistry>)ViewData["Tags"])
+                                        {
+                                            <option value="@tag.TagId" data-color="@tag.Color" style="background-color: @tag.Color">@tag.Description</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-2 col-md-1 p-0 ">
+                                <button class="TagColorbtn btn " style="color:#ffff; border-color: #ffff; line-height: 0;" type="button">
+                                    <span class="mdi mdi-24px mdi-palette-outline"></span>
+                                </button>
+                                <input type="color" class="TagColor" style="position: absolute; right: 0; opacity: 0;" value="">
+                            </div>
+                            <div class="col-1 col-md-2 p-0 ">
+                                <button type="button" id="addTag" class="btn btn-success" style="line-height: 0;margin-left:50%">
+                                    <span class="mdi mdi-24px mdi-plus">&nbsp;Add</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row productTagList p-1">
+                        @{
+                            var productTags = new List<ProductTagsRegistry>();
+                            if (@Model.ProductTags != null && @Model.ProductTags.Count > 0) productTags = @Model.ProductTags.Select(x => x.Tag).ToList();
+
+                            var productTagsJson = Newtonsoft.Json.JsonConvert.SerializeObject(productTags);
+                        }
+                        @foreach (var tag in productTags)
+                        {
+                            var tagObj = new { tagId = tag.TagId, productId = Model.ProductId };
+                            var tagJson = Newtonsoft.Json.JsonConvert.SerializeObject(tagObj);
+
+                            <div class="btn-group p-0 m-0" style="width:auto; margin-right: 5px !important" role="group" aria-label="@tag.Description" title="@tag.Description">
+                                <button type="button" disabled class="btn" style="background-color:@tag.Color; width:auto">@tag.Description</button>
+                                <button type="button" data-tag="@tagJson" class="btn btn-danger p-0 removeTag" style="width:40px"><span class="mdi mdi-24px mdi-delete"></span></button>
+                            </div>
+                        }
+                        <input type="hidden" name="productTags" id="productTags_hidden" data-oldTags="@productTagsJson" value="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Product Shipping Info-->
+    <div class="panel panel-default mt-4">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                Product Shipping Information
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="row d-flex flex-md-row flex-column">
+                <div style="flex: 1;" class="mt-1 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="ShippingWeightAmount" class="control-label"></label>
+                        <input asp-for="ShippingWeightAmount" class="form-control"/>
+                        <span asp-validation-for="ShippingWeightAmount" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="ShippingWeightUnit" class="control-label"></label>
+                        <select asp-for="ShippingWeightUnit" asp-items="@Html.GetEnumSelectList<WeightUnit>()"
+                                class="form-control">
+                        </select>
+                        <span asp-validation-for="ShippingWeightUnit" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1 form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="IsShippingContainer" />
+                            @Html.DisplayNameFor(model => model.IsShippingContainer)
+                        </label>
+                        <span asp-validation-for="IsShippingContainer" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="ExpectedShipmentCost" class="control-label"></label>
+                        <input asp-for="ExpectedShipmentCost" class="form-control"/>
+                        <span asp-validation-for="ExpectedShipmentCost" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="ShippingLength" class="control-label"></label>
+                        <input asp-for="ShippingLength" class="form-control"/>
+                        <span asp-validation-for="ShippingLength" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="ShippingWidth" class="control-label"></label>
+                        <input asp-for="ShippingWidth" class="form-control"/>
+                        <span asp-validation-for="ShippingWidth" class="text-danger"></span>
+                    </div>
+                </div>
+                <div style="flex: 1;" class="mt-3 mt-md-0">
+                    <div class="form-group p-1">
+                        <label asp-for="ShippingHeight" class="control-label"></label>
+                        <input asp-for="ShippingHeight" class="form-control"/>
+                        <span asp-validation-for="ShippingHeight" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div hidden>Old System Of Departments(Currently necessary for Home Dashboard)</div>
+    
+    <div class="row">
+        <div class="panel panel-default mt-3">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    Product Toggles
+                </h3>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-10">
+                    <div hidden class="form-group form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="IsEmbroidery" /> @Html.DisplayNameFor(model =>
+                                                                                          model.IsEmbroidery)
+                        </label>
+                    </div>
+                    <div hidden class="form-group form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="IsEngraving" /> @Html.DisplayNameFor(model =>
+                                                                                         model.IsEngraving)
+                        </label>
+                    </div>
+                    <div hidden class="form-group form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="IsMetal" /> @Html.DisplayNameFor(model => model.IsMetal)
+                        </label>
+                    </div>
+                    <div hidden class="form-group form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="IsUv" /> @Html.DisplayNameFor(model => model.IsUv)
+                        </label>
+                    </div>
+                    <div class="form-group form-check px-4 py-2">
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="IsActive" onchange="confirmUncheck(this)" /> @Html.DisplayNameFor(model =>
+                                                                                                                      model.IsActive)
+                        </label>
+                    </div>
+                    <div class="form-group form-check px-4 py-2" @(User.IsInRole(RoleList.Administrator) ||
+                                                                   User.IsInRole(RoleList.ExternalViewer) ? "" : "hidden")>
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="IsExternalProduct" />
+                            @Html.DisplayNameFor(model => model.IsExternalProduct)
+                        </label>
+                    </div>
+                    <div class="form-group p-1">
+                        <input id="submitbutton" type="submit" value="Save" class="btn btn-primary" />
+                        <div id="loadsbmt" style="display:none">
+                            <span class="spinner-border spinner-border-sm mr-2"
+                                  role="status" aria-hidden="true"></span>Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a class="p-2" asp-action="Index">Back to List</a>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Are You Sure?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <span>Are you sure you want to delete this photo? This action cannot be undone.</span>
+            </div>
+            <div class="modal-footer">
+                <a id="deleteLink" class="btn btn-primary" href="#">I'm Sure</a>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.8.2/js/lightbox.min.js"></script>
+    <script src="~/js/pages/product-creation.min.js"></script>
+
+    <script type="text/javascript">
+        $('.select2').select2();
+        $('#submitbutton').one('click', () => {
+            $('#submitbutton').hide();
+            $('#loadsbmt').show();
+        });
+        $(document).ready(function () {
+
+            $(".deleteButton").click(function () {
+                var action = $(this).data("action");
+                $("#deleteLink").attr("href", action);
+                $("#confirmModal").modal('show');
+            });
+
+            var d_select_val = $('#DepartmentList').select2('data');
+            if (d_select_val.length > 0) {
+                $('#department-error').hide();
+            }
+
+            $("#productTag").select2({ tags: true, allowClear: true });
+
+            InitAlternateProductSelect2();//initialize the alternate product related functions
+        });
+
+        var url = '@Url.Action("GetSkuCategories")';
+        $.getJSON(url, function (response) {
+            addSkuCategories(response);
+        });
+
+        url = '@Url.Action("GetSkuColors")';
+        $.getJSON(url, function (response) {
+            addSkuColors(response);
+        });
+
+        url = '@Url.Action("GetSkuUnitOfMeasure")';
+        $.getJSON(url, function (response) {
+            addSkuUnitOfMeasure(response);
+        });
+
+        $("#sku-category").on('select2:select', function (e) {
+            var data = e.params.data;
+            buildSkuItem();
+            console.log(data.id);
+        });
+        $("#sku-UOM").on('select2:select', function (e) {
+            var data = e.params.data;
+            buildSkuItem();
+            console.log(data.id);
+        });
+        $("#sku-color").on('select2:select', function (e) {
+            var data = e.params.data;
+            buildSkuItem();
+            console.log(data.id);
+        });
+        $("#sku-set-number").change(function () {
+            var data = $("#sku-set-number").val();
+            buildSkuItem();
+            console.log(data);
+        });
+
+        $("#DepartmentList").select2({})
+            .on("select2:select", function (e) {
+                $('#department-error').hide();
+            }).on("select2:unselect", function (e) {
+                let selected_element = $(e.currentTarget);
+                let select_val = selected_element.select2('data');
+                if (select_val.length == 0) {
+                    $('#department-error').show();
+                }
+            }).on("select2:", function (e) {
+                var selected_element = $(e.currentTarget);
+                var select_val = selected_element.select2('data');
+                if (!select_val.length > 0) {
+                    $('#department-error').hide();
+                }
+            });
+
+
+        function UpdateCostAndLeadTime() {
+            var url = '@Url.Action("UpdateCostAndLeadTime")';
+            $.getJSON(url, { Id: $('#editid').val() }, function (data) {
+            });
+            var text = document.getElementById("success-cost-update");
+            text.style.display = "block";
+        }
+
+        $('#defaultImage').change((event) => {
+            var input = event.target;
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#default_Image').attr('src', e.target.result);
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        });
+
+        $('.TagColor').on('input', (event) => {
+            $('#select2-productTag-container').parent().css({
+                'border-color': event.target.value
+            });
+
+            $('.TagColorbtn').css({
+                'border-color': event.target.value,
+                'background-color': event.target.value
+            });
+        });
+
+        $('.TagColorbtn').click(() => {
+            $('.TagColor').click();
+        });
+
+        $('#addTag').click(() => {
+            var tag_data = $('#productTag').select2('data');
+            var color = $('.TagColor').val();
+            var oddTags = $('#productTags_hidden').data('oldtags') || [];
+            var json = $('#productTags_hidden').val() ? JSON.parse($('#productTags_hidden').val()) : [];
+            if (tag_data != undefined && tag_data.length > 0 && tag_data[0].text != "") {
+
+                if (!isNaN(tag_data[0].id)) color = $('#productTag').find(':selected').data('color');
+                var tagId = isNaN(tag_data[0].id) ? 0 : parseInt(tag_data[0].id);
+                var tag = {
+                    TagId: tagId,
+                    Description: tag_data[0].text,
+                    Color: color
+                };
+
+                if (oddTags.findIndex(x => x.Description.toUpperCase() == tag.Description.toUpperCase()) > -1
+                    || json.findIndex(x => x.Description.toUpperCase() == tag.Description.toUpperCase()) > -1) {
+                    $('#productTag').val(null).trigger('change');
+                    return;
+                }
+
+                var tagJson = JSON.stringify({ productId: 0, tagId: tag.TagId });
+
+                var tagPill = `<div class="btn-group p-0 m-0" style="width:auto;margin-right: 5px !important" role="group" aria-label="${tag.Description}" title="${tag.Description}">
+                                                                                                                    <button type="button" disabled class="btn" style="background-color:${tag.Color}; width:auto">${tag.Description}</button>
+                                                                                                                    <button type="button" data-tag='${tagJson}' class="btn btn-danger p-0 removeTag" style="width:40px"><span class="mdi mdi-24px mdi-delete"></span></button>
+                                                                                                                  </div>`;
+                $(".productTagList").append(tagPill);
+
+                json.push(tag);
+                $('#productTags_hidden').val(JSON.stringify(json));
+                $('#productTag').val(null).trigger('change');
+            }
+        });
+
+        $(document).on('click', '.removeTag', function () {
+            var tag = $(this).data('tag') || {};
+            if (!$.isEmptyObject(tag)) {
+                if (tag.productId != 0 && tag.tagId != 0) {
+                    $.ajax({
+                        url: '/Products/UnAssignProductTag',
+                        type: 'POST',
+                        data: { productId: tag.productId, tagId: tag.tagId },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    });
+                }
+
+                var json = $('#productTags_hidden').val() ? JSON.parse($('#productTags_hidden').val()) : [];
+                if (json.length > 0) {
+                    json = $.grep(json, function (item) { return item.TagId !== tag.tagId; });
+                    $('#productTags_hidden').val(JSON.stringify(json));
+                }
+            }
+            $(this).parent().remove();
+        });
+
+        //manage the alternate product related operations
+        function InitAlternateProductSelect2() {
+            let currentProductId = @Model.ProductId;
+
+            //get the selected item
+            let selectedAltProduct = JSON.parse('@Json.Serialize(Model.AlternateProduct is null ? new { } : Model.AlternateProduct)');
+
+            //#region load items to Alternate Production dropdown from the remote data source
+
+            $('#alternate-product').select2({
+                ajax: {
+                    url: '/Products/GetAllProducts',
+                    dataType: 'json',
+                    type: "GET",
+                    data: function (params) {
+                        return { queryString: !params ? null : params.term };
+                    },
+                    processResults: function (data) {
+                        let select2Data = { results: [{ id: '', text: 'Select Alternate product' }] };
+
+                        if (data && Array.isArray(data)) {
+
+                            data.forEach((value, index) => {
+                                //restrict form adding the current product id
+                                if (value.productId != currentProductId) {
+                                    select2Data.results.push({
+                                        id: value.productId,
+                                        text: value.sku + " | " + value.description,
+                                        selected: (selectedAltProduct && selectedAltProduct.productId && selectedAltProduct.productId == value.productId)
+                                    });
+                                }
+                            });
+
+                        }
+                        else {
+
+                            if (selectedAltProduct && selectedAltProduct.productId) {
+                                select2Data.results.push({
+                                    id: selectedAltProduct.productId,
+                                    text: selectedAltProduct.sku + " | " + selectedAltProduct.description,
+                                    selected: true
+                                });
+                            }
+
+                        }
+
+                        return select2Data;
+                    }
+                }
+            });
+
+            //make the initial selection
+            var newOption = new Option('Select Alternate product', '', false, false);
+            if (selectedAltProduct && selectedAltProduct.productId) {
+                var newOption = new Option((selectedAltProduct.sku + " | " + selectedAltProduct.description), selectedAltProduct.productId, true, true);
+                $('#alternate-product').append(newOption).trigger('change');
+            }
+            else {
+                $('#alternate-product').append(newOption).trigger('change');
+                $('#alternate-product').val('').trigger('change');
+            }
+
+            //#endregion
+
+        }
+
+        function confirmUncheck(checkbox) {
+            var productId = parseInt(document.getElementById("editid").value);
+            if (!checkbox.checked) {
+                $.ajax({
+                    url: '@Url.Action("IsStockExists", "Products")',
+                    type: 'GET',
+                    data: { productId: productId },
+                    success: function (result) {
+                        if (result.isAvailable && !confirm("Are you sure you want to disable the product ? There is active stock.")) {
+                            checkbox.checked = true;
+                        }
+                    },
+                    error: function () {
+
+                    }
+                });
+            }
+        }
+
+    </script>
+}

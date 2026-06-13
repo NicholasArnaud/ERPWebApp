@@ -1,0 +1,79 @@
+﻿@using Microsoft.IdentityModel.Tokens
+@model ERPWebApp.Models.Inventory.Stock
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid text-white">
+
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a href="#Product" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                    <span class="d-none d-md-block">Product</span>
+                </a>
+            </li>
+            @if(Model.ShipStationStoreId != 0 && Model.ShipStationStore != null)
+            {
+                <li class="nav-item">
+                    <a href="#ShipStationStore" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                        <span class="d-none d-md-block">Owned Store</span>
+                    </a>
+                </li>
+            }
+            @if(Model.Products.ProductVendorMappings.Any())
+            {
+                <li class="nav-item">
+                    <a href="#VendorMappings" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                        <span class="d-none d-md-block">Vendor Mappings</span>
+                    </a>
+                </li>
+            }
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane show active" id="Product">
+                @{await Html.RenderPartialAsync("_ProductDetailsPartial",Model.Products);}
+            </div>
+            @if(Model.ShipStationStoreId != 0 && Model.ShipStationStore != null)
+            {
+                <div class="tab-pane" id="ShipStationStore">
+                    @{await Html.RenderPartialAsync("_ShipStationStoreDetailPartial", Model.ShipStationStore);}
+                </div>
+            }
+            @if(Model.Products.ProductVendorMappings.Any())
+            {
+                <div class="tab-pane" id="VendorMappings">
+                    @{await Html.RenderPartialAsync("_ProductVendorMappingsPartial",Model.Products.ProductVendorMappings);}
+                </div>
+            }
+        </div>
+        @{await Html.RenderPartialAsync("_StockDetailsPartial",Model);}
+</div>
+
+<div>
+    @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+    {
+        @if (User.IsInRole(RoleList.Administrator))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.StockId">Edit</a>
+            <span>|</span>
+        }
+        else if (User.IsInRole(RoleList.InventoryManager) && Model.Location.SiteId == 2)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.StockId">Edit</a>
+            <span>|</span>
+        }
+        else if (User.IsInRole(RoleList.ShippingManager) && Model.Location.SiteId == 49 || Model.Location.SiteId is 48 or 1)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.StockId">Edit</a>
+            <span>|</span>
+        }
+    }
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

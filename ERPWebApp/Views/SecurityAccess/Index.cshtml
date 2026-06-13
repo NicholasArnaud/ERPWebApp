@@ -1,0 +1,205 @@
+﻿@model ERPWebApp.Models.Company.Security.SecurityAccess
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Access Controller</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="accordion" id="access-plan-accordion">
+                            @foreach (var AccessPlan in Model.AccessPlans)
+                            {
+                                <div class="card text-white mb-0">
+                                    <div class="card-header" id="heading-@AccessPlan.AccessPlanId">
+                                        <h3 class="m-0">
+                                            <a class="card-title custom-accordion-title d-block pt-2 pb-2"
+                                               data-bs-toggle="collapse" href="#collapse-@AccessPlan.AccessPlanId"
+                                               aria-expanded="false" aria-controls="collapse-@AccessPlan.AccessPlanId">
+                                                @AccessPlan.AccessPlanName
+                                            </a>
+                                        </h3>
+                                    </div>
+                                    <div id="collapse-@AccessPlan.AccessPlanId" class="collapse"
+                                         aria-labelby="heading-@AccessPlan.AccessPlanId" data-bs-parent="#access-plan-accordion">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="alert alert-info bg-info float-start"><i class="mdi mdi-access-point me-1"></i> Click and Drag doors and cards to assign and unassign them to the Access Plan!</div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="row" id="dragula-door-@AccessPlan.AccessPlanId">
+                                                        <div class="col-md-6">
+                                                            <div class="bg-dragula p-2 p-lg-4">
+                                                                <h4 class="mt-1">All Doors</h4>
+                                                                <div id="door-list-left-@AccessPlan.AccessPlanId" class="py-2">
+                                                                    @if (Model.AccessPoints.Count != 0)
+                                                                    {
+                                                                        foreach (var AccessPoint in Model.AccessPoints.Where(p => !Model.AccessPlanDoors.Where(y => y.AccessPlanId == AccessPlan.AccessPlanId).Select(x => x.AccessPointId).Contains(p.AccessPointId)))
+                                                                        {
+                                                                            <div class="card mb-0 mt-2">
+                                                                                <div class="card-header">
+                                                                                    <a class="custom-accordion-title" data-bs-toggle="collapse"
+                                                                                       href="#collapse-@AccessPlan.AccessPlanId-@AccessPoint.AccessPointId"
+                                                                                       aria-expanded="false" aria-controls="#collapse-@AccessPlan.AccessPlanId-@AccessPoint.AccessPointId">
+                                                                                        <h5 class="card-title mb-1 mt-0">@AccessPoint.AccessPointLocation</h5>
+                                                                                    </a>
+                                                                                </div>
+                                                                                <div id="collapse-@AccessPlan.AccessPlanId-@AccessPoint.AccessPointId" class="collapse">
+                                                                                    <div class="card-body">
+                                                                                        <div class="card-text w-100 overflow-hidden">
+                                                                                            <div id="AccessPlan-@AccessPlan.AccessPlanId" class="access-plan-id-secret" hidden>@AccessPlan.AccessPlanId</div>
+                                                                                            <div id="AccessPoint-@AccessPlan.AccessPlanId-@AccessPoint.AccessPointId" hidden>@AccessPoint.AccessPointId</div>
+                                                                                            <p><b>Ip Address:</b> @AccessPoint.IpAddress</p>
+                                                                                            <p><b>MAC Address:</b> @AccessPoint.MacAddress</p>
+                                                                                            <p><b>Serial Number:</b> @AccessPoint.SerialNumber</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                    }
+                                                                </div> <!-- end company-list-1-->
+                                                            </div> <!-- end div.bg-light-->
+                                                        </div> <!-- end col -->
+
+                                                        <div class="col-md-6">
+                                                            <div class="bg-dragula p-2 p-lg-4">
+                                                                <h4 class="mt-1">Assigned Doors</h4>
+                                                                <div id="door-list-right-@AccessPlan.AccessPlanId" class="py-2">
+                                                                    @if (Model.AccessPlanDoors.Count != 0)
+                                                                    {
+                                                                        foreach (var AccessPlanDoor in Model.AccessPlanDoors.Where(s => s.AccessPlanId == AccessPlan.AccessPlanId))
+                                                                        {
+                                                                            <div class="card mb-0 mt-2">
+                                                                                <div class="card-header">
+                                                                                    <a class="custom-accordion-title" data-bs-toggle="collapse"
+                                                                                       href="#collapse-@AccessPlan.AccessPlanId-@AccessPlanDoor.AccessPlanDoorId"
+                                                                                       aria-expanded="false" aria-controls="#collapse-@AccessPlan.AccessPlanId-@AccessPlanDoor.AccessPlanDoorId">
+                                                                                        <h5 class="card-title mb-1 mt-0">@AccessPlanDoor.AccessPoint.AccessPointLocation</h5>
+                                                                                    </a>
+                                                                                </div>
+                                                                                <div id="collapse-@AccessPlan.AccessPlanId-@AccessPlanDoor.AccessPlanDoorId" class="collapse">
+                                                                                    <div class="card-body">
+                                                                                        <div class="card-text w-100 overflow-hidden">
+                                                                                            <div id="AccessPlanDoor-@AccessPlan.AccessPlanId" hidden>@AccessPlanDoor.AccessPlanDoorId</div>
+                                                                                            <div id="AccessPoint-@AccessPlan.AccessPlanId-@AccessPlanDoor.AccessPointId" hidden>@AccessPlanDoor.AccessPointId</div>
+                                                                                            <div id="AccessPlan-@AccessPlan.AccessPlanId" class="access-plan-id-secret" hidden>@AccessPlan.AccessPlanId</div>
+                                                                                            <p><b>Ip Address:</b> @AccessPlanDoor.AccessPoint.IpAddress</p>
+                                                                                            <p><b>MAC Address:</b> @AccessPlanDoor.AccessPoint.MacAddress</p>
+                                                                                            <p><b>Serial Number:</b> @AccessPlanDoor.AccessPoint.SerialNumber</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                    }
+                                                                </div> <!-- end door-list-2-->
+                                                            </div> <!-- end div.bg-light-->
+                                                        </div> <!-- end col -->
+
+                                                    </div> <!-- end row -->
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="row" id="dragula-card-@AccessPlan.AccessPlanId">
+                                                        <div class="col-md-6">
+                                                            <div class="bg-dragula p-2 p-lg-4">
+                                                                <h4 class="mt-1">All Cards</h4>
+                                                                <div id="card-list-left-@AccessPlan.AccessPlanId" class="py-2">
+                                                                    @if (Model.AccessCards.Count != 0)
+                                                                    {
+                                                                        foreach (var AccessCard in Model.AccessCards.Where(p => !Model.AccessPlanUsers.Where(y => y.AccessPlanId == AccessPlan.AccessPlanId).Select(d => d.AccessCardId).Contains(p.AccessCardId)))
+                                                                        {
+                                                                            <div class="card mb-0 mt-2">
+                                                                                <div class="card-header">
+                                                                                    <a class="custom-accordion-title" data-bs-toggle="collapse"
+                                                                                       href="#collapse-@AccessPlan.AccessPlanId-@AccessCard.AccessCardId"
+                                                                                       aria-expanded="false" aria-controls="#collapse-@AccessPlan.AccessPlanId-@AccessCard.AccessCardId">
+                                                                                        <h5 class="card-title mb-1 mt-0">@AccessCard.Employee.FullName</h5>
+                                                                                    </a>
+                                                                                </div>
+                                                                                <div id="collapse-@AccessPlan.AccessPlanId-@AccessCard.AccessCardId" class="collapse">
+                                                                                    <div class="card-body">
+                                                                                        <div class="card-text w-100 overflow-hidden">
+                                                                                            <div id="AccessPlan-@AccessPlan.AccessPlanId" class="access-plan-id-secret" hidden>@AccessPlan.AccessPlanId</div>
+                                                                                            <div id="AccessCard-@AccessPlan.AccessPlanId-@AccessCard.AccessCardId" hidden>@AccessCard.AccessCardId</div>
+                                                                                            <p><b>Key:</b> @AccessCard.Key</p>
+                                                                                            <p><b>Department:</b> @AccessCard.Employee.Department.DepartmentName</p>
+                                                                                            <p><b>Job Position:</b> @AccessCard.Employee.Position</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                    }
+                                                                </div> <!-- end company-list-1-->
+                                                            </div> <!-- end div.bg-light-->
+                                                        </div> <!-- end col -->
+
+                                                        <div class="col-md-6">
+                                                            <div class="bg-dragula p-2 p-lg-4">
+                                                                <h4 class="mt-1">Assigned Cards</h4>
+                                                                <div id="card-list-right-@AccessPlan.AccessPlanId" class="py-2">
+                                                                    @if (Model.AccessCards.Count != 0)
+                                                                    {
+                                                                        foreach (var AccessPlanUser in Model.AccessPlanUsers.Where(s => s.AccessPlanId == AccessPlan.AccessPlanId))
+                                                                        {
+                                                                            <div class="card mb-0 mt-2">
+                                                                                <div class="card-header">
+                                                                                    <a class="custom-accordion-title" data-bs-toggle="collapse"
+                                                                                       href="#collapse-@AccessPlan.AccessPlanId-@AccessPlanUser.AccessPlanUserId"
+                                                                                       aria-expanded="false" aria-controls="#collapse-@AccessPlan.AccessPlanId-@AccessPlanUser.AccessPlanUserId">
+                                                                                        <h5 class="card-title mb-1 mt-0">@AccessPlanUser.AccessCard.Employee.FullName</h5>
+                                                                                    </a>
+                                                                                </div>
+                                                                                <div id="collapse-@AccessPlan.AccessPlanId-@AccessPlanUser.AccessPlanUserId" class="collapse">
+                                                                                    <div class="card-body">
+                                                                                        <div class="card-text w-100 overflow-hidden">
+                                                                                            <div id="AccessPoint-@AccessPlan.AccessPlanId" hidden>@AccessPlanUser.AccessPlanUserId</div>
+                                                                                            <div id="AccessCard-@AccessPlan.AccessPlanId-@AccessPlanUser.AccessCardId" hidden>@AccessPlanUser.AccessCardId</div>
+                                                                                            <div id="AccessPlan-@AccessPlan.AccessPlanId" class="access-plan-id-secret" hidden>@AccessPlan.AccessPlanId</div>
+                                                                                            <p><b>Key:</b> @AccessPlanUser.AccessCard.Key</p>
+                                                                                            <p><b>Department:</b> @AccessPlanUser.AccessCard.Employee.Department.DepartmentName</p>
+                                                                                            <p><b>Job Position:</b> @AccessPlanUser.AccessCard.Employee.Position</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                    }
+                                                                </div> <!-- end door-list-2-->
+                                                            </div> <!-- end div.bg-light-->
+                                                        </div> <!-- end col -->
+                                                    </div> <!-- end row -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/lib/hyper-assets/vendor/dragula.min.js"></script>
+        // component.dragula.js below is minified straight from the library
+        <script src="~/lib/hyper-assets/js/component.dragula.js"></script>
+        <script src="~/js/pages/security-access.min.js">
+        </script>
+    }
+}

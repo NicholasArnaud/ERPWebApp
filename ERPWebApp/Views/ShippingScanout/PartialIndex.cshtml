@@ -1,0 +1,54 @@
+﻿@* @model IEnumerable<ERPWebApp.Data.DTOModels.ShippingScanoutDTO>
+
+<table class="table dt-responsive" id="shipping-scanout-table">
+    <thead>
+        <tr>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.TrackingNumber)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.CarrierCode)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.ServiceCode)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.IsExpedited)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.CreateDate)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if(Model != default)
+            @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TrackingNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CarrierCode)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.ServiceCode)
+                </td>
+                <td>
+                    @if (Html.ValueFor(modelItem => item.IsExpedited) == "True")
+                    {
+                        <a>Yes</a>
+                    }
+                    else
+                    {
+                        <a>No</a>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreateDate)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table> *@

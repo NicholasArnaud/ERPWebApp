@@ -1,0 +1,78 @@
+@model ERPWebApp.Models.Inventory.Stock
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Stock Summary</h5>
+        @if(User.IsInRole(RoleList.InventoryManager) || User.IsInRole(RoleList.Administrator))
+        {
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.StockId">
+                    <button type="button" class="btn btn-info"><span class="mdi mdi-18px mdi-arrow-top-left-thick">&nbsp;Edit</span></button>
+                </a>
+            </div>
+        }
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Products)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Products.Description)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Location)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Location.LocationName)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.TotalAvailable)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.TotalAvailable)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Products.OnOrder)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Products.OnOrder)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.RecentlyReadded)
+            </dt>
+            <dd class="col-sm-10">
+                @(Html.ValueFor(model => model.RecentlyReadded).Equals("True") ? "Yes" : "No")
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.IsPrimary)
+            </dt>
+            <dd class="col-sm-10">
+                @(Html.ValueFor(model => model.IsPrimary).Equals("True") ? "Yes" : "No")
+            </dd>
+            @if(User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager) || User.IsInRole(RoleList.InventoryManager))
+            {
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.ModifyDate)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.ModifyDate)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.ModifyByUser)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.ModifyByUser)
+                </dd>
+            }
+            @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ExternalViewer))
+            {
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.IsExternal)
+                </dt>
+                <dd class="col-sm-10">
+                    @(Html.ValueFor(model => model.IsExternal).Equals("True") ? "Yes" : "No")
+                </dd>
+            }
+        </dl>
+    </div>
+</div>

@@ -1,0 +1,405 @@
+﻿@using ERPWebApp.Models.Common
+@using ERPWebApp.Models.Company;
+@model Home;
+@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+
+@{
+    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    #chart-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    #chart {
+        width: 100%;
+    }
+
+    .chart-label {
+        display: inline-block;
+        padding: 0 10px;
+        text-align: center;
+    }
+
+        .chart-label > div:first-child {
+            font-size: 22px;
+        }
+
+        .chart-label > div:last-child {
+            font-size: 16px;
+        }
+
+    .category-pie-chart {
+        display: inline-block;
+        padding: 0 10px;
+    }
+
+    #help-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    #help-info {
+        position: absolute;
+        top: 40px;
+        right: -200px;
+        width: 200px;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        pointer-events: none;
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        border-radius: 4px;
+        font-size: 13px;
+        z-index: 9999;
+        visibility: hidden;
+    }
+</style>
+<div class="card-body" style="padding:0rem">
+    <div class="modal fade" id="ModifyGoals" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form asp-action="CreateSOMG">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myCenterModalLabel">Modify Goals</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div id="dynamic-form"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                                aria-hidden="true">
+                            Cancel
+                        </button>
+                        <button type="submit" value="CreateSOMG" class="btn btn-primary"
+                                aria-hidden="true">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--error message-->
+<div class="alert alert-danger d-flex align-items-center" role="alert" id="error-message"
+     style="display: none !important;">
+    <div>
+        An error occurred while saving the layout
+    </div>
+</div>
+<!--error message-->
+
+<div class="form-check form-switch mt-2 mb-2">
+    <label class="form-check-label" for="layout-editing-check" id="layout-editing-check-label">
+        Enable Layout
+        Editing
+    </label>
+    <input class="form-check-input" type="checkbox" id="layout-editing-check">
+</div>
+
+<div class="row" id="drac-container" style="display: none;">
+
+    <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-6" id="drac-speedometer">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3>
+                            Speed-O-Meter
+                            <button onclick="toggleHelpInfo('speedometer-info')"
+                                    style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                                <i class="mdi mdi-information"></i>
+                            </button>
+                        </h3>
+                    </div>
+                    <div class="form-check custom-switch form-switch">
+                        <label class="form-check-label">Add Favourite </label>
+                        <input class="form-check-input" asp-for="SpeedOMeter" type="checkbox" id="SpeedOMeter"
+                               name="SpeedOMeter">
+                    </div>
+                </div>
+                <div id="speedometer-info" class="hidden alert alert-info" role="alert">
+                    <p>Tracks daily items shipped by department, and then compares it to specific goals. </p>
+                </div>
+                <div class="mt-3 mb-3" style="display: none;">
+                    <select class="departments-select" multiple="multiple"></select>
+                </div>
+                <div class="dropdown float-end" style="margin:1rem">
+                    <a href="#" class="dropdown-toggle arrow-none card-drop p-0" data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="mdi mdi-dots-vertical"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a type="button" class="btn dropdown-item" asp-area="" asp-controller="SpeedOMeterHistories"
+                           asp-action="Index">History</a>
+
+                        @if (User.IsInRole(RoleList.Manager) || User.IsInRole(RoleList.Administrator))
+                        {
+                            <button type="button" class="btn dropdown-item" data-bs-toggle="modal"
+                                    data-bs-target="#ModifyGoals">
+                                Modify Goals
+                            </button>
+                        }
+
+                    </div>
+                </div>
+                <!-- Add the navigation menu with tabs -->
+                <ul class="nav nav-tabs" id="chart-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="overview-tab" data-bs-toggle="tab" href="#overview" role="tab"
+                           aria-controls="overview" aria-selected="true">Overview</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="details-tab" data-bs-toggle="tab" href="#details" role="tab"
+                           aria-controls="details" aria-selected="false">Details</a>
+                    </li>
+                </ul>
+
+                <div class="modal fade" id="departmentSelectionModal" tabindex="-1"
+                     aria-labelledby="departmentSelectionModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="departmentSelectionModalLabel">Select Departments</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="department-options"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary save-departments-btn">
+                                    Apply
+                                    changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add tab content container -->
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                        <div id="new-speed-o-meter-chart"></div>
+                        <div id="no-data-message" class="d-none text-center">
+                            <h4>No shipped products today.</h4>
+                        </div>
+                        <div id="chart-labels" class="text-center"></div>
+                        <div id="new-speed-o-meter-chart"></div>
+                    </div>
+                    <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab"></div>
+                    <div id="no-data-message-details" class="d-none text-center">
+                        <h4>No shipped products today.</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <feature name="@CwaFeatures.ORDER">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-6" id="drac-orderShipments">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3>
+                                Todays Shipments
+                                <button onclick="toggleHelpInfo('orderShipments-info')"
+                                        style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                                    <i class="mdi mdi-information"></i>
+                                </button>
+                            </h3>
+                        </div>
+                        <div class="form-check custom-switch form-switch">
+                            <label class="form-check-label">Add Favourite </label>
+                            <input class="form-check-input" asp-for="OrderShipments" type="checkbox" id="OrderShipments"
+                                   name="OrderShipments">
+                        </div>
+                    </div>
+                    <div id="orderShipments-info" class="hidden alert alert-info" role="alert">
+                        <p>Tracks todays shipments and groups them by the carrier service code. </p>
+                    </div>
+                    <div id="totalshipCount-area" class="apex-charts">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6" id="drac-ordhistory">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3>
+                                Department Order History
+                                <button onclick="toggleHelpInfo('dailyorder-info')"
+                                        style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                                    <i class="mdi mdi-information"></i>
+                                </button>
+                            </h3>
+                        </div>
+                        <div class="form-check custom-switch form-switch">
+                            <label class="form-check-label">Add Favourite </label>
+                            <input class="form-check-input" asp-for="DepartmentOrderHistory" type="checkbox"
+                                   id="DepartmentOrderHistory" name="DepartmentOrderHistory">
+                        </div>
+                    </div>
+                    <label for="department-select" class="form-label"></label>
+                    <div>
+                        <div id="dailyorder-info" class="hidden alert alert-info" role="alert">
+                            <p>Tracks received and completed orders every day. </p>
+                        </div>
+                        <div class="order-fetching-container"
+                             style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                            <div id="order-fetching" class="hidden"
+                                 style="background-color: #37404A; padding: 1rem; border-radius: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+                                <p>Fetching...</p>
+                                <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-sm-6 mb-3">
+                                <div style="width: 100%; overflow: hidden;">
+                                    <select id="department-select" class="form-control"
+                                            style="width: 100%; padding: 4px;">
+                                        <option value="0">All</option>
+                                        @foreach (var department in (IEnumerable<SelectListItem>)ViewBag.Department)
+                                        {
+                                            <option value="@department.Value" selected="@(department.Selected ? "selected" : null)">
+                                                @department.Text
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                                <input type="text" id="departmentDateRange" name="departmentDateRange"
+                                       class="form-control" value="Last 30 Days" readonly style="width: 100%;">
+                            </div>
+                        </div>
+                        <div id="daily-orders-chart" class="apex-charts"></div>
+                    </div>
+                    <!-- end card body-->
+                </div>
+                <!-- end card -->
+            </div>
+        </div>
+    </feature>
+
+    <div class="col-xl-6" id="drac-topdepartment">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-12 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3>
+                                Top Departments
+                                <button onclick="toggleHelpInfo('leaderboard-info')"
+                                        style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                                    <i class="mdi mdi-information"></i>
+                                </button>
+                            </h3>
+                        </div>
+                        <div class="form-check custom-switch form-switch">
+                            <label class="form-check-label">Add Favourite </label>
+                            <input class="form-check-input" asp-for="TopDepartment" type="checkbox" id="TopDepartment"
+                                   name="TopDepartment">
+                        </div>
+                    </div>
+                    <div id="leaderboard-info" class="hidden alert alert-info" role="alert">
+                        <p> Displays the 5 departments with the most items shipped monthly, quarterly, and yearly. </p>
+                    </div>
+
+                    <div>
+                        <select id="timeframe-selector" class="form-control" style="width: fit-content; padding: 4px;">
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row" style="display: flex; align-items: flex-start;">
+                    <div class="leaderboard-fetching-container"
+                         style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+                        <div id="leaderboard-fetching" class="hidden"
+                             style="background-color: transparent; padding: 1rem; border-radius: 5px; text-align: center;">
+                            <p>Fetching...</p>
+                            <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 id="previous-title">Previous Month</h3>
+                        <table id="past-table" class="table dt-responsive webkit-nowrap w-100">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Total Items Shipped</th>
+                                </tr>
+                            </thead>
+                            <tbody id="past-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 id="current-title">Current Month</h3>
+                            <div class="days-remaining" style="margin-top: 8px;">
+                                <p><i>Days until next: </i><b><span id="remaining-days"></span></b></p>
+                            </div>
+                        </div>
+                        <table id="present-table" class="table dt-responsive webkit-nowrap w-100">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Total Items Shipped</th>
+                                </tr>
+                            </thead>
+                            <tbody id="present-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- end row-->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        //get the item order from the DB and parse in to a javascript array
+        var elementPositions = @Html.Raw(Json.Serialize(Model.DashboardLayouts is null ? new object[] { } : Model.DashboardLayouts));
+
+        //dasboard's name
+        var dashboardName = '@DashboardNames.DashboardOperations.ToString()';
+    </script>
+
+    <!-- for drag-n-drop -->
+    <script src="~/lib/hyper-assets/vendor/dragula/dragula.min.js"></script>
+
+    <script src="~/js/pages/home.js"></script>
+}

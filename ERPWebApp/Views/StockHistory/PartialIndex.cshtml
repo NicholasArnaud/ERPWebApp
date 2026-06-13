@@ -1,0 +1,35 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.StockHistory>
+<table class="table dt-responsive webkit-nowrap w-100" id="stockhistory-datatable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifyDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifyByUser)
+            </th>
+            <th hidden>
+                @Html.DisplayNameFor(model => model.StockId)
+            </th>
+            <th hidden>
+                @Html.DisplayNameFor(model => model.ProductId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sku)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th hidden>
+                @Html.DisplayNameFor(model => model.LocationId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalAvailable)
+            </th>
+        </tr>
+    </thead>
+    
+</table>

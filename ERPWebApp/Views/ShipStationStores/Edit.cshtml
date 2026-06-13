@@ -1,0 +1,133 @@
+﻿@model ERPWebApp.Models.ShipStationStore
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>ShipStationStore</h4>
+<hr />
+<form asp-action="Edit" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-5">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ShipStationStoreId" />
+
+
+            <div class="form-group p-1 custom-mt-xs">
+                <label class="form-check-label">Select Store</label>
+                @{
+                    var shipStation = $"{Model.StoreName} [{Model.StoreId.ToString()}]";
+                }
+                <input value="@shipStation" class="form-control" readonly="readonly" />
+                <input type="hidden" asp-for="StoreName" />
+            </div>
+            
+            <div class="form-group p-1">
+                <label asp-for="ContactName" class="control-label"></label>
+                <input asp-for="ContactName" class="form-control" />
+                <span asp-validation-for="ContactName" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="PhoneNumber" class="control-label"></label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="FaxNumber" class="control-label"></label>
+                <input asp-for="FaxNumber" class="form-control" />
+                <span asp-validation-for="FaxNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="PublicEmail" class="control-label"></label>
+                <input asp-for="PublicEmail" class="form-control" />
+                <span asp-validation-for="PublicEmail" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="Address" class="control-label"></label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="StoreType" class="control-label"></label>
+                <select class="select2 form-control select2" data-toggle="select2" id="StoreType" name="StoreType"
+                        asp-items="ViewBag.StoreTypes">
+                    <option value="none" selected disabled hidden>--Select a Store Type--</option>
+                    <option value=""></option>
+                </select>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="RawFiles" class="control-label"></label>
+                <input type="file" multiple asp-for="RawFiles" class="form-control" />
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="HasIncreasedPricing" /> @Html.DisplayNameFor(model =>
+                    model.HasIncreasedPricing)
+                </label>
+            </div>
+            <div class="form-group col-md-12">
+                <label asp-for="Notes">Notes</label>
+                <textarea asp-for="Notes" class="form-control" type="text" rows="5" value=""></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+            <div class="form-group p-2">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </div>
+        <div class="col-md-5">
+            @if (Model.StoreFiles != null && Model.StoreFiles.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Files</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            @foreach (var file in Model.StoreFiles)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex align-items-center">
+                                        <a style="width: 90%; max-width: 90%;" target="_blank" href="@file.Files.FileUrl">@file.Files.FileName</a>
+                                        <a asp-action="DeleteFile" asp-route-storeFileId="@file.StoreFileId">
+                                            <button type="button" class="btn"><span class="mdi mdi-18px mdi-delete"></span></button>
+                                        </a>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+</form>
+<div>
+    <a class="p-2" asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function ()
+        {
+            $("#StoreType").select2();
+        });
+    </script>
+}

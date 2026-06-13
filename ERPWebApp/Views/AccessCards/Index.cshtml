@@ -1,0 +1,131 @@
+﻿@model IEnumerable<ERPWebApp.Models.Company.Security.AccessCard>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Access Cards</h3>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    @if (!this.User.IsInRole(RoleList.SecurityBasic))
+                    {
+                        <a class="btn btn-primary text-white" asp-action="Create">
+                            Create
+                        </a>
+                    }
+                    <div class="d-flex align-items-center">
+                        <label class="me-2" style="white-space: nowrap;">Is Active</label>
+                        <label class="switch">
+                            <input type="checkbox" id="active-toggle" @(ViewBag.IsActive == true ? "checked" : "") />
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <table class="table dt-responsive webkit-nowrap w-100" id="access-card-datatable">
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Employee)</th>
+                            <th>@Html.DisplayNameFor(model => model.Key)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Employee.FullName)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Key)</td>
+                                <td class="table-action">
+                                    @if (this.User.IsInRole(RoleList.Administrator) ||
+                                   this.User.IsInRole(RoleList.HRManager) ||
+                                   this.User.IsInRole(RoleList.SecurityManager) ||
+                                   this.User.IsInRole(RoleList.Developer))
+                                    {
+                                        <a class="action-icon" asp-action="Edit" asp-route-id="@item.AccessCardId">
+                                            <i class="mdi mdi-24px mdi-pencil"></i>
+                                        </a>
+                                    }
+                                    <a class="action-icon" asp-action="Details" asp-route-id="@item.AccessCardId">
+                                        <i class="mdi mdi-24px mdi-book-information-variant"></i>
+                                    </a>
+                                    @if (this.User.IsInRole(RoleList.Administrator) ||
+                                   this.User.IsInRole(RoleList.HRManager) ||
+                                   this.User.IsInRole(RoleList.SecurityManager) ||
+                                   this.User.IsInRole(RoleList.Developer))
+                                    {
+                                        <a class="action-icon" asp-action="Delete" asp-route-id="@item.AccessCardId">
+                                            <i class="mdi mdi-24px mdi-delete"></i>
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var table = $("#access-card-datatable").DataTable({
+                "dom": "<'row'<'col-sm-12 col-md-7'l><'col-sm-12 col-md-4'f><'col-sm-12 col-md-1'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                keys: true,
+                language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>",
+                        next: "<i class='mdi mdi-chevron-right'>"
+                    }
+                },
+                drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded");
+                },
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export',
+                        buttons: [
+                            'copy',
+                            'excel',
+                            'csv',
+                            'pdf',
+                            'print'
+                        ]
+                    }
+                ]
+            });
+
+            $('#active-toggle').change(function () {
+                const isActive = $(this).is(':checked'); 
+
+                $.ajax({
+                    url: '/AccessCards/Index', 
+                    type: 'GET',
+                    data: { isActive: isActive }, 
+                    success: function (response) {
+                        // Replace table body with the new rows
+                        $('#access-card-datatable tbody').html(response);
+                    },
+                    error: function (error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+            });
+        });
+    </script>
+}

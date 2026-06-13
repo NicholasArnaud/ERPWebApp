@@ -1,0 +1,233 @@
+﻿@model ERPWebApp.Models.ProductIndexData
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head xmlns="http://www.w3.org/1999/html">
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+    <link rel="stylesheet" type="text/css" href="~/css/sliderbutton.css">
+</head>
+
+<style type="text/css">
+    #file-action-btn {
+        width: auto;
+    }
+
+    @@media (max-width: 767.98px) {
+        #file-action-btn {
+            border-top-right-radius: 0.15rem;
+            border-bottom-right-radius: 0.15rem;
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+
+        <div id="myModalError" class="modal fade text-width:80%;" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div style="display: none" class="modal-header modal-colored-header bg-danger" id="modalHeadeError">
+                        <i class="dripicons-wrong h1"></i>Error Uploading
+                    </div>
+                    <div style="display: none" class="modal-header modal-colored-header bg-warning" id="modalHeadeWarning">
+                        <i class="dripicons-warning h1"></i>Uploading File
+                    </div>
+                    <div style="display: none" class="modal-header modal-colored-header bg-success" id="modalHeadeSuccess">
+                        <i class="dripicons-checkmark h1"></i>File Uploaded Successfully
+                    </div>
+                    <div id="myModalErrorAlertBody" class="Modal-body" style="text-align:center">
+                        Message will appear here
+                    </div>
+                    <div style="display: none" id="mySpinnerExcelCon" class="d-flex justify-content-center">
+                        <div style="display: none" id="mySpinnerExcel" class="spinner-border avatar-lg text-primary text-successy" role="status"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="myModalBtn" class="btn btn-secondary" onclick="$('#myModalError').modal('hide');">Close </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card col-12">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-9 col-sm-7 col-xs-12">
+                        <h3 class="card-title">Products</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                {
+                    @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.InventoryManager) || User.IsInRole(RoleList.ShippingManager))
+                    {
+                        <div class="row custom-bb">
+                            <div class="col-md-3 col-sm-5 col-xs-12">
+                                <a class="btn btn-dark" asp-action="Create">Create New</a>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row mb-3">
+
+                        <div class="col-md-4 col-sm-6 col-xs-12 d-flex flex-column justify-content-center">
+
+                            <div class="form-check form-switch">
+                                <label class="form-check-label" for="custom-switch-2" id="custom-switch-2-label">Production</label>
+                                <input type="checkbox" class="form-check-input" id="custom-switch-2"
+                                    @(ViewData["isProduction"] == null || (bool)ViewData["isProduction"] ? "checked" : "") />
+                            </div> 
+
+                            @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                            {
+                                <div class="form-check form-switch mt-1">
+                                    <label class="form-check-label" for="custom-switch-3" id="custom-switch-3-label">Is Active</label>
+                                    <input type="checkbox" class="form-check-input" id="custom-switch-3" 
+                                    @(ViewData["isActive"] == null || (bool)ViewData["isActive"] ? "checked" : "") />
+
+                                </div>
+                            }
+
+                        </div>
+
+                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.ProductionManager))
+                        {
+                            <div class="col-md-4 col-sm-6 col-xs-12 custom-mt-xs">
+                                <label class="control-label">File Action: &nbsp;</label>
+                                <div class="d-flex flex-column flex-md-row">
+
+                                    <form asp-action="BatchUserUpload" asp-controller="Products" method="post" enctype="multipart/form-data" class="d-flex flex-grow-1" id="file-upload-form" style="display: none !important;">
+                                        <input id="userUpload" name="userUpload" class="form-control" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                                        <button type="submit" id="btnsubmit" style="display: none" class="btn btn-secondary">upload </button>
+                                    </form>
+
+                                    <button class="btn btn-dark dropdown-toggle flex-grow-0 btn-block" id="file-action-btn" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select an Action</button>
+                                    <div id="file-action-dropdown" class="dropdown-menu">
+                                        <a class="dropdown-item" asp-action="DownloadExcelTemplate"><span class="mdi mdi-18px mdi-microsoft-excel"> Download Template</span></a>
+                                        <a class="dropdown-item" id="file-upload-option" href="#" disabled>Upload File</a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+                    <div class="row mb-3 custom-bb">
+
+                        <div class="form-group col-md-4 col-sm-6 col-xs-12">
+                            <label class="control-label"> Select Departments</label>
+                            <select class="select2 form-control select2-multiple"
+                                asp-items="ViewBag.DepartmentList"
+                                multiple="multiple"
+                                required="required"
+                                data-placeholder="Choose ..."
+                                id="department-pid"
+                                name="department-pid">
+                            </select>
+                        </div>
+
+                        <div class="form-group col-md-4 col-sm-6 col-xs-12 custom-mt-xs">
+                            <div class="form-group col-12">
+                                <label class="control-label"> Select Subcatagory</label>
+                                <select class="select2 form-control select2-multiple"
+                                    asp-items="ViewBag.SubCatList"
+                                    multiple="multiple"
+                                    required="required"
+                                    data-placeholder="Choose ..."
+                                    id="subcat-pid"
+                                    name="subcat-pid">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-4 col-sm-6 col-xs-12 custom-mt-xs custom-mt-sm">
+                            <div class="form-group col-12">
+                                <label class="control-label"> Select Product Tag</label>
+                                <select class="select2 form-control select2-multiple"
+                                    asp-items="ViewBag.ProductTagList"
+                                    multiple="multiple"
+                                    required="required"
+                                    data-placeholder="Choose ..."
+                                    id="producttag-pid"
+                                    name="producttag-pid">
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+
+                }
+
+                <div class="row">
+                </div>
+
+                <div class="row" id="test">
+                    <div class="col-12">
+                        <div id="filtered-orders-partial">
+                            @{
+                                await Html.RenderPartialAsync("PartialView", Model.Products);
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div id="my-detail-modal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="my-detail-modal-label">Product Details</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div id="details-modal-view"></div>
+                        </form>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    </div>
+    <div class="card">
+        <div id="my-delete-modal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="my-delete-modal-label">Delete Product</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div id="delete-modal-view"></div>
+                        </form>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/pages/product-datatable.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var msg = '@TempData["ErrorMessage"]';
+            if (msg) {
+                showModal(msg, "error");
+            }
+
+            var successmsg = '@TempData["SuccessMessage"]';
+            if (successmsg) {
+                showModal(successmsg, "success");
+            }
+        });
+    </script>
+}

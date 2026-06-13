@@ -1,0 +1,235 @@
+﻿@{
+    ViewData["Title"] = "Invoice Import";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Invoicing</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Invoice Imports Dropdown -->
+                    <div class="col-6 col-md-2 mb-2">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle w-100" type="button" id="invoiceImportsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Invoice Imports
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="invoiceImportsDropdown">
+                                <li>
+                                    <form asp-controller="Invoice" asp-action="DHLInvoiceImport" method="post" enctype="multipart/form-data">
+                                        <button type="button" class="dropdown-item" onclick="this.nextElementSibling.click()">DHL Invoice Import</button>
+                                        <input type="file" class="form-control" name="csvFile" accept=".csv" style="display:none" onchange="this.form.submit()">
+                                    </form>
+                                </li>
+                                <li>
+                                    <form asp-controller="Invoice" asp-action="UPSInvoiceImport" method="post" enctype="multipart/form-data">
+                                        <button type="button" class="dropdown-item" onclick="this.nextElementSibling.click()">UPS Invoice Import</button>
+                                        <input type="file" class="form-control" name="xlsFile" accept=".xls" style="display:none" onchange="this.form.submit()">
+                                    </form>
+                                </li>
+                                <li>
+                                    <form asp-controller="Invoice" asp-action="StampsUSPSInvoiceImport" method="post" enctype="multipart/form-data">
+                                        <button type="button" class="dropdown-item" onclick="this.nextElementSibling.click()">Stamps/USPS Invoice Import</button>
+                                        <input type="file" class="form-control" name="csvFile" accept=".csv" style="display:none" onchange="this.form.submit()">
+                                    </form>
+                                </li>
+                                <li>
+                                    <form asp-controller="Invoice" asp-action="EasyPostInvoiceImport" method="post" enctype="multipart/form-data">
+                                        <button type="button" class="dropdown-item" onclick="this.nextElementSibling.click()">EasyPost Invoice Import</button>
+                                        <input type="file" class="form-control" name="csvFile" accept=".csv" style="display:none" onchange="this.form.submit()">
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Other Imports Dropdown -->
+                    <div class="col-6 col-md-2 mb-2">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle w-100" type="button" id="otherImportsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Other Imports
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="otherImportsDropdown">
+                                <li>
+                                    <form asp-controller="Invoice" asp-action="SkulabsImport" method="post" enctype="multipart/form-data">
+                                        <button type="button" class="dropdown-item" onclick="this.nextElementSibling.click()">Skulabs Import</button>
+                                        <input type="file" class="form-control" name="csvFile" accept=".csv" style="display:none" onchange="this.form.submit()">
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <form id="search-form" method="get">
+                    <div class="row">
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="filter-carrierType">Carrier Type</label>
+                            <select class="form-control filter-element" id="filter-carrierType" name="carrierType">
+                                <option value="">Select Carrier</option>
+                                <option value="DHL">DHL</option>
+                                <option value="UPS">UPS</option>
+                                <option value="StampsUSPS">Stamps/USPS</option>
+                                <option value="EasyPost">EasyPost</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="filter-fileName">File Name</label>
+                            <input type="text" class="form-control filter-element" id="filter-fileName" name="fileName" placeholder="Search..." />
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="filter-uploadedBy">Uploaded By</label>
+                            <input type="text" class="form-control filter-element" id="filter-uploadedBy" name="uploadedBy" placeholder="Search..." />
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="filter-orderNumber">Order Number</label>
+                            <input type="text" class="form-control filter-element" id="filter-orderNumber" name="orderNumber" placeholder="Search..." />
+                        </div>
+                        <div class="col-12 col-md-2 mb-2">
+                            <label for="filter-trackingCode">Tracking Code</label>
+                            <input type="text" class="form-control filter-element" id="filter-trackingCode" name="trackingCode" placeholder="Search..." />
+                        </div>
+                        <div class="col-12 col-md-4 mb-2">
+                            <label class="form-label">Upload Date Range</label>
+                            <input type="hidden" id="uploadDateStart" name="uploadDateStart" />
+                            <input type="hidden" id="uploadDateEnd" name="uploadDateEnd" />
+                            <div id="upload-date-range" class="form-control" data-toggle="date-picker-range" data-target-display="#selected-upload-date" data-cancel-class="btn-light">
+                                <i class="mdi mdi-calendar"></i>
+                                <span id="selected-upload-date"></span>
+                                <i class="mdi mdi-menu-down"></i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-2 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-light w-100">Search</button>
+                        </div>
+                        <div class="col-12 col-md-2 mb-2 d-flex align-items-end">
+                            <button type="button" id="reset-filters" class="btn btn-secondary w-100">Reset Filters</button>
+                        </div>
+                    </div>
+                </form>
+                <hr />
+                <div class="table-responsive">
+                    <table class="table table-sm table-centered dt-responsive" id="invoices-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Carrier Type</th>
+                                <th>Upload Date</th>
+                                <th>File Name</th>
+                                <th>Uploaded By</th>
+                                <th>File Url</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function() {
+            $('#filter-carrierType').select2({
+                placeholder: "Select Carrier",
+                allowClear: true
+            });
+
+            $('#filter-carrierType').on('select2:clear', function(e) {  
+                $(this).val('').trigger('change');  
+            });  
+
+            // Setting up the default date range.
+            var endDate = moment();
+            var startDate = moment().subtract(1, 'month');
+
+            $('#upload-date-range').daterangepicker({
+                autoUpdateInput: false,
+                startDate: startDate,
+                endDate: endDate,
+                locale: {
+                    cancelLabel: 'Clear',
+                    format: 'YYYY-MM-DD'
+                }
+            }, function(start, end, label) {
+                $('#uploadDateStart').val(start.format('YYYY-MM-DD'));
+                $('#uploadDateEnd').val(end.format('YYYY-MM-DD'));
+                $('#selected-upload-date').html(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
+            });
+
+            $('#uploadDateStart').val(startDate.format('YYYY-MM-DD'));
+            $('#uploadDateEnd').val(endDate.format('YYYY-MM-DD'));
+            $('#selected-upload-date').html(startDate.format('MM/DD/YYYY') + ' - ' + endDate.format('MM/DD/YYYY'));
+
+            $('#upload-date-range').on('cancel.daterangepicker', function(ev, picker) {
+                $('#uploadDateStart').val('');
+                $('#uploadDateEnd').val('');
+                $('#selected-upload-date').html('');
+            });
+
+            $('#reset-filters').on('click', function() {
+                $('.filter-element').val('').trigger('change');
+                $('#filter-carrierType').val('').trigger('change');
+                $('#filter-fileName').val('');
+                $('#filter-uploadedBy').val('');
+                $('#filter-orderNumber').val('');
+                $('#filter-trackingCode').val('');
+            });
+
+            var table = $('#invoices-table').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "searching": false,
+                "paging": true,
+                "pageLength": 10,
+                "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+                "ajax": {
+                    "url": '@Url.Action("GetInvoices", "Invoice")',
+                    "type": "GET",
+                    "data": function (data) {
+                        data.carrierType = $('#filter-carrierType').val();
+                        data.uploadDateStart = $('#uploadDateStart').val();
+                        data.uploadDateEnd = $('#uploadDateEnd').val();
+                        data.fileName = $('#filter-fileName').val();
+                        data.uploadedBy = $('#filter-uploadedBy').val();
+                        data.orderNumber = $('#filter-orderNumber').val();
+                        data.trackingCode = $('#filter-trackingCode').val();
+                    }
+                },
+                "columns": [
+                    { "data": "carrierType" },
+                    { "data": "formattedUploadDate" },
+                    { "data": "fileName" },
+                    { "data": "uploadedBy" },
+                    {
+                        "data": "fileUrl",
+                        "render": function(data, type, row) {
+                            return data ? '<a href="' + data + '">Download</a>' : 'N/A';
+                        }
+                    },
+                    { "data": "totalCost", "render": $.fn.dataTable.render.number(',', '.', 2, '$') }
+                ],
+                "language": {
+                    "paginate": {
+                        "previous": "<i class='mdi mdi-chevron-left'>",
+                        "next": "<i class='mdi mdi-chevron-right'>"
+                    }
+                },
+                "drawCallback": function() {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded");
+                }
+            });
+
+            $('#search-form').on('submit', function(e) {
+                e.preventDefault();
+                table.draw();
+            });
+        });
+    </script>
+}  

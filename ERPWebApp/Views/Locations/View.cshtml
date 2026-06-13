@@ -1,0 +1,112 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.LocationViewModel>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12">
+                    @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                    {
+                        <div class="col-3 mt-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="inactive-checkbox">
+                                <label class="form-check-label" for="inactive-checkbox">
+                                    Show Inactive Locations
+                                </label>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="col-3">
+                        <label class="form-check-label" for="site-select-id">
+                            Filter By Site
+                        </label>
+                        <select class="form-control" id="site-select-id" asp-items="ViewBag.Site">
+                            <option value="0">All Sites</option>
+                        </select>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.location.Sites)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.location.LocationName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.location.LocationDescription)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.location.Type)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.location.IsActive)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.location.IsExternal)
+                                </th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.location.Sites.SiteId)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.location.LocationName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.location.LocationDescription)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.location.Type)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.location.IsActive)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.location.IsExternal)
+                                    </td>
+                                    <td>
+
+                                        <a asp-action="Edit" asp-route-id="@item.location.LocationId">Edit</a> |
+                                        <a asp-action="Details" asp-route-id="@item.location.LocationId">Details</a> |
+                                        <a asp-action="Delete" asp-route-id="@item.location.LocationId">Delete</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6">
+                                        <div id="createLocationPartialView">
+                                            <table class="table responsive mb-1">
+                                                @await Html.PartialAsync("_StockViewPartial", item.stocks)
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+          
+
+        </div>
+        </div>
+        
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

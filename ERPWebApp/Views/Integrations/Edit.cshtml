@@ -1,0 +1,11 @@
+﻿@*@model EditIntegrationViewModel*@
+
+<h2>Edit Integration</h2>
+
+<form method="post" action="@Url.Action("Edit", "Integrations")">
+    @* Will put form fields for integration details here *@
+
+    <button type="button" onclick="window.location.href='@Url.Action("InitiateShopifyOAuth", "Integrations", new { id = Model.Id })'">
+        Reconnect to Shopify
+    </button>
+</form>

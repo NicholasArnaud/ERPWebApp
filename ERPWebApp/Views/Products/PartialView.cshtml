@@ -1,0 +1,104 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.Product>
+
+    <div class="table-responsive" style="overflow-x: hidden;">
+        <table class="table dt-responsive webkit-nowrap w-100" id="product-datatable">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Sku)
+                    </th>
+                    <th class='notexport'>
+                        @Html.DisplayNameFor(model => model.ProductId)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                    <th>
+                        SubCategory
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.FulfillmentCost)
+                    </th>
+                    <th id="costcolumn">
+                        @Html.DisplayNameFor(model => model.Cost)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.OverseasCost)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.LaborCost)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.AltItemNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.AlternateProductId)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.OnOrder)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.LeadTime)
+                    </th>
+                    <th hidden class='notexport'>
+                        @Html.DisplayNameFor(model => model.IsEmbroidery)
+                    </th>
+                    <th hidden class='notexport'>
+                        @Html.DisplayNameFor(model => model.IsEngraving)
+                    </th>
+                    <th hidden class='notexport'>
+                        @Html.DisplayNameFor(model => model.IsMetal)
+                    </th>
+                    <th hidden class='notexport'>
+                        @Html.DisplayNameFor(model => model.IsUv)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.StockTotalAvailable)
+                    </th>
+                    <th>
+                        Tags
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IsActive)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.WeightAmount)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.WeightUnit)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.Length)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.Width)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.Height)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.DimensionalUnit)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.IsExternalProduct)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.Departments)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.MinInventory)
+                    </th>
+                    <th class="none">
+                        @Html.DisplayNameFor(model => model.MaxInventory)
+                    </th>
+                    <th>
+                        Image
+                    </th>
+                    <th class='notexport'>
+                        <a>Actions</a>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+    </div>

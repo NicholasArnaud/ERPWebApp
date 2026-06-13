@@ -1,0 +1,45 @@
+﻿@model IEnumerable<ERPWebApp.Models.SalesReport>
+
+
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Sku)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QuantitySold)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CostPerItem)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ShippingCost)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sku)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.QuantitySold)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CostPerItem)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalCost)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ShippingCost)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

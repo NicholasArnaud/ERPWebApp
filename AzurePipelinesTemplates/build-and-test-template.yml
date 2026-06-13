@@ -1,0 +1,102 @@
+parameters:
+- name: buildConfiguration
+  type: string
+  default: 'Release'
+- name: dotnet_sdk_version
+  type: string
+  default: 9.x
+- name: iteration
+  type: string
+  default: v.1.2
+
+stages:
+- stage: BuildStage
+  displayName: 'Build Stage'
+  jobs:
+    - job: BuildJob
+      displayName: 'Build Job'
+      steps:
+        - checkout: self
+          clean: true
+          fetchDepth: 1
+
+        # Set DOTNET_ROOT environment variable
+        - script: |
+            echo ##vso[task.setvariable variable=DOTNET_ROOT]$(DOTNET_ROOT)
+            echo ##vso[task.prependpath]$(DOTNET_ROOT)
+          displayName: 'Set DOTNET_ROOT Environment Variable'
+
+        # Install .NET Core SDK if not cached
+        - task: UseDotNet@2
+          displayName: 'Install .NET Core sdk ${{ parameters.dotnet_sdk_version }}'
+          inputs:
+            version: ${{ parameters.dotnet_sdk_version }}
+            installationPath: $(DOTNET_ROOT)
+            includePreviewVersions: true
+        - task: AdvancedSecurity-Codeql-Init@1
+          displayName: 'Init CodeQL Adv. Security'
+          inputs:
+            languages: 'javascript, csharp'
+              # Supported languages: csharp, cpp, go, java, javascript, python, ruby, swift
+              # You can customize the initialize task: https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/advanced-security-codeql-init-v1?view=azure-pipelines
+              # If you're using a self-hosted agent to run CodeQL, use `enableAutomaticCodeQLInstall` to automatically use the latest CodeQL bits on your agent:
+            enableAutomaticCodeQLInstall: true
+        # Restore dependencies
+        - task: DotNetCoreCLI@2
+          displayName: 'Dotnet Restore'
+          inputs:
+            command: restore
+            projects: '**/*.csproj'
+            arguments: '--packages $(NUGET_PACKAGES)'
+
+        # Build the project
+        - task: DotNetCoreCLI@2
+          displayName: 'Dotnet Build'
+          inputs:
+            projects: '**/*.csproj'
+            arguments: '--configuration ${{ parameters.buildConfiguration }} --framework net9.0 --no-restore'
+        - task: AdvancedSecurity-Dependency-Scanning@1 # More details on this task: https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/advanced-security-dependency-scanning-v1?view=azure-pipelines
+        - task: AdvancedSecurity-Codeql-Analyze@1
+        # Run tests
+        - task: DotNetCoreCLI@2
+          displayName: 'dotnet test'
+          inputs:
+            command: 'test'
+            arguments: '--no-restore --no-build --filter "Category=execute" --configuration ${{ parameters.buildConfiguration }} --collect "Code coverage"'
+            # arguments: '--filter "Category=execute" --configuration ${{ parameters.buildConfiguration }} --no-restore --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
+            publishTestResults: true
+            projects: '**/*UnitTests.csproj'
+
+        # - task: PublishCodeCoverageResults@1
+        #   inputs:
+        #     codeCoverageTool: 'Cobertura'
+        #     summaryFileLocation: '$(Pipeline.Workspace)/**/*coverage.cobertura.xml'
+
+        # Publish the application
+        - task: DotNetCoreCLI@2
+          displayName: 'Publish the application'
+          condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+          inputs:
+            command: 'publish'
+            projects: '**/*.csproj'
+            arguments: '--configuration Release --framework net9.0 --self-contained --runtime win-x64 --output $(build.artifactStagingDirectory) --no-restore'
+            publishWebProjects: true
+            zipAfterPublish: true
+
+        # Generate EF Core Migration Bundle
+        # - script: |
+        #     dotnet tool install --global dotnet-ef
+        #     echo "##vso[task.prependpath]$HOME/.dotnet/tools"
+        #     dotnet tool restore
+        #     cd ERPWebApp
+        #     dotnet ef migrations bundle --output "$(build.artifactStagingDirectory)/EfBundle/efbundle.exe"
+        #   displayName: 'Generate EF Core Migration Bundle'
+        #   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
+        # Publish build artifact
+        - task: PublishPipelineArtifact@1
+          displayName: 'Publish build artifact'
+          condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+          inputs:
+            artifactName: 'erpbuild'
+            targetPath: '$(build.artifactStagingDirectory)'

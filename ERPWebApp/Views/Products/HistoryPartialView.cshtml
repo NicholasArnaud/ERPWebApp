@@ -1,0 +1,59 @@
+﻿@model ERPWebApp.Data.DTOModels.ProductDTO
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title" id="header-text-id">Movement History</h2>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table dt-responsive webkit-nowrap w-100" id="movementHistory-datatable">
+                <thead>
+                    <tr>
+                        <th data-priority="1">
+                            Movement Type
+                        </th>
+                        <th data-priority="1">
+                            SKU
+                        </th>
+                        <th data-priority="1">
+                            From
+                        </th>
+                        <th data-priority="1">
+                            From Running Balance
+                        </th>
+                        <th data-priority="1">
+                            To
+                        </th>
+                        <th data-priority="1">
+                            To Running Balance
+                        </th>
+                        <th data-priority="1">
+                            Action Qty
+                        </th>
+                        <th data-priority="1">
+                            Date
+                        </th>
+                        <th data-priority="2">
+                            Employee
+                        </th>
+                        <th data-priority="2">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+     <script type="text/javascript">
+        $(document).ready(function () {
+          
+        });
+   
+    </script>
+}

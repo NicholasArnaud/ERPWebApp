@@ -1,0 +1,42 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: windows-2022
+
+variables:
+  buildConfiguration: 'Release'
+  NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+  DOTNET_ROOT: $(Pipeline.Workspace)/.dotnet
+
+stages:
+- template: AzurePipelinesTemplates/build-and-test-template.yml
+  parameters:
+    buildConfiguration: '$(buildConfiguration)'
+    dotnet_sdk_version: '9.x'
+
+- template: AzurePipelinesTemplates/deploy-template.yml
+  parameters:
+    azureSubscription: "ERPAzureSubscription"
+    resourceGroupName: "DefaultResourceGroup"
+    webAppName: "ERPWebApp"
+    sourceBranchTrigger: "refs/heads/main"
+    environment: ERPProd
+    slotName: "Staging"
+    artifactName: ERPbuild
+    dependsOn: 'BuildStage'
+    variableGroupName: ERP-Prod
+
+- template: AzurePipelinesTemplates/deploy-template.yml
+  parameters:
+    azureSubscription: "ERPAzureSubscription"
+    resourceGroupName: "ERP-Client"
+    webAppName: "Client-ERP"
+    sourceBranchTrigger: "refs/heads/main"
+    environment: ClientERPProd
+    slotName: "production"
+    artifactName: ERPbuild
+    dependsOn: 'BuildStage'
+    variableGroupName: ERP-Prod-Client

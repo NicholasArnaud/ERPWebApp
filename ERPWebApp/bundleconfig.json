@@ -1,0 +1,206 @@
+[
+  {
+    "outputFileName": "wwwroot/js/pages/home.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/home.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/product-creation.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/product-creation.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/sales-report.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/sales-report.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/label-finder.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/label-finder.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/security-access.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/security-access.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/product-vendor-map.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/product-vendor-map.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/stock-datatable.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/stock-datatable.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/stockhistory-datatable.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/stockhistory-datatable.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/product-datatable.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/product-datatable.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/purchase-order-edit.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/purchase-order-edit.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/report-page.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/report-page.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/purchase-order-create.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/purchase-order-create.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/print-all-purchase-order.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/print-all-purchase-order.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/location-datatable.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/location-datatable.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/purchase-order-index.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/purchase-order-index.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/nirf-edit.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/nirf-edit.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/container-datatable.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/container-datatable.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/financials-fulfillment-chart.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/financials-fulfillment-chart.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/financials-top-10-chart.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/financials-top-10-chart.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/financials-trends-chart.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/financials-trends-chart.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/order-batch.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/order-batch.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/shipstation-awaiting-orders.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/shipstation-awaiting-orders.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/product-vendor-datatable.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/product-vendor-datatable.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/auditlog-datatable.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/auditlog-datatable.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/email-alerts.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/email-alerts.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/cycleCount.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/cycleCount.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/batching.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/batching.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/myDash-home-dashboard.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/myDash-home-dashboard.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/InventoryRequestForms/create.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/InventoryRequestForms/create.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/InventoryRequestForms/edit.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/InventoryRequestForms/edit.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/Nirf/edit.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/Nirf/edit.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/Move-Stock.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/Move-Stock.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/Orders/Details.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/Orders/Details.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/pages/ShippingScanout/index.min.js",
+    "inputFiles": [
+      "wwwroot/js/pages/ShippingScanout/index.js"
+    ]
+  }
+]

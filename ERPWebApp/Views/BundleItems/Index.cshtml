@@ -1,0 +1,73 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.BundleItem>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+<p>
+    <div typeof="button" class="btn btn-dark mb-2">
+        <a class="nav-link" asp-action="Create">
+            Create New
+        </a>
+    </div>
+</p>
+
+<div class="table-responsive">
+    <table id="bundleItemsTable" class="table dt-responsive webkit-nowrap w-100">
+        <thead>
+            <tr>
+                <th class="col-3 col-md-4">
+                    @Html.DisplayNameFor(model => model.Bundle)
+                </th>
+                <th class="col-4 col-md-4">
+                    @Html.DisplayNameFor(model => model.Product)
+                </th>
+                <th class="col-2 col-md-1">
+                    @Html.DisplayNameFor(model => model.Quantity)
+                </th>
+                <th class="col-3 col-md-3"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Bundles" asp-action="Details" asp-route-id="@item.BundleId">
+                            @Html.DisplayFor(modelItem => item.Bundle.BundleName)
+                        </a>
+                    </td>
+                    <td>
+                        <a asp-controller="Products" asp-action="Details" asp-route-id="@item.Product.ProductId">
+                            @Html.DisplayFor(modelItem => item.Product.Description)
+                        </a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Quantity)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.BundleItemId">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.BundleItemId">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.BundleItemId">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            $('#bundleItemsTable').DataTable({
+                "responsive": true
+            });
+        });
+    </script>
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css" />  

@@ -1,0 +1,500 @@
+﻿@using ERPWebApp.Models.Inventory
+@model ERPWebApp.Models.NirfForms.NirfViewModel
+<style>
+    .accordion-button:not(.collapsed) {
+        background: #464F5B;
+        color: white;
+    }
+
+
+    /*
+                                                This is for select2 validations.
+                                                If a select2 didnt pass the validation and gets auto applied the classes invalid
+                                                the css below will set the border to red. And same Visa Versa for if it passes validation
+                                                then the css below will set the border to green.S
+                                                */
+    .was-validated .custom-select:invalid + .select2 .select2-selection {
+        border-color: #FF5B5B !important;
+    }
+
+    .was-validated .custom-select:valid + .select2 .select2-selection {
+        border-color: #10C469 !important;
+    }
+
+    *:focus {
+        outline: 0px;
+    }
+    /* Popup container */
+    .popup {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+        /* The actual popup (appears on top) */
+        .popup .popuptext {
+            visibility: hidden;
+            width: 180px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 10px;
+            padding: 8px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 100%;
+            margin-left: -100px;
+        }
+
+        /* Toggle this class when clicking on the popup container (hide and show the popup) */
+        .popup .show {
+            visibility: visible;
+            -webkit-animation: fadeIn 1s;
+            animation: fadeIn 1s
+        }
+
+    #department-error {
+        color: #ff5b5b;
+    }
+</style>
+@if (@TempData["CreateError"] != null)
+{
+    <div class="row">
+        <div class="col-12 text-danger">
+            <h2>@TempData["CreateError"]</h2>
+        </div>
+    </div>
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">NIRF Form</h2>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" class="needs-validation" novalidate enctype="multipart/form-data">
+                    <div class="container-fluid">
+
+                        <!--Skus-->
+                        <div class="panel panel-default mt-3">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Skus
+                                </h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <div class="row g-3">
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label" asp-for="NirfForms.SellersProductSku">Sellers Product Sku</label>
+                                        <input asp-for="NirfForms.SellersProductSku" minlength="4" class="form-control" type="text" required />
+                                        <span asp-validation-for="NirfForms.SellersProductSku" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="sku-category">Sku Category</label>
+                                        <select id="sku-category" class="form-control select2" data-toggle="select2" required>
+                                            <option value="" disabled selected>Category</option>
+                                        </select>
+                                        <div class="invalid-feedback">No category selected</div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="sku-UOM">Unit of Measure</label>
+                                        <select id="sku-UOM" class="form-control select2" data-toggle="select2" required>
+                                            <option value="" disabled selected>Unit Of Measure</option>
+                                        </select>
+                                        <div class="invalid-feedback">No unit of measure selected</div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="sku-color">Color</label>
+                                        <select id="sku-color" class="form-control select2" data-toggle="select2" required>
+                                            <option value="" disabled selected>Color</option>
+                                        </select>
+                                        <div class="invalid-feedback">No color selected</div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="sku-set-number">Set Quantity</label>
+                                        <input id="sku-set-number" class="form-control" type="number" min="1" value="1">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label" asp-for="NirfProductMapping.Product.Sku">Sku</label>
+                                        <input asp-for="NirfProductMapping.Product.Sku" required minlength="4" id="full-sku" class="form-control" type="text" />
+                                        <span asp-validation-for="NirfProductMapping.Product.Sku" class="text-danger"></span>
+                                    </div>            
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Basic description of item-->
+                        <div class="panel panel-default  mt-3">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Basic description of item
+                                </h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="form-group col-12">
+                                        <label class="control-label" asp-for="NirfProductMapping.Product.Description">Description</label>
+                                        <textarea asp-for="NirfProductMapping.Product.Description" class="form-control" required rows="5"><</textarea>
+                                        <span asp-validation-for="NirfProductMapping.Product.Description" class="text-danger"></span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Item selection-->
+                        <div class="panel panel-default mt-4">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Item selection
+                                </h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label" asp-for="NirfProductMapping.Product.AltItemNumber">Alt Item No.</label>
+                                        <input asp-for="NirfProductMapping.Product.AltItemNumber" required class="form-control" type="text" />
+                                        <span asp-validation-for="NirfProductMapping.Product.AltItemNumber" class="text-danger"></span>
+                                    </div>
+
+                                  
+
+                                    <div class="form-group col-md-4">
+                                        <input hidden type="text" name="filterText" id="filterText" value="@ViewBag.ProductDepartmentList" />
+                                        <label class="control-label">Select Departments</label>
+                                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                                data-placeholder="Choose ..." id="DepartmentList" name="DepartmentList"
+                                                asp-items="ViewBag.DepartmentList" multiple="multiple">
+                                        </select>
+                                        <div class="invalid-feedback">No Department selected</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Weight of item-->
+                        <div class="panel panel-default mt-4">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Weight of item
+                                </h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="form-group col">
+                                        <label class="control-label" asp-for="NirfProductMapping.Product.WeightUnit">Weight Unit</label>
+                                        <select class="select custom-select select2-multiple"
+                                                data-toggle="select2"
+                                                asp-for="NirfProductMapping.Product.WeightUnit" asp-items="@Html.GetEnumSelectList<WeightUnit>()" class="form-control" required>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col">
+                                        <label class="control-label" asp-for="NirfProductMapping.Product.WeightAmount">Weight</label>
+                                        <input class="form-control" type="number" min="0.01" step="0.01" onchange="setTwoNumberDecimal" value="0.00" required asp-for="NirfProductMapping.Product.WeightAmount" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--dimensions of item-->
+                        <div class="panel panel-default mt-4">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Dimensions of item
+                                </h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="form-group col">
+                                        <label class="control-label" asp-for="NirfProductMapping.Product.DimensionalUnit">Dimensional Unit</label>
+                                        <select class="select custom-select select2-multiple"
+                                                data-toggle="select2"
+                                                asp-for="NirfProductMapping.Product.DimensionalUnit" required asp-items="@Html.GetEnumSelectList<DimensionalUnit>()" class="form-control">
+                                        </select>
+                                    </div>
+                                    <div class="form-group col">
+                                        <label class="control-label" asp-for="NirfProductMapping.Product.Length">Length</label>
+                                        <input class="form-control" type="number" min="0.01" step="0.01" value="0.00" required asp-for="NirfProductMapping.Product.Length" />
+                                    </div>
+                                    <div class="form-group col">
+                                        <label class="control-label" asp-for="NirfProductMapping.Product.Width">Width</label>
+                                        <input class="form-control" type="number" min="0.01" step="0.01" value="0.00" required asp-for="NirfProductMapping.Product.Width" />
+                                    </div>
+                                    <div class="form-group col">
+                                        <label class="control-label" asp-for="NirfProductMapping.Product.Height">Height</label>
+                                        <input class="form-control" type="number" min="0.01" step="0.01" value="0.00" required asp-for="NirfProductMapping.Product.Height" />
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--item image-->
+                        <div class="panel panel-default mt-4">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Item images
+                                </h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="form-group p-1 mt-2">
+                                        <label class="control-label">Upload Images (Png / Jpeg)</label>
+                                        <input accept="image/jpeg, image/png" class="form-control" type="file" name="imagesInput" id="images-input" multiple="multiple" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Design & Placement-->
+                        <div class="panel panel-default mt-4">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Design & Placement
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row g-3">
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label" asp-for="NirfForms.Orientation">Orientation</label>
+                                        <input class="form-control" type="text" required asp-for="NirfForms.Orientation" />
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label" asp-for="NirfForms.DesignPlacement">Design Placement</label>
+                                        <input class="form-control" type="text" required asp-for="NirfForms.DesignPlacement" />
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label" asp-for="NirfForms.DesignAlignment">Design Alignment</label>
+                                        <input class="form-control" type="text" required asp-for="NirfForms.DesignAlignment" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Cost & Fulfillment-->
+                        <div class="panel panel-default mt-4">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Cost & Fulfillment
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label class="form-label" asp-for="NirfProductMapping.Product.FulfillmentCost">Fulfillment Cost</label>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" min="0.01" step="0.01" value="0.00" required asp-for="NirfProductMapping.Product.FulfillmentCost">
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label class="form-label" asp-for="NirfProductMapping.Product.Cost">Cost</label>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" min="0.01" step="0.01" value="0.00" required asp-for="NirfProductMapping.Product.Cost">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Employee Assignments-->
+                        <div class="panel panel-default mt-4">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Employee Assignments
+                                </h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <div class="row g-3">
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label">Select Inventory Employee</label>
+                                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                                data-placeholder="Choose ..." id="InventoryList" name="InventoryList"
+                                                asp-items="ViewBag.InventoryList">
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label">Select Parameter Employee</label>
+                                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                                data-placeholder="Choose ..." id="ParameterList" name="ParameterList"
+                                                asp-items="ViewBag.ParameterList">
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label">Select Packaging Employee</label>
+                                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                                data-placeholder="Choose ..." id="PackagingList" name="PackagingList"
+                                                asp-items="ViewBag.PackagingList">
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label">Select Forecasting Employee</label>
+                                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                                data-placeholder="Choose ..." id="ForecastingList" name="ForecastingList"
+                                                asp-items="ViewBag.ForecastingList">
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label">Select Shipping Employee</label>
+                                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                                data-placeholder="Choose ..." id="ShippingList" name="ShippingList"
+                                                asp-items="ViewBag.ShippingList">
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label class="control-label">Select Vendor Employee</label>
+                                        <select class="select2 form-control select2-multiple" data-toggle="select2" required="required"
+                                                data-placeholder="Choose ..." id="VendorList" name="VendorList"
+                                                asp-items="ViewBag.VendorList">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Additional Information-->
+                        <div class="panel panel-default mt-4">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Additional Information
+                                </h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label" asp-for="NirfForms.SpecialInstructions">Special Instructions</label>
+                                        <textarea asp-for="NirfForms.SpecialInstructions" class="form-control" rows="5"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                      
+                       
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <button class="btn btn-primary" type="submit"> Continue</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/js/pages/product-creation.min.js"></script>
+        <script type="text/javascript">
+            function infoFunction() {
+                var popup = document.getElementById("info-popup");
+                popup.classList.toggle("show");
+            }
+            $(document).ready(function () {
+                let url = '@Url.Action("GetSkuCategories")';
+                $.getJSON(url, function (response) {
+                    addSkuCategories(response);
+                });
+                url = '@Url.Action("GetSkuColors")';
+                $.getJSON(url, function (response) {
+                    addSkuColors(response);
+                });
+                url = '@Url.Action("GetSkuUnitOfMeasure")';
+                $.getJSON(url, function (response) {
+                    addSkuUnitOfMeasure(response);
+                });
+                $("#sku-category").on('select2:select', function (e) {
+                    let data = e.params.data;
+                    buildSkuItem();
+                    console.log(data.id);
+                });
+                $("#sku-UOM").on('select2:select', function (e) {
+                    let data = e.params.data;
+                    buildSkuItem();
+                    console.log(data.id);
+                });
+                $("#sku-color").on('select2:select', function (e) {
+                    let data = e.params.data;
+                    buildSkuItem();
+                    console.log(data.id);
+                });
+                $("#sku-set-number").change(function () {
+                    let data = $("#sku-set-number").val();
+                    buildSkuItem();
+                    console.log(data);
+                });
+
+                
+
+                function setTwoNumberDecimal(event) {
+                    this.value = parseFloat(this.value).toFixed(2);
+                }
+                // this uses bootstraps custom validation rules and applies to every form on the page. If you set a "required" tag inside a form element
+                // ex. <textarea rows="2" required></textarea>
+                // then the form will not submit until that textarea gets validation with whatever conditions you set.
+
+                (function () {
+                    var forms = document.querySelectorAll('.needs-validation');
+
+                    Array.prototype.slice.call(forms)
+                        .forEach(function (form) {
+                            form.addEventListener('submit', function (event) {
+                                var departmentList = $("#DepartmentList").val();
+
+                                if (!departmentList || departmentList.length === 0) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    $('#department-error').show(); // Show error if no department is selected
+                                } else {
+                                    $('#department-error').hide(); // Hide error if department is selected
+                                }
+                                if (!form.checkValidity()) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                }
+
+                                form.classList.add('was-validated');
+                            }, false)
+                        })
+                })();
+
+
+                $("#DepartmentList").select2({})
+                    .on("select2:select select2:unselect", function (e) {
+                        let selected_element = $(e.currentTarget);
+                        let select_val = selected_element.select2('data');
+
+                        if (select_val.length > 0) {
+                            let select_Helper = select_val.map(item => item.id).join(',');
+                            document.getElementById("filterText").value = select_Helper;
+                            $('#department-error').hide(); // Hide error when a department is selected
+                        } else {
+                            document.getElementById("filterText").value = "";
+                        }
+                    });
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                    
+                    var form = document.querySelector('.needs-validation');
+
+                    form.classList.add('was-validated');
+
+                    var inputs = form.querySelectorAll('input, select, textarea');
+                    inputs.forEach(function (input) {
+                        input.classList.add(input.checkValidity() ? 'is-valid' : 'is-invalid');
+                    });
+               });
+        </script>
+    }
+}

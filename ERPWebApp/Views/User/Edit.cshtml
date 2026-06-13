@@ -1,0 +1,140 @@
+﻿@model ERPWebApp.Models.Company.ApplicationUser
+@namespace ERPWebApp.Models.Company
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container-fluid text-white">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">User</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title">Edit user</h2>
+                <div>
+                    <button type="submit" name="submit" class="action-button btn btn-primary"><span class="mdi mdi-18px mdi-content-save">&nbsp;Update</span></button>
+                    <button type="button" class="btn btn-info" onclick="location.href='@Url.Action("Index")'">
+                        <span class="mdi mdi-18px mdi-arrow-top-left-thick">Back to List</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="justify-content-center">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="UserName" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="UserName" class="form-control" />
+                                <span asp-validation-for="UserName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="Email" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label asp-for="PhoneNumber" class="control-label"></label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input asp-for="PhoneNumber" class="form-control" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="form-group form-check col-md-4">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" asp-for="EmailConfirmed" /> @Html.DisplayNameFor(model => model.EmailConfirmed)
+                                </label>
+                            </div>
+                            <div class="form-group form-check col-md-4">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" asp-for="TwoFactorEnabled" /> @Html.DisplayNameFor(model => model.TwoFactorEnabled)
+                                </label>
+                            </div>
+                            <div class="form-group form-check col-md-4">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" asp-for="LockoutEnabled" /> @Html.DisplayNameFor(model => model.LockoutEnabled)
+                                </label>
+                            </div>
+                        </div>
+                        @*<hr>
+                         <div class="row">
+                            <div class="col-sm-3">
+                                <label class="control-label">User Profile picture</label>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <input type="file" id="ProfilePic" name="profilePic" multiple class="form-control" />
+                            </div>
+                        </div> *@
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+@*     <script>
+
+        function UpdateUserProfilePic() {
+            var fileInput = document.getElementById('default_Image');
+            var idInput = document.getElementById('userImageId');
+
+            // Create a new FormData object
+            var formData = new FormData();
+
+            // Append the file and id inputs to the FormData
+
+            formData.append('imageId', idInput.value);
+            formData.append('profilePic', fileInput.files[0]);
+
+            // Send the FormData to the server using an AJAX request
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/user/UpdateUserProfilePic');
+            xhr.onload = function () {
+                // Handle the response from the server
+                if (xhr.status === 200) {
+                    // Request was successful
+                    console.log(xhr.responseText);
+                } else {
+                    // Request failed
+                    console.error(xhr.statusText);
+                }
+            };
+            xhr.send(formData);
+        }
+
+        function deleteUserProfilePic() {
+            var idInput = document.getElementById('userImageId');
+            const url = '../user/DeleteImage'
+            $.getJSON(url, { imageId: $('#userImageId').val() }, function (response) {
+
+            })
+        }
+    </script> *@
+}
+

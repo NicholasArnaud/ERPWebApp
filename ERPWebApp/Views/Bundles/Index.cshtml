@@ -1,0 +1,60 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.Bundle>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+<div class="alert alert-primary" role="alert">
+    <strong>Info</strong> Bundles allow you to group existing products together for streamlined inventory management and simplified ordering, while maintaining the individual tracking of each item within the bundle.
+</div>
+
+<p>
+
+    <div typeof="button" class="btn btn-dark mb-2">
+        <a class="nav-link" asp-action="Create">
+            Create New
+        </a>
+    </div>
+
+</p>
+
+<table id="bundlesTable" class="table dt-responsive webkit-nowrap w-100">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.BundleName)</th>
+            <th>@Html.DisplayNameFor(model => model.FulfillmentCost)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.BundleName)</td>
+                <td>@Html.DisplayFor(modelItem => item.FulfillmentCost)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.BundleId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.BundleId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.BundleId">Delete</a> |
+                    <a asp-action="Duplicate" asp-route-id="@item.BundleId">Duplicate</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            $('#bundlesTable').DataTable({
+                "responsive": true
+            });
+        });
+    </script>
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css" />  

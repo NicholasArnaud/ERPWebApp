@@ -1,0 +1,45 @@
+parameters:
+- name: buildConfiguration
+  type: string
+  default: 'Release'
+- name: dotnet_sdk_version
+  type: string
+  default: 9.x
+
+stages:
+- stage: BuildStage
+  displayName: 'Build Stage'
+  jobs:
+    - job: BuildJob
+      displayName: 'Build Job'
+      steps:
+        - checkout: self
+          clean: true
+          fetchDepth: 1
+        - task: UseDotNet@2
+          displayName: 'Install .NET Core sdk ${{ parameters.dotnet_sdk_version }}'
+          inputs:
+            version: ${{ parameters.dotnet_sdk_version }}
+        - task: DotNetCoreCLI@2
+          displayName: 'Dotnet Restore'
+          inputs:
+            command: restore
+            projects: '**/*.csproj'
+        - task: DotNetCoreCLI@2
+          displayName: 'Dotnet Build'
+          inputs:
+            projects: '**/*.csproj'
+            arguments: '--configuration ${{ parameters.buildConfiguration }} --framework net9.0 --no-restore'
+        - task: DotNetCoreCLI@2
+          displayName: 'Publish application'
+          inputs:
+            command: 'publish'
+            projects: '**/*.csproj'
+            arguments: '--configuration ${{ parameters.buildConfiguration }} --framework net9.0 --self-contained --runtime win-x64 --output $(build.artifactStagingDirectory)'
+            publishWebProjects: true
+            zipAfterPublish: true
+        - task: PublishPipelineArtifact@1
+          displayName: 'Publish build artifact'
+          inputs:
+            artifactName: 'erpbuild'
+            targetPath: '$(build.artifactStagingDirectory)'

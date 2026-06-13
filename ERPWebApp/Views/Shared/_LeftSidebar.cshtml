@@ -1,0 +1,742 @@
+﻿@using ERPWebApp.Models.Common
+@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+<div class="leftside-menu menuitem-active">
+    <!-- Sidebar Hover Menu Toggle Button -->
+    <div class="button-sm-hover" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Show Full Sidebar">
+        <i class="ri-checkbox-blank-circle-line align-middle"></i>
+    </div>
+
+    <!-- Full Sidebar Menu Close Button -->
+    <div class="button-close-fullsidebar">
+        <i class="ri-close-fill align-middle"></i>
+    </div>
+    <div class="h-100 show" id="leftside-menu-container" data-simplebar="init">
+        <div class="simplebar-wrapper" style="margin: 0px;">
+            <div class="simplebar-height-auto-observer-wrapper">
+                <div class="simplebar-height-auto-observer"></div>
+            </div>
+            <div class="simplebar-mask">
+                <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                    <div class="simplebar-content-wrapper" tabindex="0" role="region" aria-label="scrollable content" style="height: 100%; overflow: hidden scroll;">
+                        <div class="simplebar-content" style="padding: 0px;">
+                            <!-- Leftbar User -->
+                            <div class="leftbar-user">
+                                <a asp-area="Identity" asp-page="/Account/Manage/Index">
+                                    <img src="~/lib/hyper-assets/images/users/avatar-1.jpg" alt="user-image" height="42" class="rounded-circle shadow-sm">
+                                    <span class="leftbar-user-name mt-2">@User.Identity.Name</span>
+                                </a>
+                            </div>
+                            <!--- Sidemenu -->
+                            <ul class="side-nav">
+                                <li class="side-nav-title side-nav-item">
+                                    <span>Navigation</span>
+                                </li>
+                                @if (!User.IsInRole(RoleList.ExternalUser))
+                                {
+                                    @if (!User.IsInRole(RoleList.SellerBasic) && !User.IsInRole(RoleList.RestrictedUser))
+                                    {
+                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                       User.IsInRole(RoleList.Developer) ||
+                                       User.IsInRole(RoleList.RoleManager) ||
+                                       User.IsInRole(RoleList.HRBasic) ||
+                                       User.IsInRole(RoleList.SecurityManager) ||
+                                       User.IsInRole(RoleList.SecurityBasic) ||
+                                       User.IsInRole(RoleList.Manager)
+                                       )
+                                        {
+                                            <li class="side-nav-item">
+                                                <a data-bs-toggle="collapse" href="#sidebarAdmin" class="side-nav-link" aria-expanded="false"
+                                                   aria-controls="sidebarAdmin">
+                                                    <i class=" uil-robot"></i><span>Admin</span>
+                                                </a>
+                                                <div class="collapse" id="sidebarAdmin">
+                                                    <ul class="side-nav-second-level">
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.HRBasic))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="User" asp-action="Index">
+                                                                    <span>Users</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                        @*                                                         @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.HRBasic) || User.IsInRole(RoleList.Developer) || User.IsInRole(RoleList.RoleManager))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="Integrations" asp-action="Index">
+                                                                    <span>Integrations</span>
+                                                                </a>
+                                                            </li>
+                                                        } *@
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.HRBasic) || User.IsInRole(RoleList.Developer) || User.IsInRole(RoleList.FinancialManager) || User.IsInRole(RoleList.RoleManager))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="Invoice" asp-action="Index">
+                                                                    <span>Invoices</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.HRBasic) || User.IsInRole(RoleList.Developer) || User.IsInRole(RoleList.RoleManager))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="EmailAlerts" asp-action="Index">
+                                                                    <span>Email Alerts</span>
+                                                                    <span style="background-color: #f2f2f2; color: #333; font-size: 0.8em; padding: 2px 4px; border-radius: 4px; margin-left: 4px;">Beta</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.HRBasic))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="Departments" asp-action="Index">
+                                                                    <span>Departments</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.HRManager))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="MessageEmployees" asp-action="Index">
+                                                                    <span>Messaging</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a asp-area="" asp-controller="Employees" asp-action="Index">
+                                                                    <span>Employees</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager) || User.IsInRole(RoleList.InventoryManager))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="Report" asp-action="Index">
+                                                                    <span> Reports </span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a asp-area="" asp-controller="UserSiteMappings" asp-action="Index">
+                                                                    <span>User Site Manager</span>
+                                                                </a>
+                                                            </li>
+                                                            //hiding power BI reports menu for now on Nick's request.
+                                                            @* <li>
+                                                            <a asp-area="" asp-controller="Report" asp-action="PowerBIReports">
+                                                            <span> PowerBI Reports </span>
+                                                            </a>
+                                                            </li> *@
+                                                        }
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.RoleManager))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="UserRoles" asp-action="Index">
+                                                                    <span>User Role Manager</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                       User.IsInRole(RoleList.HRBasic) ||
+                                                       User.IsInRole(RoleList.Developer) ||
+                                                       User.IsInRole(RoleList.SecurityManager) ||
+                                                       User.IsInRole(RoleList.SecurityBasic))
+                                                        {
+                                                            <li class="side-nav-item">
+                                                                <a data-bs-toggle="collapse" href="#sidebarSecurityLists" aria-expanded="false"
+                                                                   aria-controls="sidebarSecurityLists">
+                                                                    <span>Security Lists</span>
+                                                                    <span class="menu-arrow"></span>
+                                                                </a>
+                                                                <div id="sidebarSecurityLists" class="collapse">
+                                                                    <ul class="side-nav-third-level">
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="AccessCards" asp-action="Index">
+                                                                                <span>Access Cards</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="AccessPoints" asp-action="Index">
+                                                                                <span>Access Points</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="AccessPlans" asp-action="Index">
+                                                                                <span>Access Plans</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+                                                            <li class="side-nav-item">
+                                                                <a data-bs-toggle="collapse" href="#sidebarSecurityAccess" aria-expanded="false"
+                                                                   aria-controls="sidebarSecurityAccess">
+                                                                    <span>Security Access</span>
+                                                                    <span class="menu-arrow"></span>
+                                                                </a>
+                                                                <div id="sidebarSecurityAccess" class="collapse">
+                                                                    <ul class="side-nav-third-level">
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="SecurityAccess" asp-action="Index">
+                                                                                <span>Access Controller</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.HRBasic))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="AuditLog" asp-action="Index">
+                                                                    <span>Audit Logs</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Developer))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="DepartmentRoleMapping" asp-action="Index">
+                                                                    <span>Department Role Manager</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+
+                                            </li>
+                                        }
+                                        <li class="side-nav-item">
+                                            <a data-bs-toggle="collapse" href="#sidebarDashboards" class="side-nav-link"
+                                               aria-expanded="false" aria-controls="sidebarDashboards">
+                                                <i class=" uil-dashboard"></i><span> Dashboards </span>
+                                            </a>
+                                            <div id="sidebarDashboards" class="collapse">
+                                                <ul class="side-nav-second-level" aria-expanded="false">
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.ORDER">
+                                                        <li>
+                                                            <a asp-area="" asp-controller="Home" asp-action="Index">
+                                                                <span>Operations</span>
+                                                            </a>
+                                                        </li>
+
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Developer) || User.IsInRole(RoleList.Manager))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="Financials" asp-action="Index">
+                                                                    <span>Financials</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                    </feature>
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.INVENTORY">
+                                                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Developer) || User.IsInRole(RoleList.Manager))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="Inventory" asp-action="Index">
+                                                                    <span>Inventory</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                    </feature>
+                                                    @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Developer) || User.IsInRole(RoleList.Manager))
+                                                    {
+                                                        <li>
+                                                            <a asp-area="" asp-controller="MyDash" asp-action="Index">
+                                                                <span>My Dash</span>
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </li>
+                                        <li class="side-nav-item">
+                                            <a data-bs-toggle="collapse" href="#sidebarPages" class="side-nav-link"
+                                               aria-expanded="false" aria-controls="sidebarPages">
+                                                <i class=" uil-notebooks"></i><span>Pages</span>
+                                            </a>
+                                            <div id="sidebarPages" class="collapse">
+                                                <ul class="side-nav-second-level" aria-expanded="false">
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.ORDER">
+                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                       User.IsInRole(RoleList.Manager) ||
+                                                       User.IsInRole(RoleList.ShippingManager) ||
+                                                       User.IsInRole(RoleList.CustomerSupportBasic)
+                                                       )
+                                                        {
+                                                            <li class="side-nav-item">
+                                                                <a data-bs-toggle="collapse" href="#sidebarOrderProduct" aria-expanded="false"
+                                                                   aria-controls="sidebarOrderProduct">
+                                                                    <span>Order Product</span>
+                                                                    <span class="menu-arrow"></span>
+                                                                </a>
+                                                                <div class="collapse" id="sidebarOrderProduct">
+                                                                    <ul class="side-nav-third-level">
+                                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                                       User.IsInRole(RoleList.FinancialBasic) ||
+                                                                       User.IsInRole(RoleList.FinancialManager)
+                                                                       )
+                                                                        {
+                                                                            <li>
+                                                                                <a asp-area="" asp-controller="CustomFulfillment" asp-action="Index">
+                                                                                    <span>Custom Fulfillment</span>
+                                                                                </a>
+                                                                            </li>
+                                                                        }
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="Bundles" asp-action="Index">
+                                                                                <span>Product Bundles</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="BundleItems" asp-action="Index">
+                                                                                <span>Bundle Items</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+
+                                                        }
+                                                    </feature>
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.INVENTORY">
+                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                       User.IsInRole(RoleList.InventoryBasic) ||
+                                                       User.IsInRole(RoleList.ShippingBasic) ||
+                                                       User.IsInRole(RoleList.Manager)
+                                                       )
+                                                        {
+                                                            <li class="side-nav-item">
+                                                                <a data-bs-toggle="collapse" href="#sidebarSkuProperties" aria-expanded="false"
+                                                                   aria-controls="sidebarSkuProperties">
+                                                                    <span>Sku Properties</span>
+                                                                    <span class="menu-arrow"></span>
+                                                                </a>
+                                                                <div id="sidebarSkuProperties" class="collapse">
+                                                                    <ul class="side-nav-third-level" aria-expanded="false">
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="SkuCategories" asp-action="Index">
+                                                                                <span>Categories</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="SkuUnitOfMeasures" asp-action="Index">
+                                                                                <span>Unit Of Measurement</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="SkuColors" asp-action="Index">
+                                                                                <span>Colors</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+
+                                                            <li class="side-nav-item">
+                                                                <a data-bs-toggle="collapse" href="#sidebarInventory"
+                                                                   aria-expanded="false" aria-controls="sidebarInventory">
+                                                                    <span>Inventory</span>
+                                                                    <span class="menu-arrow"></span>
+                                                                </a>
+                                                                <div id="sidebarInventory" class="collapse">
+                                                                    <ul class="side-nav-third-level">
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="InventoryBalances" asp-action="Index">
+                                                                                <span>Balance</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="Products" asp-action="Index">
+                                                                                <span>Products</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="ProductContainers" asp-action="Index">
+                                                                                <span>Containers</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="Sites" asp-action="Index">
+                                                                                <span>Sites</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="Locations" asp-action="Index">
+                                                                                <span>Locations</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="Stocks" asp-action="Index">
+                                                                                <span>Stock</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="ProductVendorMapping" asp-action="Index">
+                                                                                <span>Product Vendor Mapping</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="SubCategory" asp-action="Index">
+                                                                                <span>Sub Categories</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+                                                            <li class="side-nav-item">
+                                                                <a data-bs-toggle="collapse" href="#sidebarShipping" aria-expanded="false" aria-controls="sidebarShipping">
+                                                                    <span>Shipping</span>
+                                                                    <span class="menu-arrow"></span>
+                                                                </a>
+                                                                <div id="sidebarShipping" class="collapse">
+                                                                    <ul class="side-nav-third-level">
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="ShippingProviders" asp-action="Index">
+                                                                                <span>Providers</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="ShippingMethods" asp-action="Index">
+                                                                                <span>Methods</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="Vendors" asp-action="Index">
+                                                                                <span>Vendors</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        @if (User.IsInRole(RoleList.ShippingBasic) || User.IsInRole(RoleList.ShippingManager) || User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                                                                        {
+                                                                            <li>
+                                                                                <a asp-area="" asp-controller="Warehouse" asp-action="Index">
+                                                                                    <span>Warehouse</span>
+                                                                                </a>
+                                                                            </li>
+                                                                        }
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    </feature>
+
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.ORDER">
+                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                       User.IsInRole(RoleList.CustomerSupportBasic) ||
+                                                       User.IsInRole(RoleList.ProductionBasic) ||
+                                                       User.IsInRole(RoleList.FinancialBasic) ||
+                                                       User.IsInRole(RoleList.Manager)
+                                                       )
+                                                        {
+                                                            <li class="side-nav-item">
+                                                                <a data-bs-toggle="collapse" href="#sidebarShipStation" aria-expanded="false"
+                                                                   aria-controls="sidebarShipStation">
+                                                                    <span>ShipStation</span>
+                                                                    <span class="menu-arrow"></span>
+                                                                </a>
+                                                                <div id="sidebarShipStation" class="collapse">
+                                                                    <ul class="side-nav-third-level">
+
+                                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                                       User.IsInRole(RoleList.ProductionBasic) ||
+                                                                       User.IsInRole(RoleList.Manager)
+                                                                       )
+                                                                        {
+                                                                            <li>
+                                                                                <a asp-area="" asp-controller="BarcodeScans" asp-action="Index">
+                                                                                    <span>Barcode Scans</span>
+                                                                                </a>
+                                                                            </li>
+                                                                            <li>
+                                                                                <a asp-area="" asp-controller="DesignOrderCounter" asp-action="Index">
+                                                                                    <span>Design Order Count</span>
+                                                                                </a>
+                                                                            </li>
+                                                                        }
+
+                                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                                       User.IsInRole(RoleList.FinancialBasic) ||
+                                                                       User.IsInRole(RoleList.Manager)
+                                                                       )
+                                                                        {
+                                                                            <li>
+                                                                                <a asp-area="" asp-controller="ShipStationOrderedHistories"
+                                                                                   asp-action="Index">
+                                                                                    <span>Ordered History</span>
+                                                                                </a>
+                                                                            </li>
+                                                                        }
+
+                                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                                       User.IsInRole(RoleList.CustomerSupportBasic) ||
+                                                                       User.IsInRole(RoleList.Manager)
+                                                                       )
+                                                                        {
+                                                                            <li>
+                                                                                <a asp-area="" asp-controller="ShipStationStores" asp-action="Index">
+                                                                                    <span>Stores</span>
+                                                                                </a>
+                                                                            </li>
+                                                                        }
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    </feature>
+
+                                                    @if (User.IsInRole(RoleList.Administrator) ||
+                                                   User.IsInRole(RoleList.CustomerSupportBasic) ||
+                                                   User.IsInRole(RoleList.Manager) ||
+                                                   User.IsInRole(RoleList.ProductionBasic)
+                                                   )
+                                                    {
+                                                        <li class="side-nav-item">
+                                                            <a data-bs-toggle="collapse" href="#sidebarShipEngine" aria-expanded="false"
+                                                               aria-controls="sidebarShipEngine">
+                                                                <span>ShipEngine</span>
+                                                                <span class="menu-arrow"></span>
+                                                            </a>
+                                                            <div id="sidebarShipEngine" class="collapse">
+                                                                <ul class="side-nav-third-level">
+                                                                    <li>
+                                                                        <a asp-area="" asp-controller="ShipEngine" asp-action="Index">
+                                                                            <span>Label Finder</span>
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </li>
+
+                                        <feature name="@ERPWebApp.Models.Common.CwaFeatures.ORDER">
+                                            @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Developer))
+                                            {
+                                                <li class="side-nav-item">
+                                                    <a data-bs-toggle="collapse" href="#sidebarDevelopment" class="side-nav-link" aria-expanded="false"
+                                                       aria-controls="sidebarDevelopment">
+                                                        <i class=" uil-no-entry"></i><span> Development </span>
+                                                    </a>
+                                                    <div id="sidebarDevelopment" class="collapse">
+                                                        <ul class="side-nav-second-level">
+
+                                                            <li>
+                                                                <a asp-area="" asp-controller="SalesReports" asp-action="Index">
+                                                                    <span>Sales Reports</span>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                            }
+                                        </feature>
+                                    }
+                                    @if (User.IsInRole(RoleList.Administrator) ||
+                                   User.IsInRole(RoleList.ProductionBasic) ||
+                                   User.IsInRole(RoleList.ShippingBasic) ||
+                                   User.IsInRole(RoleList.Manager) ||
+                                   User.IsInRole(RoleList.InventoryBasic) ||
+                                   User.IsInRole(RoleList.FinancialBasic)
+                                   )
+                                    {
+                                        <li class="side-nav-item">
+                                            <a data-bs-toggle="collapse" href="#sidebarProduction" class="side-nav-link" aria-expanded="false"
+                                               aria-controls="sidebarProduction">
+                                                <i class="uil-symbol"></i><span> Production Pages </span>
+                                            </a>
+                                            <div id="sidebarProduction" class="collapse">
+                                                <ul class="side-nav-second-level">
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.INVENTORY">
+                                                        <li>
+                                                            <a asp-area="" asp-controller="NirfForms" asp-action="Index">
+                                                                <span>NIRF Forms</span>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a asp-area="" asp-controller="InventoryRequestForms" asp-action="Index">
+                                                                <span>Inventory Request Forms</span>
+                                                            </a>
+                                                        </li>
+                                                    </feature>
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.ORDER">
+                                                        <li>
+                                                            <a asp-area="" asp-controller="Orders" asp-action="Index">
+                                                                <span>Orders</span>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a asp-area="" asp-controller="ShippingScanout" asp-action="Index">
+                                                                <span>Shipping Scanout</span>
+                                                            </a>
+                                                        </li>
+                                                    </feature>
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.INVENTORY">
+                                                        <li>
+                                                            <a asp-area="" asp-controller="PurchaseOrders" asp-action="Index">
+                                                                <span>Purchase Orders</span>
+                                                            </a>
+                                                        </li>
+                                                    </feature>
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.ORDER">
+                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                       User.IsInRole(RoleList.Manager) ||
+                                                       User.IsInRole(RoleList.InventoryBasic) ||
+                                                       User.IsInRole(RoleList.InventoryManager) ||
+                                                       User.IsInRole(RoleList.ShippingBasic) ||
+                                                       User.IsInRole(RoleList.ShippingManager)
+                                                       )
+                                                        {
+                                                            <li class="side-nav-item">
+                                                                <a data-bs-toggle="collapse" href="#sidebarBatch" aria-expanded="false"
+                                                                   aria-controls="sidebarBatch">
+                                                                    <span>Batch Pages</span>
+                                                                    <span class="menu-arrow"></span>
+                                                                </a>
+                                                                <div class="collapse" id="sidebarBatch">
+                                                                    <ul class="side-nav-third-level">
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="OrderBatch" asp-action="Index">
+                                                                                <span>Order Batch</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="BatchItemStatus" asp-action="Index">
+                                                                                <span>Batch Item Status</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="BatchView" asp-action="Index">
+                                                                                <span>Order Batch View</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    </feature>
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.INVENTORY">
+                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                       User.IsInRole(RoleList.Manager) ||
+                                                       User.IsInRole(RoleList.InventoryBasic) ||
+                                                       User.IsInRole(RoleList.InventoryManager) ||
+                                                       User.IsInRole(RoleList.ShippingBasic) ||
+                                                       User.IsInRole(RoleList.ShippingManager)
+                                                       )
+                                                        {
+                                                            <li class="side-nav-item">
+                                                                <a data-bs-toggle="collapse" href="#sidebarStock" aria-expanded="false"
+                                                                   aria-controls="sidebarStock">
+                                                                    <span>Stock Pages</span>
+                                                                    <span class="menu-arrow"></span>
+                                                                </a>
+                                                                <div class="collapse" id="sidebarStock">
+                                                                    <ul class="side-nav-third-level">
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="MoveStock" asp-action="Index">
+                                                                                <span>Move Stock</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a asp-area="" asp-controller="CycleCount" asp-action="Index">
+                                                                                <span>Cycle Count</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    </feature>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    }
+
+                                }
+
+                                <feature name="@ERPWebApp.Models.Common.CwaFeatures.SELLER" requirement="All">
+                                    @if (
+                                    User.IsInRole(RoleList.Administrator) ||
+                                    User.IsInRole(RoleList.RestrictedUser) ||
+                                    User.IsInRole(RoleList.SellerBasic) ||
+                                    User.IsInRole(RoleList.CustomerSupportBasic) ||
+                                    User.IsInRole(RoleList.Manager)
+                                    )
+                                    {
+                                        <li class="side-nav-item">
+                                            <a data-bs-toggle="collapse" href="#sidebarSellers" class="side-nav-link" aria-expanded="false" aria-controls="sidebarSellers">
+                                                <i class=" uil-store"></i><span> Seller Pages </span>
+                                            </a>
+                                            <div id="sidebarSellers" class="collapse">
+                                                <ul class="side-nav-second-level">
+                                                    <li>
+                                                        <a asp-area="" asp-controller="WelcomeSeller" asp-action="Index">
+                                                            <span>Welcome</span>
+                                                        </a>
+                                                    </li>
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.INVENTORY">
+                                                        <li>
+                                                            <a asp-area="" asp-controller="ProductGallery" asp-action="Index">
+                                                                <span>Product Gallery</span>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a asp-area="" asp-controller="Stocks" asp-action="Index">
+                                                                <span>My Stock</span>
+                                                            </a>
+                                                        </li>
+                                                        @if (User.IsInRole(RoleList.CustomViewOnly))
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="Products" asp-action="Index">
+                                                                    <span>Products</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                    </feature>
+                                                    <feature name="@ERPWebApp.Models.Common.CwaFeatures.ORDER">
+                                                        @if (User.IsInRole(RoleList.Administrator) ||
+                                                       User.IsInRole(RoleList.SellerBasic) ||
+                                                       User.IsInRole(RoleList.CustomerSupportBasic) ||
+                                                       User.IsInRole(RoleList.Manager)
+                                                       )
+                                                        {
+                                                            <li>
+                                                                <a asp-area="" asp-controller="SellerOrders" asp-action="Index">
+                                                                    <span>Order Search</span>
+                                                                </a>
+                                                            </li>
+                                                            @*  <li>
+                                                            <a asp-area="" asp-controller="SellerMargins" asp-action="Index">
+                                                            <span>Margins</span>
+                                                            </a>
+                                                            </li> *@
+                                                        }
+                                                    </feature>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    }
+                                </feature>
+                                <feature name="@ERPWebApp.Models.Common.CwaFeatures.HELP_REQUEST">
+                                    @if (!User.IsInRole(RoleList.SellerBasic) && !User.IsInRole(RoleList.RestrictedUser))
+                                    {
+                                        <li class="side-nav-item">
+                                            <a class="side-nav-link" aria-expanded="false" aria-controls="sidebarHelp"
+                                               asp-area="" asp-controller="HelpRequestForms" asp-action="Index">
+                                                <i class="mdi mdi-help-circle-outline"></i><span> Help </span>
+                                            </a>
+                                        </li>
+                                    }
+                                </feature>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="simplebar-placeholder" style="width: auto; height: 881px;"></div>
+        </div>
+        <div class="simplebar-track simplebar-horizontal" style="visibility: hidden;"><div class="simplebar-scrollbar" style="width: 0px; display: none; transform: translate3d(0px, 0px, 0px);"></div></div>
+        <div class="simplebar-track simplebar-vertical" style="visibility: visible;"><div class="simplebar-scrollbar" style="height: 791px; transform: translate3d(0px, 0px, 0px); display: block;"></div></div>
+
+    </div>
+
+</div>

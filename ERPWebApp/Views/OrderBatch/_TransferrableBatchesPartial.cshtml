@@ -1,0 +1,212 @@
+﻿@using ERPWebApp.Models.Company
+@using ERPWebApp.Models.Orders
+@using Newtonsoft.Json
+@model Tuple<List<DesignBatchItemViewModel>, List<DepartmentStatusLineViewModel>>
+
+
+
+<style>
+    .table-custom-danger {
+        background-color: #ff0000;
+        color: white;
+    }
+</style>
+@{
+    var firstItem = Model.Item1.First();
+    var requiresPoClass = firstItem.RequiresPO ? "btn-success" : "btn-danger";
+    var requiresPoDisabled = firstItem.RequiresPO ? "disabled" : "";
+}
+
+<button type="button" class="btn @requiresPoClass requiresPoButton" data-order-batch-id="@firstItem.OrderBatchId" @requiresPoDisabled>
+    Requires PO
+</button>
+
+<div class="modal fade" id="transferModal" tabindex="-1" role="dialog" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transferModalLabel">Transfer Product</h5>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-primary" role="alert">
+                    <strong>Info</strong> No or missing Locations? Please contact your supervisor to check/grant access.
+                </div>
+                <form id="transferModalForm">
+                    <div class="form-group" id="alt-item-group" style="display: none;">
+                        <label for="alt-item-select">Alt Item Number</label>
+                        <select id="alt-item-select" class="form-control select2" data-toggle="select2" name="altItemNumber">
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transfer-from">From Location</label>
+                        <select id="transfer-from" class="form-control select2" data-toggle="select2" name="transferFrom">
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transfer-to">To Location</label>
+                        <select id="transfer-to" class="form-control select2" data-toggle="select2" name="transferTo">
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                </form>
+                <div id="transfer-modal-message" class="text-danger mt-2" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="transferModalCancelButton" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="transferModalConfirmButton">Transfer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="department-status-lines" class="row department-status-line-container">
+    @foreach (var departmentStatusLine in Model.Item2)
+    {
+        <div class="col-4">
+            <h4>@departmentStatusLine.Department.DepartmentName</h4>
+            <div class="status-line-container">
+                <div class="status-line">
+                    @for (var i = 0; i < departmentStatusLine.Statuses.Count; i++)
+                    {
+                        var status = departmentStatusLine.Statuses[i];
+                        <div class="status-dot-wrapper">
+                            <div class="status-dot" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="@status.StatusName" style="left: @(i * (100.0 / (departmentStatusLine.Statuses.Count - 1)))%;"></div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="status-names">
+                @for (var i = 0; i < departmentStatusLine.Statuses.Count; i++)
+                {
+                    var status = departmentStatusLine.Statuses[i];
+                    <div class="status-name" style="left: @(i * (100.0 / (departmentStatusLine.Statuses.Count - 1)))%;">@status.StatusName</div>
+                }
+            </div>
+        </div>
+    }
+</div>
+<hr>
+
+@* @{
+    //TO DO: Reimplement these when new PO system is in.
+    bool requiresPO = Model.Item1.Any(item => item.RequiresPO);
+    bool anyInvalidStock = Model.Item1.Any(item => !item.IsValidStock);
+} *@
+@* @if (requiresPO && anyInvalidStock)
+{
+    <div class="alert alert-danger" role="alert">
+        All products must be in stock for the batch to transfer!
+    </div>
+} *@
+
+<table id="inventory-batches-table" class="table dt-responsive webkit-nowrap w-100">
+    <thead>
+        <tr>
+            <th>Sku</th>
+            <th>Quantity</th>
+            <th>Description</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Pick Location</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Item1)
+        {
+            var orderBatchItemIdListJson = JsonConvert.SerializeObject(item.OrderBatchItemIdList);
+            var pickOnlyLocationsJson = JsonConvert.SerializeObject(item.PickOnlyLocations);
+            var receiveOnlyLocationsJson = JsonConvert.SerializeObject(item.ReceiveOnlyLocations);
+            var rowClass = item.IsValidStock ? "" : "table-custom-danger";
+            <tr class="@rowClass"
+                data-orderbatchid="@item.OrderBatchId"
+                data-orderbatchitemid="@item.OrderBatchItemId"
+                data-orderbatchitemidlist='@orderBatchItemIdListJson'
+                data-productid="@item.ProductId"
+                data-pickonlylocations='@Html.Raw(pickOnlyLocationsJson)'
+                data-receiveonlylocations='@Html.Raw(receiveOnlyLocationsJson)'
+                data-cwaorderid="@item.ERPOrderId">
+                <td>@item.Sku</td>
+                <td>@item.Quantity</td>
+                <td>@item.Description</td>
+                <td>@item.DepartmentName</td>
+                <td>@item.Status.StatusName</td>
+                <td>
+                    @if (item.PickOnlyLocations != null && item.PickOnlyLocations.Any())
+                    {
+                        var pickLocation = item.PickOnlyLocations.OrderByDescending(l => l.TotalAvailable).First();
+                        @($"{pickLocation.LocationName} : {pickLocation.TotalAvailable}")
+                    }
+                </td>
+                <td>
+                    @if (@* item.RequiresPO ? anyInvalidStock :  *@item.IsValidStock && item.BatchItem.IsPicked != true)
+                    {
+                        <button type="button" class="btn btn-primary transfer-btn">Transfer</button>
+                        <button type="button" class="btn btn-danger remove-btn" name="order-removal" data-orderbatchid="@item.OrderBatchId" data-cwaorderid="@item.ERPOrderId">Remove</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-secondary" disabled>Transfer</button>
+                        <button type="button" class="btn btn-danger remove-btn" name="order-removal" data-orderbatchid="@item.OrderBatchId" data-cwaorderid="@item.ERPOrderId">Remove</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    var cwaOrderIdToRemove, orderBatchIdToRemove;
+
+    $(document).ready(function () {
+    $('button[name="order-removal"]').on('click', function () {
+        cwaOrderIdToRemove = $(this).data('cwaorderid');
+        orderBatchIdToRemove = $(this).data('orderbatchid');
+
+
+        var orderDetailsHtml = '<strong>Order Number:</strong> ' + cwaOrderIdToRemove + '<br><br>';
+        orderDetailsHtml += '<strong>Items:</strong><br>';
+        var rows = $('tr[data-orderbatchid="' + orderBatchIdToRemove + '"][data-cwaorderid="' + cwaOrderIdToRemove + '"]');
+
+        var items = rows.map(function () {
+            return {
+                sku: $(this).find('td').eq(0).text(),
+                description: $(this).find('td').eq(2).text()
+            };
+        }).get();
+        items.forEach(function (item) {
+            orderDetailsHtml += 'SKU: ' + item.sku + ', Description: ' + item.description + '<br>';
+        });
+
+        $('#removeOrderMessage').html(orderDetailsHtml);
+
+        $('#cwaOrderId').val(cwaOrderIdToRemove);
+        $('#orderBatchId').val(orderBatchIdToRemove);
+
+
+        $.ajax({
+            url: '@Url.Action("CheckTransferStatus", "OrderBatch")',
+            type: 'POST',
+            data: {
+                orderBatchId: orderBatchIdToRemove,
+                cwaOrderId: cwaOrderIdToRemove
+            },
+    success: function (response) {
+                if (response.anyTransferred) {
+                    $('#transferWarning').show();
+                    // Removed the disabling of the confirm button
+                    // $('#confirmRemoveButton').prop('disabled', true);
+                } else {
+                    $('#transferWarning').hide();
+                }
+                $('#removeConfirmationModal').modal('show');
+            },
+                error: function () {
+                alert('An error occurred while checking the transfer status.');
+            }
+        });
+    });
+    });
+</script>  

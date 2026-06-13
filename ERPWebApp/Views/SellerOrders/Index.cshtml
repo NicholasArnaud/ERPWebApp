@@ -1,0 +1,263 @@
+﻿@using ERPWebApp.Models.Orders
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Order
+
+@{
+    ViewData["Title"] = "Index";
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Order Search</h3>
+            </div>
+            <div class="card-body">
+                @if (Model?.orderNumber == default)
+                {
+                    <form asp-action="GetOrderDetails">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <span asp-validation-for="orderNumber" class="text-danger"></span>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="row mb-1">
+                                    <input asp-for="orderNumber" class="form-control" placeholder="ShipStation Order#"
+                                           value='@(Model?.orderNumber ?? "")' disabled="@(Model?.orderNumber != null)" />
+                                </div>
+                                <div class="row">
+                                        <input for="trackingNumber" class="form-control" placeholder="Tracking Number"
+                                           value='' disabled="" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <input class="form-control" type="submit" value="Pull Order Details" />
+                            </div>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-md-4">
+                            <form asp-action="Index">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <input asp-for="orderNumber" class="form-control" value='@(Model.orderNumber)' disabled="true" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input class="form-control" type="submit" value="Clear" />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <form asp-action="ForceGetOrderDetails" method="post">
+                                <div>
+                                    <div>
+                                        <input asp-for='@(Model.orderNumber)' name="orderNumber" class="form-control" value='@(Model.orderNumber)' style="display:none" />
+                                    </div>
+                                    <div>
+                                        <button type="submit" name="submit" class="action-button btn btn-primary">Pull Updated Order Info</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@if (ViewData.ModelState.IsValid && ViewData["trackingStatus"].ToString() != "null")
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Order Details</h3>
+                </div>
+                @if (Model.orderKey != "")
+                {
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <label asp-for="orderStatus" class="form-label header-title mb-3"></label>
+                                        <h4 class="mb-1" id="order-status"> @Model.orderStatus</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            @if (!Model.orderShipments.Any() && !Model.orderFulfillments.Any())
+                            {
+                                <div id="no-shipment-info-alert" class="col-lg-7 col-md-10 col-sm-11">
+                                    <div class="alert alert-danger bg-danger text-white border-0" role="alert">
+                                        <strong>Info - </strong> No Tracking Information Available for this Order yet.
+                                    </div>
+                                </div>
+                            }
+                            @if (ViewData["trackingStatus"].ToString() != "")
+                            {
+                                <div id="shipping-tracker" class="col-lg-7 col-md-10 col-sm-11">
+                                    <div class="horizontal-steps mt-4 mb-4 pb-5" id="tooltip-container">
+                                        <div class="horizontal-steps-content">
+                                            <div id="Tracking-Status-Ordered" class="step-item">
+                                                <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">Order Placed</span>
+                                            </div>
+                                            @if (ViewData["trackingStatus"].ToString() == "AC")
+                                            {
+                                                <div id="Tracking-Status-Accepted" class="step-item current">
+                                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">Accepted</span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div id="Tracking-Status-Accepted" class="step-item">
+                                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">Accepted</span>
+                                                </div>
+                                            }
+                                            @if (ViewData["trackingStatus"].ToString() == "IT")
+                                            {
+                                                <div id="Tracking-Status-InTransit" class="step-item current">
+                                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">In Transit</span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div id="Tracking-Status-InTransit" class="step-item">
+                                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">In Transit</span>
+                                                </div>
+                                            }
+                                            @if (ViewData["trackingStatus"].ToString() == "DE")
+                                            {
+                                                <div id="Tracking-Status-Delivered" class="step-item current">
+                                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">Delivered</span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div id="Tracking-Status-Delivered" class="step-item">
+                                                    <span data-bs-container="#tooltip-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">Delivered</span>
+                                                </div>
+
+                                            }
+                                        </div>
+                                        @if (ViewData["trackingStatus"].ToString() == "AC")
+                                        {
+                                            <div id="Tracking-Status-ProgressBar" class="process-line" style="width: 33%;"></div>
+                                        }
+                                        else if (ViewData["trackingStatus"].ToString() == "IT")
+                                        {
+                                            <div id="Tracking-Status-ProgressBar" class="process-line" style="width: 66%;"></div>
+                                        }
+                                        else if (ViewData["trackingStatus"].ToString() == "DE")
+                                        {
+                                            <div id="Tracking-Status-ProgressBar" class="process-line" style="width: 100%;"></div>
+                                        }
+                                        else
+                                        {
+                                            <div id="Tracking-Status-ProgressBar" class="process-line" style="width: 0%;"></div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div id="tracking-progress-alert" class="col-lg-7 col-md-10 col-sm-11">
+                                    <div class="alert alert-info bg-info text-white border-0" role="alert">
+                                        <strong>Info - </strong> Tracking progress is not available for this Order.
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                @if (Model.Tags != null)
+                                {
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h3 class="header-title mb-1">Order Tags</h3>
+                                            <h4 class="mb-1" id="order-tags"></h4>
+                                            @foreach (var tag in Model.Tags)
+                                            {
+                                                <span class="badge badge-secondary-lighten">
+                                                    @tag.name
+                                                    <span class="dot" style="background-color: @tag.color; height: 10px; width: 10px; -ms-border-radius: 50%; border-radius: 50%; display: inline-block;"></span>
+                                                </span>
+                                            }
+
+                                        </div>
+                                    </div>
+                                }
+                            </div> <!-- end col -->
+
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="text-center">
+                                            <i class="mdi mdi-truck-fast h2 text-muted"></i>
+                                            <p class="mb-1 h4">Ship To</p>
+                                            <p class="mb-1">@Model.shipTo.name</p>
+                                            <p class="mb-1">@Model.shipTo.company</p>
+                                            <p class="mb-1">@Model.shipTo.street1 @Model.shipTo.street2</p>
+                                            <p class="mb-1">@Model.shipTo.city, @Model.shipTo.state @Model.shipTo.postalCode @Model.shipTo.country</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> <!-- end col -->
+
+                            <div class="col-lg-4">
+                            </div> <!-- end col -->
+
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="header-title mb-3">Delivery Info</h4>
+
+                                        <div class="text-center">
+                                            <i class="mdi mdi-truck-fast h2 text-muted"></i>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.carrierCode): @Model.carrierCode
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.serviceCode): @Model.serviceCode
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.packageCode): @Model.packageCode
+                                            </p>
+                                            <p class="mb-1">
+                                                @Html.DisplayNameFor(model => model.orderNumber): @Model.orderNumber
+                                            </p>
+                                            @if (ViewData["trackingNumber"].ToString() != string.Empty)
+                                            {
+                                                <p class="mb-1">
+                                                    Tracking Number:
+                                                    <span>
+                                                        @ViewData["trackingNumber"].ToString()
+                                                    </span>
+                                                </p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> <!-- end col -->
+                        </div>
+                    </div>
+                }
+
+
+            </div>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

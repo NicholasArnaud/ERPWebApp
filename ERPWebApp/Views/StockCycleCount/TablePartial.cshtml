@@ -1,0 +1,133 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.Stock>
+<div id="my-edit-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="my-edit-modal-label">Edit Product Count</h4>
+            </div>
+            <div class="modal-body">
+                <div id="edit-modal-view"></div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<table class="table dt-responsive webkit-nowrap w-100" id="cycle-datatable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Products.Sku)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location.Sites.SiteName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location.LocationName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalAvailable)
+            </th>
+            @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.InventoryManager) ||  this.User.IsInRole(RoleList.ShippingManager))
+            {
+            <th><a>Actions</a></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Products.Sku)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Products.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Location.Sites.SiteName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Location.LocationName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TotalAvailable)
+                </td>
+                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.InventoryManager) ||  this.User.IsInRole(RoleList.ShippingManager))
+                {
+                <td class="table-action">
+                    <a id="@item.StockId" onclick="getEditFields(this.id)" style="color:white" class="mdi mdi-24px mdi-pencil" data-bs-toggle="modal" data-bs-target="#my-edit-modal"></a>
+                </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+<script language="javascript" type="text/javascript">
+    function getEditFields(id) {
+                $.ajax({
+                    url: '/StockCycleCount/Edit',
+                    type: 'GET',
+                    data: { id: id },
+                    success: function (partialView) {
+                        $("#edit-modal-view").html(partialView);
+                        console.log("Grabbed Detail Info");
+                    },
+                    error: function (data) {
+                        console.log(data);
+                    }
+                });
+            }
+    $("document").ready(function(){
+        $('#cycle-datatable').DataTable({
+            dom: "<'row'<'col-3 col-sm-4 col-md-4 col-lg-7'l><'col-6 col-sm-4 col-md-4'f><'d-none d-md-block d-lg-block col-sm-4 col-md-4 col-lg-1'B>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            keys: !0, language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                    },
+                }, drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                },
+                buttons: [
+                    {
+                    extend: 'collection',
+                    text:'Export',
+                    className: 'btn btn-dark',
+                        buttons: [
+                            {
+                                extend: 'excelHtml5',
+                                exportOptions:{columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                            },
+                            {
+                                "extend": 'csv',
+                                exportOptions:{columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                            },
+                            {
+                                extend: 'copy',
+                                exportOptions:{columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                            },
+                            {
+                                extend: 'print',
+                                exportOptions:{columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                            },
+                        ]
+                    }
+                ],
+                "oLanguage": {
+                      "sLengthMenu": '<select class="btn btn-light">'+
+                        '<option value="10">10</option>'+
+                        '<option value="20">20</option>'+
+                        '<option value="30">30</option>'+
+                        '<option value="40">40</option>'+
+                        '<option value="50">50</option>'+
+                        '<option value="-1">All</option>'+
+                        '</select>'}
+        });
+
+        
+    })
+
+</script>

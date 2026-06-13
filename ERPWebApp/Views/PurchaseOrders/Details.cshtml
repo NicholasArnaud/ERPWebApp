@@ -1,0 +1,574 @@
+﻿@model ERPWebApp.Models.PurchaseOrders.PurchaseOrderViewModel
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row" data-bs-theme="dark">
+    <div class="col-9 col-xl-10 col-lg-10 col-md-10"><h1>Details</h1></div>
+    <div class="col-3 col-xl-2 col-lg-2 col-md-2" style="text-align:right">
+        <button onclick="exportAllDatatables()" class="btn btn-secondary">Print(All)</button>
+    </div>
+</div>
+<div hidden class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <input hidden id="add-product-select-id" value="@Model.PurchaseOrderSingle.PurchaseOrderId" />
+                <h3 id="title-print" class="card-title">
+                    Purchase Order: @Model.PurchaseOrderSingle.PurchaseOrderNumber
+                </h3>
+                <h3 id="second-print" class="card-title">
+                    Purchase Order: @Model.PurchaseOrderSingle.PurchaseOrderNumber
+                </h3>
+                <h3 id="third-print" class="card-title">
+                    Purchase Order: @Model.PurchaseOrderSingle.PurchaseOrderNumber
+                </h3>
+            </div>
+            <!--   <div style="float:right" id="barcode">
+              </div>-->
+            <div id="product-print" class="card-body">
+                <div style="font-size:24px" class="row">
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.Vendor.VendorName)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.Vendor.VendorName)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ShippingMethod.ShippingMethodName)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ShippingMethod.ShippingMethodName)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ShippingProvider.ShippingProviderName)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ShippingProvider.ShippingProviderName)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.OrderDate)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.OrderDate)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.POStatus)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.POStatus)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ReferenceNumber)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ReferenceNumber)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.IsActive)
+                        </b>
+                        <i class="col-sm-10">
+                            @if (@Html.ValueFor(model => model.PurchaseOrderSingle.IsActive) == "True")
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.GrandTotal)
+                        </b>
+                        <i class="col-sm-10">
+                            @{
+                                var grandTotal = decimal.Round(Model.PurchaseOrderSingle.GrandTotal, 4).ToString("C");
+                                @grandTotal
+                                ;
+                            }
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ShippingTax)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ShippingTax)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.Discount)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.Discount)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ShippingCost)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ShippingCost)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.OtherCost)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.OtherCost)
+                        </i>
+                    </div>
+                    <div class="col-12 card">
+                        <b class="col-12">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.Notes)
+                        </b>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title">
+                    Purchase Order: @Model.PurchaseOrderSingle.PurchaseOrderNumber
+                </h3>
+                <div>
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.ShippingManager) || this.User.IsInRole(RoleList.FinancialManager))
+                    {
+                        @if (Model.PurchaseOrderSingle.POStatus != ERPWebApp.Models.PurchaseOrders.Status.Close && Model.PurchaseOrderSingle.POStatus != ERPWebApp.Models.PurchaseOrders.Status.Cancelled)
+                        {
+                            @if (ViewBag.IsComplete == "yes")
+                            {
+                                <a asp-action="ClosePO" asp-route-id="@Model.PurchaseOrderSingle.PurchaseOrderId">
+                                    @*<input type="button" class="btn btn-warning" style="float:right" value="Close PO" />*@
+                                    <button type="submit" name="submit" class="action-button btn btn-warning"><span class="mdi mdi-18px mdi-content-save">&nbsp;Close PO</span></button>
+                                </a>
+                            }
+                            else if (Model.PurchaseOrderSingle.POStatus != ERPWebApp.Models.PurchaseOrders.Status.FullyReceived
+                                    && Model.PurchaseOrderSingle.POStatus != ERPWebApp.Models.PurchaseOrders.Status.InProgress)
+                            {
+                                <a asp-action="CancelPO" asp-route-id="@Model.PurchaseOrderSingle.PurchaseOrderId">
+                                    @*<input type="button" class="btn btn-danger" style="float:right" value="Cancel PO" />*@
+                                    <button type="submit" name="submit" class="action-button btn btn-danger"><span class="mdi mdi-18px mdi-content-save">&nbsp;Cancel PO</span></button>
+                                </a>
+                            }
+
+                            @if(ViewBag.IsForceComplete == "yes"){
+                                <button type="button" class="action-button btn btn-warning" data-bs-toggle="modal" data-bs-target="#forceCloseModal">
+                                    <span class="mdi mdi-18px mdi-content-save">&nbsp;Force Close</span>
+                                </button>
+                            }
+                        }
+                    }
+                    <a asp-action="Index">
+                        <button type="button" class="btn btn-info"><span class="mdi mdi-18px mdi-arrow-top-left-thick">&nbsp;Back to List</span></button>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.Vendor.VendorName)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.Vendor.VendorName)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ShippingMethod.ShippingMethodName)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ShippingMethod.ShippingMethodName)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ShippingProvider.ShippingProviderName)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ShippingProvider.ShippingProviderName)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.OrderDate)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.OrderDate)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.POStatus)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.POStatus)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ReferenceNumber)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ReferenceNumber)
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.IsActive)
+                        </b>
+                        <i class="col-sm-10">
+                            @if (@Html.ValueFor(model => model.PurchaseOrderSingle.IsActive) == "True")
+                            {
+                                <a>Yes</a>
+                            }
+                            else
+                            {
+                                <a>No</a>
+                            }
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.GrandTotal)
+                        </b>
+                        <i class="col-sm-10">
+                            @{
+                                grandTotal = decimal.Round(Model.PurchaseOrderSingle.GrandTotal, 4).ToString("C");
+                                @grandTotal
+                                ;
+                            }
+                        </i>
+                    </div>
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ShippingTax)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ShippingTax)
+                        </i>
+                    </div>
+
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.Discount)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.Discount)
+                        </i>
+                    </div>
+
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.ShippingCost)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.ShippingCost)
+                        </i>
+                    </div>
+
+                    <div class="col-md-3 card">
+                        <b class="col-sm-10">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.OtherCost)
+                        </b>
+                        <i class="col-sm-10">
+                            @Html.DisplayFor(model => model.PurchaseOrderSingle.OtherCost)
+                        </i>
+                    </div>
+                    <div class="col-12 card">
+                        <b class="col-12">
+                            @Html.DisplayNameFor(model => model.PurchaseOrderSingle.Notes)
+                        </b>
+
+                        <textarea id="targetTextArea" readonly style="height: 225px;" class="form-control">@Html.DisplayFor(model => model.PurchaseOrderSingle.Notes)</textarea>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-xl-12 col-lg-12 col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">PO Products</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%" id="Product-datatable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.ProductPurchaseOrders.First().ProductVendorMapping.Product.Sku)
+                                </th>
+                                <th>
+                                    QTY
+                                </th>
+                                <th>
+                                    Vendor Cost
+                                </th>
+                                <th>
+                                    Discount
+                                </th>
+                                <th>
+                                    Shipping
+                                </th>
+                                <th>
+                                    Tax
+                                </th>
+                                <th>
+                                    Other Cost
+                                </th>
+                                <th>
+                                    Cost Per Item
+                                </th>
+                                <th>
+                                    Total Cost
+                                </th>
+                                <th>
+                                    Open
+                                </th>
+                                <th>
+                                    Expected Delivery Date
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.ProductPurchaseOrders.First().TotalRecieved)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.ProductPurchaseOrders.First().AverageCost)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.detailPurchaseOrderModels)
+                            {
+                                <tr>
+                                   
+                                    <td style="text-align:center">
+                                        <a target="_blank" href="/Products/Details/@item.ProductId">@Html.DisplayFor(modelItem => item.Sku)</a>
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem =>item.Quantity)
+                                    </td>
+                                    <td style="text-align:center">
+                                        $@String.Format("{0:0.0000}",item.VendorCost.Value)
+                                    </td>
+                                    <td style="text-align:center">
+                                        $@Html.DisplayFor(modelItem =>item.Discount)
+                                    </td>
+                                    <td style="text-align:center">
+                                        $@Html.DisplayFor(modelItem =>item.Shipping)
+                                    </td>
+                                    <td style="text-align:center">
+                                        $@Html.DisplayFor(modelItem =>item.Tax)
+                                    </td>
+                                    <td style="text-align:center">
+                                        $@Html.DisplayFor(modelItem =>item.OtherCost)
+                                    </td>
+                                    <td style="text-align:center">
+                                        $@Html.DisplayFor(modelItem =>item.CostPerItem)
+                                    </td>
+                                    <td style="text-align:center">
+                                        $@Html.DisplayFor(modelItem =>item.TotalCost)
+                                    </td>
+                                    <td style="text-align:center">
+                                        @Html.DisplayFor(modelItem =>item.Open)
+                                    </td>
+                                    <td style="text-align:center">
+                                        @(item.ExpectedDate.HasValue
+                                            ? item.ExpectedDate.Value.ToString("MM/dd/yyyy")
+                                            : "N/A")
+                                    </td>
+                                    <td style="text-align:center">
+                                        @Html.DisplayFor(modelItem =>item.TotalReceived)
+                                    </td>
+                                    <td style="text-align:center">
+                                        $@Html.DisplayFor(modelItem =>item.AverageCost)
+
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="row">
+    <div class="col-12 col-xl-6 col-lg-12 col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Po Files</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%" id="File-datatable">
+                        <thead>
+                            <tr>
+                                <th style="text-align:center">
+                                    File Name
+                                </th>
+                                <th style="text-align:center">
+                                    Type
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var items in Model.purchaseOrderFilesMappings)
+                            {
+                                <tr>
+                                    <td style="text-align:center">
+
+                                        <a target="_blank" href="@items.Files.FileUrl">
+                                            @items.Files.FileName
+                                        </a>
+                                    </td>
+                                    <td style="text-align:center">
+                                        @items.Files.FileType
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-6 col-lg-12 col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">PO Stocks</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%" id="Stock-datatable">
+                        <thead>
+                            <tr>
+                                <th>Stock</th>
+                                <th>Site</th>
+                                <th>Location</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model.ProductPurchaseOrderStockMappings)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Stock.Products.Sku)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Stock.Location.Sites.SiteName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Stock.Location.LocationName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.QtyRecieved)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-10">
+        @if ((this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.Manager)) && Model.PurchaseOrderSingle.POStatus != ERPWebApp.Models.PurchaseOrders.Status.Close)
+        {  
+                <a asp-action="Edit" asp-route-id="@Model.PurchaseOrderSingle.PurchaseOrderId">
+                    @* <input type="button" class="btn btn-primary" value="Edit">*@
+                <button type="submit" name="submit" class="action-button btn btn-primary"><span class="mdi mdi-18px mdi-content-save-edit">&nbsp;Edit</span></button>
+            </a>       
+        }
+        <div class="row">&nbsp;</div>
+        <div class="row">&nbsp;</div>
+    </div>
+</div>
+
+<div class="modal fade" id="forceCloseModal" tabindex="-1" aria-labelledby="forceCloseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        <form asp-route-id="@Model.PurchaseOrderSingle.PurchaseOrderId" asp-action="ForceClose" onsubmit="return validateCloseForm()">
+            <div class="modal-header">
+                <h5 class="modal-title" id="forceCloseModalLabel">Force Close</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="message-text" class="col-form-label">Close Notes</label>
+                    <textarea id="closeNote" required style="height: 225px;" name="closeNote" class="form-control"></textarea>
+                    <div class="invalid-feedback">
+                        Close Notes cannot be empty.
+                    </div>
+                </div>       
+            </div>
+            <div class="modal-footer">
+                <button type="submit" name="submit" class="action-button btn btn-warning">
+                    <span class="mdi mdi-18px mdi-content-save">&nbsp;Close PO</span>
+                </button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/js/pages/print-all-purchase-order.min.js?"></script>
+      
+    }
+
+     <script>
+        $(document).ready(function () {
+            $('#Product-datatable').DataTable();
+            $('#File-datatable').DataTable();
+            $('#Stock-datatable').DataTable();
+        });
+
+        function validateCloseForm(){
+            var closeNote = $('#closeNote').val().trim();
+            if (closeNote === '') {
+                $('#closeNote').parent().find('.invalid-feedback').show();
+                return false;
+            }
+            return true;
+        }
+
+    </script>
+    }
+

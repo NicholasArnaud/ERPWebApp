@@ -1,0 +1,497 @@
+﻿@model ERPWebApp.Models.MoveStock
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-12">
+        <span class="text-success display-4">@TempData["successMessage"]</span>
+        <br />
+        <span class="text-success">@TempData["detailMessage"]</span>
+        <span class="text-warning display-4" style="font-size:30px">@TempData["errorMessage"]</span>
+    </div>
+</div>
+@if (User.IsInRole(RoleList.Administrator) ||
+User.IsInRole(RoleList.Manager) ||
+User.IsInRole(RoleList.InventoryBasic) ||
+User.IsInRole(RoleList.ShippingBasic) ||
+User.IsInRole(RoleList.ShippingManager) ||
+User.IsInRole(RoleList.ExternalUser))
+{
+    <div class="row">
+    <div class="col-12 col-sml-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title" id="card-title-text">Transfer Stock</h2>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item"
+                        onclick="document.getElementById('card-title-text').textContent = 'Transfer Stock'">
+                        <a class="nav-link active" id="move-tab" data-bs-toggle="tab" href="#move" role="tab"
+                            aria-controls="move" aria-selected="true">
+                            Transfer Stock
+                        </a>
+                    </li>
+                    @if (User.IsInRole(RoleList.Administrator))
+                        {
+                            <li class="nav-item" onclick="document.getElementById('card-title-text').textContent = 'Add Stock'">
+                                <a class="nav-link" id="add-tab" data-bs-toggle="tab" href="#add" role="tab" aria-controls="add"
+                                    aria-selected="false">
+                                    Add Stock
+                                </a>
+                            </li>
+                            <li class="nav-item"
+                                onclick="document.getElementById('card-title-text').textContent = 'Remove Stock'">
+                                <a class="nav-link" id="remove-tab" data-bs-toggle="tab" href="#remove" role="tab"
+                                    aria-controls="remove" aria-selected="false">
+                                    Remove Stock
+                                </a>
+                            </li>
+                        }
+
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="move" role="tabpanel" aria-labelledby="move-tab">
+                            <form asp-action="MoveStockForm" onsubmit="return handleFormSubmit(this);">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-row">
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="FromStock.ProductId" class="control-label"></label>
+                                        <select asp-for="FromStock.ProductId" class="form-control select2" id="product-select-id"
+                                                data-toggle="select2"  placeholder="Search Products..">
+                                        </select>
+                                        <span asp-validation-for="FromStock.ProductId" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="FromStock.LocationId" class="control-label">
+                                            From (Site, Location, Quantity)
+                                        </label>
+                                        <select asp-for="FromStock.LocationId" class="form-control select2"
+                                            data-toggle="select2" id="site-select-id">
+                                            <option value="none" selected disabled hidden>--Select a Location--</option>
+                                        </select>
+                                        <span asp-validation-for="FromStock.LocationId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="quantity" class="control-label">Quantity</label>
+                                        <input asp-for="quantity" class="form-control" type="number" min="1" value=""
+                                            placeholder="0" />
+                                        <span asp-validation-for="quantity" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="ToStock.Location.SiteId" class="control-label">To Site</label>
+                                        <select asp-for="ToStock.Location.SiteId" class="form-control select2"
+                                            data-toggle="select2" asp-items="ViewBag.SiteName" id="to-site-select-id">
+                                            <option value="none" selected disabled hidden>--Select a Site--</option>
+                                        </select>
+                                        <span asp-validation-for="ToStock.Location.SiteId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="ToStock.LocationId" class="control-label">To Location</label>
+                                        <select asp-for="ToStock.LocationId" class="form-control select2"
+                                                data-toggle="select2" id="to-location-select-id" asp-items="ViewBag.LocationName">
+                                            <option value="none" selected disabled hidden>--Select a Location--</option>
+                                        </select>
+                                        <span asp-validation-for="FromStock.LocationId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <div class="dropdown">
+                                            <button type="button" class="btn btn-dark dropdown-toggle mt-2"
+                                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Transfer
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <center>
+                                                    <div class="form-group px-2" style="padding: 15px; color: white">
+                                                        <label>Confirm Transfer?</label>
+                                                        <div class="dropdown-divider"></div>
+                                                        <input type="button" value="Cancel" class="btn btn-danger btnClose"
+                                                            style="margin: 10px" />
+                                                        <input type="submit" value="Move" class="btn btn-primary"
+                                                            id="btnTransfer" style="margin: 10px"/>
+                                                    </div>
+                                                </center>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade show" id="add" role="tabpanel" aria-labelledby="add-tab">
+                            <div class="row">
+                                <div class="col-12">
+                                    <button class="btn btn-dark float-end" onclick="generateBarcode()">Print Label</button>
+                                    <div id="barcode" style="display: none">
+                                    </div>
+                                </div>
+                            </div>
+                            <form asp-action="AddStockForm" onsubmit="return handleFormSubmit(this);">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-row">
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="ToStock.Location.SiteId" class="control-label">To Site</label>
+                                        <select asp-for="ToStock.Location.SiteId" class="form-control select2"
+                                            data-toggle="select2" asp-items="ViewBag.SiteName" id="add-to-site-select-id">
+                                            <option value="none" selected disabled hidden>--Select a Site--</option>
+                                        </select>
+                                        <span asp-validation-for="ToStock.Location.SiteId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="ToStock.LocationId" class="control-label">To Location</label>
+                                        <select asp-for="ToStock.LocationId" class="form-control select2"
+                                            data-toggle="select2" id="add-to-location-select-id"
+                                            asp-items="ViewBag.LocationName">
+                                            <option value="none" selected disabled hidden>--Select a Location--</option>
+                                        </select>
+                                        <span asp-validation-for="ToStock.LocationId" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="FromStock.ProductId" class="control-label"></label>
+                                        <select asp-for="FromStock.ProductId" class="form-control select2" id="add-product-select-id"
+                                                data-toggle="select2"  placeholder="Search Products..">
+                                        </select>
+                                        <span asp-validation-for="FromStock.ProductId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="quantity" class="control-label">Quantity</label>
+                                        <input asp-for="quantity" class="form-control" type="number" min="1" value=""
+                                            placeholder="0" />
+                                        <span asp-validation-for="quantity" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <div class="dropdown">
+                                            <button type="button" class="btn btn-dark dropdown-toggle mt-2"
+                                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Add
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <center>
+                                                    <div class="form-group px-2" style="padding: 15px; color: white">
+                                                        <label>Confirm Add?</label>
+                                                        <div class="dropdown-divider"></div>
+                                                        <input type="button" value="Cancel" class="btn btn-danger btnClose"
+                                                            style="margin: 10px" />
+                                                        <input type="submit" value="Add" class="btn btn-primary"
+                                                            style="margin: 10px" id="btnAdd"/>
+                                                    </div>
+                                                </center>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade show" id="remove" role="tabpanel" aria-labelledby="remove-tab">
+                            <form asp-action="RemoveStockForm" onsubmit="return handleFormSubmit(this);">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-row">
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="FromStock.ProductId" class="control-label"></label>
+                                        <select asp-for="FromStock.ProductId" class="form-control select2" id="removeproduct-select-id"
+                                                data-toggle="select2"  placeholder="Search Products..">
+                                        </select>
+                                        <span asp-validation-for="FromStock.ProductId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="FromStock.LocationId" class="control-label">
+                                            From (Site, Location, Quantity)
+                                        </label>
+                                        <select asp-for="FromStock.LocationId" class="form-control select2"
+                                            data-toggle="select2" id="removesite-select-id">
+                                            <option value="none" selected disabled hidden>--Select a Location--</option>
+                                        </select>
+                                        <span asp-validation-for="FromStock.LocationId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <label asp-for="quantity" class="control-label">Quantity</label>
+                                        <input asp-for="quantity" class="form-control" type="number" min="1" value=""
+                                            placeholder="0" />
+                                        <span asp-validation-for="quantity" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group col-12 col-md-6 px-2">
+                                        <div class="dropdown">
+                                            <button type="button" class="btn btn-dark dropdown-toggle mt-2"
+                                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Remove
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <center>
+                                                    <div class="form-group p-1" style="padding: 15px; color: white">
+                                                        <label>Confirm Remove?</label>
+                                                        <div class="dropdown-divider"></div>
+                                                        <input type="button" value="Cancel"
+                                                            class="btn btn-secondary btnClose" style="margin: 10px" />
+                                                        <input type="submit" value="Remove" class="btn btn-danger"
+                                                            style="margin: 10px" id="btnRemove"/>
+                                                    </div>
+                                                </center>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title" id="header-text-id">Movement History</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table dt-responsive webkit-nowrap w-100" id="movementHistory-datatable">
+                        <thead>
+                            <tr>
+                                <th data-priority="1">
+                                    Movement Type
+                                </th>
+                                <th data-priority="1">
+                                    SKU
+                                </th>
+                                <th data-priority="1">
+                                    From
+                                </th>
+                                <th data-priority="1">
+                                    From Running Balance
+                                </th>
+                                <th data-priority="1">
+                                    To
+                                </th>
+                                <th data-priority="1">
+                                    To Running Balance
+                                </th>
+                                <th data-priority="1">
+                                    Action Qty
+                                </th>
+                                <th data-priority="1">
+                                    Date
+                                </th>
+                                <th data-priority="2">
+                                    Employee
+                                </th>
+                                <th data-priority="2">
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+<script src="~/js/pages/Move-Stock.min.js?"></script>
+    <script type="text/javascript">
+
+        const initializeProductSelect2 = () => {
+            $("#product-select-id, #add-product-select-id, #removeproduct-select-id").select2({
+                placeholder: 'Search Products...',
+                minimumInputLength: 3,
+                allowClear: true,
+                ajax: {
+                    url: '/MoveStock/SearchProducts',
+                    dataType: 'json',
+                    delay: 300,
+                    data: params => ({ searchTerm: params.term }),
+                    processResults: data => ({ results: data })
+                }
+            });
+        };
+        
+    function newexportaction(e, dt, button, config) {
+        var self = this;
+        var oldStart = dt.settings()[0]._iDisplayStart;
+        dt.one('preXhr', function (e, s, data) {
+            // Just this once, load all data from the server
+            data.start = 0;
+            data.length = 2147483647;
+            dt.one('preDraw', function (e, settings) {
+                // Call the original action function
+                if (button[0].className.indexOf('buttons-copy') >= 0) {
+                    $.fn.dataTable.ext.buttons.copyHtml5.action.call(self, e, dt, button, config);
+                } else if (button[0].className.indexOf('buttons-excel') >= 0) {
+                    $.fn.dataTable.ext.buttons.excelHtml5.available(dt, config) ? $.fn.dataTable.ext.buttons.excelHtml5.action.call(self, e, dt, button, config) : $.fn.dataTable.ext.buttons.excelFlash.action.call(self, e, dt, button, config);
+                } else if (button[0].className.indexOf('buttons-csv') >= 0) {
+                    $.fn.dataTable.ext.buttons.csvHtml5.available(dt, config) ? $.fn.dataTable.ext.buttons.csvHtml5.action.call(self, e, dt, button, config) : $.fn.dataTable.ext.buttons.csvFlash.action.call(self, e, dt, button, config);
+                } else if (button[0].className.indexOf('buttons-pdf') >= 0) {
+                    $.fn.dataTable.ext.buttons.pdfHtml5.available(dt, config) ? $.fn.dataTable.ext.buttons.pdfHtml5.action.call(self, e, dt, button, config) : $.fn.dataTable.ext.buttons.pdfFlash.action.call(self, e, dt, button, config);
+                } else if (button[0].className.indexOf('buttons-print') >= 0) {
+                    $.fn.dataTable.ext.buttons.print.action(e, dt, button, config);
+                }
+                dt.one('preXhr', function (e, s, data) {
+                    // DataTables thinks the first item displayed is index 0, but we're not drawing that.
+                    // Set the property to what it was before exporting.
+                    settings._iDisplayStart = oldStart;
+                    data.start = oldStart;
+                });
+                // Reload the grid with the original page. Otherwise, API functions like table.cell(this) don't work properly.
+                setTimeout(dt.ajax.reload, 0);
+                // Prevent rendering of the full data to the DOM
+                return false;
+            });
+        });
+        // Requery the server with the new one-time export settings
+        dt.ajax.reload();
+    }
+
+    $(document).ready(function () {
+        $(".select2").select2();
+        $('.btnClose').click(function () {
+            $(this).parents('.dropdown').find('button.dropdown-toggle').dropdown('toggle')
+        });
+
+        initializeProductSelect2();
+
+        $("#barcode").html();
+        let generateURL = '/GetTableData';
+        $('#movementHistory-datatable').DataTable({
+            "processing": true, // for show progress bar
+            "serverSide": true, // for process server side
+            "filter": true, // this is for disable filter (search box)
+            "orderMulti": false, // for disable multiple column at once
+            "scrollY": "500px",
+            "scrollCollapse": true,
+            searchDelay: 500,
+            fixedHeader: true,
+            lengthMenu: [
+                [10, 25, 100],
+                [10, 25, 100]
+            ],
+            order: [[5, 'desc']],
+            "dom": "<'row'<'col-sm-12 col-md-7'l><'col-sm-12 col-md-4'f><'col-sm-12 col-md-1'B>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            "ajax": {
+                "url": generateURL,
+                "type": "POST",
+                "datatype": "json"
+            },
+            keys: !0,
+            language: {
+                paginate: {
+                    previous: "<i class='mdi mdi-chevron-left'>",
+                    next: "<i class='mdi mdi-chevron-right'>"
+                },
+
+            },
+            drawCallback: function () {
+                $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+            },
+            "columns": [
+                {
+                    "data": "movementType",
+                    "name": "MovementType",
+                    "autoWidth": true,
+                    "defaultContent": "",
+                },
+                { "data": "sku", "name": "SKU", "autoWidth": true },
+                {
+                    "data": "fromLocation",
+                    "name": "From",
+                    "autoWidth": true,
+                    "defaultContent": ""
+                },
+                { "data": "fromLocationRunningBalance", "name": "FromRunningBalance", "autoWidth": true },
+                {
+                    "data": "toLocation",
+                    "name": "To",
+                    "autoWidth": true,
+                    "defaultContent": ""
+                },
+                { "data": "toLocationRunningBalance", "name": "ToRunningBalance", "autoWidth": true },
+                { "data": "actionQuantity", "name": "Quantity", "autoWidth": true },
+                {
+                    "data": "performedOn",
+                    "name": "DateTime",
+                    "autoWidth": true,
+                    "defaultContent": "",
+                    "render": function (data) {
+                        let date = new Date(data);
+                        let month = date.getMonth() + 1;
+                        let day = date.getDate();
+                        let hour = date.getHours();
+                        let minute = date.getMinutes();
+                        let second = date.getSeconds();
+                        return (month.toString().length > 1 ? month : "0" + month) + "/" +
+                            (day.toString().length > 1 ? day : "0" + day) + "/" +
+                            date.getFullYear() + " " +
+                            (hour.toString().length > 1 ? hour : "0" + hour) + ":" +
+                            (minute.toString().length > 1 ? minute : "0" + minute) + ":" +
+                            (second.toString().length > 1 ? second : "0" + second);
+                    }
+                },
+                { "data": "performedBy", "name": "EmployeeName", "autoWidth": true, "defaultContent": "" },
+                { "data": "action", "name": "Action", "autoWidth": true, "defaultContent": "" }
+            ],
+            "buttons": [{
+                extend: 'collection', text: 'Export', buttons: [{
+                    "extend": 'copy', "titleAttr": 'Copy', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }, {
+                    "extend": 'excel', "titleAttr": 'Excel', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }, {
+                    "extend": 'csv', "titleAttr": 'CSV', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }, {
+                    "extend": 'pdf', "titleAttr": 'PDF', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }, {
+                    "extend": 'print', "titleAttr": 'Print', "action": newexportaction, exportOptions: {
+                        columns: ':not(.notexport)'
+                    }
+                }]
+            }],
+        });
+    });
+
+    const submissionStates = new Map();
+
+    function handleFormSubmit(form) {
+        const button = form.querySelector('input[type="submit"]');
+
+        if (submissionStates.get(form)) {
+            return false;
+        }
+
+        submissionStates.set(form, true);
+
+
+        if (button) {
+            button.disabled = true;
+            button.classList.add('disabled');
+            button.value = 'Processing...';
+        }
+
+        return true;
+    }
+
+    </script>
+}

@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ERPWebApp", "ERPWebApp\ERPWebApp.csproj", "{A3CBE69F-50DC-4976-8A85-A2631ECF6ED9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ERPWebApp.UnitTests", "ERPWebApp.UnitTests\ERPWebApp.UnitTests.csproj", "{B8F80560-3E75-4B01-B1F7-BFC82BA1DA6F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		azure-pipelines-dev.yml = azure-pipelines-dev.yml
+		azure-pipelines.yml = azure-pipelines.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AzurePipelinesTemplates", "AzurePipelinesTemplates", "{188C12F1-AACE-4E2A-93EB-696088C71EB6}"
+	ProjectSection(SolutionItems) = preProject
+		AzurePipelinesTemplates\deploy-template.yml = AzurePipelinesTemplates\deploy-template.yml
+		AzurePipelinesTemplates\build-and-test-template.yml = AzurePipelinesTemplates\build-and-test-template.yml
+		AzurePipelinesTemplates\build-template.yml = AzurePipelinesTemplates\build-template.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Test|Any CPU = Test|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A3CBE69F-50DC-4976-8A85-A2631ECF6ED9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3CBE69F-50DC-4976-8A85-A2631ECF6ED9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3CBE69F-50DC-4976-8A85-A2631ECF6ED9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3CBE69F-50DC-4976-8A85-A2631ECF6ED9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3CBE69F-50DC-4976-8A85-A2631ECF6ED9}.Test|Any CPU.ActiveCfg = Test|Any CPU
+		{A3CBE69F-50DC-4976-8A85-A2631ECF6ED9}.Test|Any CPU.Build.0 = Test|Any CPU
+		{B8F80560-3E75-4B01-B1F7-BFC82BA1DA6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8F80560-3E75-4B01-B1F7-BFC82BA1DA6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8F80560-3E75-4B01-B1F7-BFC82BA1DA6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8F80560-3E75-4B01-B1F7-BFC82BA1DA6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8F80560-3E75-4B01-B1F7-BFC82BA1DA6F}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{B8F80560-3E75-4B01-B1F7-BFC82BA1DA6F}.Test|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4968253F-B737-4BD6-9CB1-D22935F45ACF}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{188C12F1-AACE-4E2A-93EB-696088C71EB6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
+EndGlobal

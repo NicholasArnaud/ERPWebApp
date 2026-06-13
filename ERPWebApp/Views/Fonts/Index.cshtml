@@ -1,0 +1,79 @@
+﻿@using ERPWebApp.Models
+@model IEnumerable<ERPWebApp.Models.NirfForms.Fonts>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table dt-responsive webkit-nowrap w-100" id="fonts-datatable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.FontTitle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FontTitle)
+                </td>
+                <td>
+                    @if (item.IsActive)
+                    {
+                        <a>Yes</a>
+                    }
+                    else
+                    {
+                        <a>No</a>
+                    }
+                </td>
+                <td class="table-action">
+                    <a class="action-icon" asp-action="Details" asp-route-id="@item.FontId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.InventoryManager) || this.User.IsInRole(RoleList.ShippingManager))
+                    {
+                        <a class="action-icon" asp-action="Edit" asp-route-id="@item.FontId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                    }
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.InventoryManager) || this.User.IsInRole(RoleList.ShippingManager))
+                    {
+                        <a class="action-icon" asp-action="Delete" asp-route-id="@item.FontId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var fontTable = $("#fonts-datatable").DataTable({
+                    keys: !0, language: {
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                        },
+
+                    }, drawCallback: function () {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                    }
+                });
+            });
+        </script>
+    }
+    }
+

@@ -1,0 +1,174 @@
+﻿@model IEnumerable<ERPWebApp.Models.Report>
+
+@{
+    ViewData["Title"] = "GetQueries";
+    var queryList = ViewData["QueryList"] as List<SelectListItem> ?? new List<SelectListItem>();
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* Override DataTables styling for Bootstrap 5 background colors */
+    .dataTables_wrapper .table .table-danger,
+    .dataTables_wrapper .table .table-danger > td {
+        background-color: #dc3545 !important;
+        color: #ffffff !important;
+    }
+
+    .dataTables_wrapper .table .table-success,
+    .dataTables_wrapper .table .table-success > td {
+        background-color: #198754 !important;
+        color: #ffffff !important;
+    }
+</style>
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div id="my-loading-modal" class="modal fade text-width:80%;" role="dialog">
+                <!--Loading Banner-->
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header modal-colored-header bg-secondary" id="modal-header-warning">
+                            <i class="dripicons-warning h1"></i>
+                            <strong id="modal-status">Loading...</strong>
+                            <i class="dripicons-warning h1"></i>
+                        </div>
+                        <div class="modal-header modal-colored-header bg-success" id="modal-header-success">
+                            <i class="dripicons-checkmark h1"></i>
+                            <strong id="modal-status">Loaded</strong>
+                            <i class="dripicons-checkmark h1"></i>
+                        </div>
+                        <div class="modal-header modal-colored-header bg-warning" id="warning-banner">
+                            <i class="dripicons-warning mr-2"></i> Calculating Report, It May Take a Couple Minutes <i class="dripicons-warning mr-2"></i>
+                        </div>
+                        <div id="my-spinner-modal" class="d-flex justify-content-center">
+                            <div id="my-spinner-modal-spinner" class="spinner-border avatar-lg text-primary text-successy" role="status"></div>
+                        </div>
+                        <div class="modal-footer">
+                            &nbsp;
+                            <button type="button" id="my-modal-btn" class="btn btn-primary" onclick="$('#my-loading-modal').modal('hide');">Close </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!--display title of page-->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Create Report</h3>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!--dropdown menu for queries-->
+                    <div class="col-3" style="width:300px;">
+                        <div class="mb-3">
+                            <label for="queries">Queries</label>
+                            <select class="form-select select2" data-toggle="select2" name="queries" id="queries" required asp-items="queryList">                              
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-3" style="width:330px;" id="prod-select">
+                        <!--Hidden Sku Filter unless Query 4 is selected-->
+                        <label style="white-space:nowrap" for="sku-select">Sku</label>
+                        <select class="form-control select2" id="sku-select"
+                                data-toggle="select2" placeholder="Search Products..">
+                        </select>
+                    </div>
+                    <div class="col-3" style="width:330px;" id="site-select">
+                        <!--Hidden Sku Filter unless Query 4 is selected-->
+                        <label style="white-space:nowrap" for="site-select">Site</label>
+                        <select id="siteId-select" class="form-control select2" data-toggle="select2" asp-items="@ViewBag.siteData">
+                            <option value="-1">All</option>
+                        </select>
+                    </div>
+                    <div class="col-3" style="width:330px;" id="location-select">
+                        <!--Hidden Sku Filter unless Query 4 is selected-->
+                        <label style="white-space:nowrap" for="site-select">Location</label>
+                        <select id="locationId-select" class="form-control select2" data-toggle="select2" asp-items="@ViewBag.locationList">
+                            <option value="-1">All</option>
+                        </select>
+                    </div>
+                    <div class="col-3" style="width:330px;" id="subcategory-select">
+                        <!--Hidden Sku Filter unless Query 11 is selected-->
+                        <label style="white-space:nowrap" for="subcategoryId-select">Sub Category</label>
+                        <select id="subcategoryId-select" class="form-control select2" data-toggle="select2" asp-items="@ViewBag.SubCategoryList">
+                            <option value="0">All</option>
+                        </select>
+                    </div>
+                    <div class="col-3" style="width:330px;" id="department-select">
+                        <!--Hidden Sku Filter unless Query 11 is selected-->
+                        <label style="white-space:nowrap" for="departmentId-select">Department</label>
+                        <select id="departmentId-select" class="form-control select2" data-toggle="select2" asp-items="@ViewBag.DepartmentList">
+                            <option value="0">All</option>
+                        </select>
+                    </div>
+                    <div class="col-3" style="width:330px;" id="stockhistory-prod-select">
+                        <!--Hidden Sku Filter unless Query 11 is selected-->
+                        <label style="white-space:nowrap" for="sku-select">Sku</label>
+                        <select id="stockhistory-sku-select" class="form-control">
+                        </select>
+                    </div>
+                    <div class="col-3" style="width:330px;" id="shipstationstore-select">
+                        <!--Hidden Sku Filter unless Query 11 is selected-->
+                        <label style="white-space:nowrap" for="shipstationstoreId-select">ShipStation Store</label>
+                        <select id="shipstationstoreId-select" class="form-control select2" data-toggle="select2" asp-items="@ViewBag.ShipStationStoreList">
+                            <option value="0">All</option>
+                        </select>
+                    </div>
+                    <div class="col-3" style="width:330px;" id="date-search">
+                        <!--Date Range Filter-->
+                        <label style="white-space:nowrap">Date Range</label>
+                        <div float:right id="date-search" class="form-control" data-toggle="date-picker-range" data-target-display="#selectedValue" data-cancel-class="btn-light" style="white-space:nowrap">
+                            <i class="mdi mdi-calendar"></i>&nbsp;
+                            <span id="selectedValue"></span>
+                        </div>
+                    </div>                  
+                    <div class="week-selector col-3" id="weekly-date-picker">
+                        <div class="form-group">
+                            <label class="control-label" for="weekpicker">Select Week</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="text" class="form-control" id="weekpicker">                              
+                            </div>
+                        </div>
+                    </div>                   
+                    <div class="col-3" style="width:330px;" id="date-picker-panel">
+                        <label style="white-space:nowrap">Date</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="date-picker">
+                            <button class="btn btn-primary" type="button" id="btn-apply">apply</button>
+                        </div>
+                    </div>
+                    <div id="rerun-report-sec">
+                        <div class="col-3 d-flex align-items-center mt-2" style="width:330px;">
+                            <button id="rerun-report" class="btn btn-primary">Refresh Report</button>
+                        </div>
+                    </div>                 
+                </div>
+                <br />
+                <div id="totalAmountDisplay"></div>
+                <br />
+                <div class="tab-content">
+                    <!--Where the datatable is generated-->
+                    <div class="col-12">
+                        <div class="table-responsive" id="partial-table">
+                            <table class="table dt-responsive webkit-nowrap w-100" id="report-datatable"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/pages/report-page.min.js"></script>
+    <script type="text/javascript">
+        $(".select2").select2();
+    </script>
+}

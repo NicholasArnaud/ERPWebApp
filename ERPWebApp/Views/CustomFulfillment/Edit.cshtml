@@ -1,0 +1,81 @@
+﻿@model ERPWebApp.Models.ProductCustomFulfillment
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>Edit Custom Fulfillment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ProductCustomFulfillmentId" />
+            <div class="form-group p-1">
+                <label asp-for="BundleId" class="control-label"></label>
+                <select asp-for="BundleId" class="form-control select2" data-toggle="select2"
+                    asp-items="ViewBag.BundleId">
+                    <option value="">Select a Bundle...</option>
+                </select>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="ProductId" class="control-label"></label>
+                <select asp-for="ProductId" class="form-control select2" data-toggle="select2"
+                    asp-items="ViewBag.ProductId">
+                    <option value="">Select a Product...</option>
+                </select>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="ShipStationStoreId" class="control-label"></label>
+                <select asp-for="ShipStationStoreId" class="form-control select2" data-toggle="select2"
+                    asp-items="ViewBag.StoreId">
+                    <option value="">Select a Store...</option>
+                </select>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="CustomFulfillmentCost" class="control-label"></label>
+                <div class="input-group mb-1">
+                    <div class="input-group-text"><i class="mdi mdi-currency-usd"></i></div>
+                    <input type="number" class="form-control" asp-for="CustomFulfillmentCost" step=".01" min="0" />
+                </div>
+            </div>
+            <div class="form-group p-1">
+                <label asp-for="EffectiveDate" class="control-label"></label>
+                <div class="input-group mb-1">
+                    <div class="input-group-text"><i class="mdi mdi-calendar"></i></div>
+                    <input type="text" asp-for="EffectiveDate" class="form-control" id="date-picker" />
+                </div>
+
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActive" checked /> @Html.DisplayNameFor(model =>
+                    model.IsActive)
+                </label>
+            </div>
+            <div class="form-group p-2">
+                <input type="submit" value="Edit" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a class="p-2" asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script language="javascript" type="text/javascript">
+        $('#date-picker').datepicker()
+            .on('changeDate', function () {
+                $('#date-picker').datepicker('hide');
+            });
+    </script>
+}

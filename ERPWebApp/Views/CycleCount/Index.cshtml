@@ -1,0 +1,162 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.Stock>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    hr {
+        border-top: solid 3px #000000 !important;
+        padding: 15px;
+    }
+</style>
+<style>
+    /* Blur effect */
+    .overlay-active body {
+        filter: blur(4px);
+        pointer-events: none; /* Disable pointer events on blurred elements */
+    }
+
+    /* Spinner styles */
+    .spinner-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.5);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+
+<!-- Modal -->
+@if (User.IsInRole(RoleList.Administrator) ||
+User.IsInRole(RoleList.Manager) ||
+User.IsInRole(RoleList.ShippingManager) ||
+User.IsInRole(RoleList.InventoryManager))
+{
+    <div id="overlay" class="overlay"></div>
+    <div id="spinner" class="spinner-overlay" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+           
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Modify Frequency
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <Span class="nowrap">Select Department To Modify</Span><br />
+                            <select asp-items="ViewBag.SiteFilter" class="form-control select2" data-toggle="select2" id="site-modify-id">
+                                <option value="none" selected disabled hidden>-- Site --</option>
+                            </select>
+
+                            <label class="control-label">Base Days   &nbsp</label>
+                            <i class="uil-info-circle" style="font-size: 15px; color:yellowgreen" data-bs-toggle="tooltip" data-bs-placement="right"
+                           title="The 'Base Days' is the number of days that can go by before stocks that dont fall under the below categories will be checked!">
+                            </i><br />
+                            <input id="baseDaysInput" type="number" min="1" class="form-control" value="@ViewBag.BaseDays" />
+
+                            <label class="control-label">Over 1000   &nbsp</label>
+                            <i class="uil-info-circle" style="font-size: 15px; color:yellowgreen" data-bs-toggle="tooltip" data-bs-placement="right"
+                           title="The number of days that will go by before having to count stocks that have more than 1000 total quantity listed!">
+                            </i><br />
+                            <input id="over1000Input" type="number" min="1" class="form-control" value="@ViewBag.Over1000" />
+
+                            <label class="control-label">Cost over $10   &nbsp</label>
+                            <i class="uil-info-circle" style="font-size: 15px; color:yellowgreen" data-bs-toggle="tooltip" data-bs-placement="right"
+                           title="The number of days that will go by before having to count stocks that contain products that cost over $10!">
+                            </i><br />
+                            <input id="cost10Input" type="number" min="1" class="form-control" value="@ViewBag.Cost10" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="submitModify" type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-6">
+                    <h3 class="text-nowrap">Cycle Count System</h3>
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn btn-dark float-end" data-bs-toggle="modal" data-bs-target="#exampleModal">Modify Cycle</button>                
+                </div>
+
+            </div>
+
+
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-5">
+                    <form>
+                        <div class="row">
+                        <div class="col-5">
+                        <label>Filter Department</label>
+                        <select asp-items="ViewBag.SiteFilter" class="form-control select2" data-toggle="select2" id="site-filter-id">
+                        </select>
+                        </div>
+                        <div class="col-5">
+                                <label>Filter Status</label>
+                        <select id="status-filter" class="form-control select2" data-toggle="select2">
+                            <option value="null">All</option>
+                            <option value="1">Started</option>
+                            <option value="2">Not started</option>
+                        </select>
+                        </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-3" style="margin-top: 22px">
+                    <button type="button" class="btn btn-dark" onclick="showStartCycleCountConfirmModal()">Start for Site</button>
+                    <button type="button" class="btn btn-dark" id="start-selected">Start Selected</button>
+                </div>
+            </div>
+            <hr style="border-top: solid 1px #000000 !important;
+                        padding: 0px;" />
+            <div id="CycleListHolder">
+                @{
+                    await Html.RenderPartialAsync("TablePartial", Model);
+                }
+            </div>
+
+        </div>
+    </div>
+    <div class="modal fade" id="confirm-start" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning" style="color:black">
+                    <h4 class="modal-title" id="myModalLabel">Confirm</h4>
+                </div>
+                <div class="modal-body bg-dark" style="color:black">
+                    <p>Are you sure want to start a cycle count for an entire site.</p>
+                    <p>Do you want to proceed?</p>
+                </div>
+                <div class="modal-footer bg-dark">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="start-site">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");       
+    }
+    <script src="~/js/pages/cycleCount.min.js"></script>
+}

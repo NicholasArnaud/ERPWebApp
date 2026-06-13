@@ -1,0 +1,47 @@
+﻿@model IEnumerable<ERPWebApp.Models.SubCategory>
+
+<table class="table dt-responsive webkit-nowrap w-100" id="category-datatable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th><a>Actions</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @if (item.IsActive)
+                    {
+                        <a>Yes</a>
+                    }
+                    else
+                    {
+                        <a>No</a>
+                    }
+                </td>
+                <td class="table-action">
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.ShippingManager) || this.User.IsInRole(RoleList.InventoryManager))
+                    {
+                        <a class="action-icon" asp-action="Edit" asp-route-id="@item.SubCategoryId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                    }
+                    <a class="action-icon" asp-action="Details" asp-route-id="@item.SubCategoryId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.ShippingManager) || this.User.IsInRole(RoleList.InventoryManager))
+                    {
+                        <a class="action-icon" asp-action="Delete" asp-route-id="@item.SubCategoryId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

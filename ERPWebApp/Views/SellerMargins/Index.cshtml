@@ -1,0 +1,223 @@
+﻿@model ERPWebApp.Controllers.SellerMarginsController.SellerMarginsWithStoreId
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Seller Margins</h1>
+<div class="row">
+    <div class=col-12>
+        <div class="card">
+            <div id="my-loading-modal" class="modal fade text-width:80%;" role="dialog">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header modal-colored-header bg-secondary" id="modal-header-warning">
+                            <i class="dripicons-warning h1"></i>
+                            <strong id="modal-status">Loading...</strong>
+                            <i class="dripicons-warning h1"></i>
+                        </div>
+                        <div class="modal-header modal-colored-header bg-success" id="modal-header-success">
+                            <i class="dripicons-checkmark h1"></i>
+                            <strong id="modal-status">Loaded</strong>
+                            <i class="dripicons-checkmark h1"></i>
+                        </div>
+                        <div class="modal-header modal-colored-header bg-warning" id="warning-banner">
+                            <i class="dripicons-warning mr-2"></i>    Table is Loading, It May Take a Couple Minutes   <i class="dripicons-warning mr-2"></i>
+                        </div>
+                        <div id="my-spinner-modal" class="d-flex justify-content-center">
+                            <div id="my-spinner-modal-spinner" class="spinner-border avatar-lg text-primary text-successy" role="status"></div>
+                        </div>
+                        <div class="modal-footer">
+                            &nbsp;
+                            <button type="button" id="my-modal-btn" class="btn btn-primary" onclick="$('#my-loading-modal').modal('hide');">Close </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div id="get-the-store" hidden class="card-title">@Html.DisplayFor(model=>model.shipstationstore.StoreId)</div>
+                <h3 id="store-name" class="card-title">@Html.DisplayFor(model=>model.shipstationstore.StoreName)</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <form asp-action="PullSellerMarginsByDateRange" id="dateForm">
+                            <div class="form-row">
+                                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager) || this.User.IsInRole(RoleList.CustomerSupportManager))
+                                {
+                                    <div style="text-align:left" class="col-md-4 col-xs-12" id="filter-list-vendor">
+                                        <label style="text-align:left" class="control-label">Select a Store</label>
+                                        <select style="text-align:left" class="form-control select2" data-toggle="select2" id="selector" name="selector" asp-items=ViewBag.StoreList>
+                                        </select>
+                                        <span class="text-danger"></span>
+                                        <input type="hidden" id="storeId" name="StoreId" />
+                                    </div>
+                                    <br />
+                                }
+                                @if (Model.shipstationstore.StoreName != "No Store Found")
+                                {
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <!-- Date Range -->
+                                            <label class="form-label">Date Range</label>
+                                            <input type="text" class="form-control date" id="singledaterange" data-toggle="date-picker-range" data-cancel-class="btn-warning">
+                                            <input type="hidden" id="startDate" name="startDate" />
+                                            <input type="hidden" id="endDate" name="endDate" />
+
+                                            <br />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <!--Table-->
+                        <div id="seller-margins-partialview">
+                            @{
+                                await Html.RenderPartialAsync("PartialIndex", Model.sellerMargins);
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript">
+        var sellerMarginsTable;
+
+        function initializeDataTable() {
+            sellerMarginsTable = $("#seller-margins-datatable").DataTable({
+                responsive: true,
+                dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-4'f><'col-sm-12 col-md-2'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>",
+                        next: "<i class='mdi mdi-chevron-right'>"
+                    },
+                },
+                columns: [
+                    { data: "orderNumber" },
+                    { data: "shipDate" },
+                    { data: "storeName" },
+                    { data: "serviceCode" },
+                    { data: "trackingNumber" },
+                    { data: "storeItemsCost" },
+                    { data: "customerItemsCost" },
+                    { data: "shippingCost" },
+                    { data: "shipmentCost" },
+                    { data: "storeCostWithEtsy" },
+                    { data: "storeCostDiffSubfulfillmentAndShipping" }
+                ],
+                order: [[1, 'asc']], // Set the default column to sort (change the index according to your needs)
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export',
+                        buttons: [
+                            'copy',
+                            'excel',
+                            'csv',
+                            'pdf',
+                            'print'
+                        ],
+                        className: 'btn btn-secondary'
+                    }
+                ]
+            });
+
+
+            console.log("PartialViewTable Reloaded");
+            $('#my-loading-modal').modal('hide');
+            $('#my-spinner-modal').hide();
+            $('#my-spinner-modal-spinner').hide();
+            $('#my-modal-btn').show();
+            $('#modal-header-warning').hide();
+            $('#modal-header-success').show();
+        }
+        function updateDataTable(data) {
+            // Clear the existing data in the DataTable
+            sellerMarginsTable.clear();
+
+            // Add the new data to the DataTable
+            sellerMarginsTable.rows.add(data);
+
+            // Redraw the DataTable
+            sellerMarginsTable.draw();
+        }
+
+        $(document).ready(function () {
+            $('#selector').select2();
+            $('#selector').on('select2:select', function (e) {
+                $('#get-the-store')[0].innerHTML = $('#selector').val();
+                $('#store-name')[0].innerHTML = $("#selector :selected").text();
+                // Set the values of the hidden input fields
+                $('#storeId').val($('#selector').val());
+            });
+            // Initialize daterangepicker
+            $('#singledaterange').daterangepicker({
+                autoUpdateInput: false,
+                opens: 'left',
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                }
+            });
+
+            // Update the display input when the date range changes
+            $('#singledaterange').on('apply.daterangepicker', function (ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+                // Set the values of the hidden input fields
+                $('#startDate').val(picker.startDate.format('MM/DD/YYYY'));
+                $('#endDate').val(picker.endDate.format('MM/DD/YYYY'));
+
+                // Submit the form
+                $.ajax({
+                    url: '@Url.Action("PullSellerMarginsByDateRange", "SellerMargins")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: $('#dateForm').serialize(),
+                    success: function (data) {
+                        // Update the table with the new data
+                        updateDataTable(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error occurred while fetching data:', error);
+                    }
+                });
+
+            });
+
+            // Clear the display input when the cancel button is clicked
+            $('#singledaterange').on('cancel.daterangepicker', function (ev, picker) {
+                $(this).val('');
+            });
+
+            $('#seller-margins-partialview').load('/SellerMargins/PartialViewIndex', function (response) {
+                initializeDataTable();
+            });
+
+        });
+    </script>
+    }

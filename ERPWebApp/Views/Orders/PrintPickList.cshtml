@@ -1,0 +1,102 @@
+﻿@using ERPWebApp.Data.DTOModels
+@using ERPWebApp.Services
+@model List<SimplifiedInventoryPickList>
+@{
+    var printPickListUrl = "/Orders/PrintPickList?batchNumber=" + ViewBag.BatchNumber;
+    int totalQuantity = 0;
+
+    string batchNumber = ViewBag.BatchNumber;
+    string[] batchNumberParts = batchNumber.Split(" ");
+    int orderBatchId = Convert.ToInt32(batchNumberParts[batchNumberParts.Length - 1]);
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Pick List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .header-text {
+            font-size: 1.5rem;
+        }
+
+        .qr-code {
+            width: 100px;
+            height: 100px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+
+</head>
+<body>
+    <h1>Batch Number: @ViewBag.BatchNumber</h1>
+    <div class="header">
+        <img class="qr-code" src="data:image/png;base64,@QRCodeHelper.GenerateQRCodeBase64(orderBatchId.ToString())" alt="Batch QR Code" />
+    </div>
+    <h2>Pick List</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Image</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Sku</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="@item.Description" style="max-width: 50px; max-height: 50px; width: auto; height: auto;" />
+                        }
+                    </td>
+                    <td>@item.Description</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.FromLocation</td>
+                </tr>
+                totalQuantity += item.Quantity;
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" style="text-align: right;"><strong>Total Quantity:</strong></td>
+                <td>@totalQuantity</td>
+            </tr>
+        </tfoot>
+    </table>
+    <script>
+        window.print();
+    </script>
+</body>
+</html>

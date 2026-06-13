@@ -1,0 +1,143 @@
+﻿@model ERPWebApp.Models.Inventory.InventoryRequestForm
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>Inventory Form Editing</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="InventoryRequestFormId" />
+            <input type="hidden" asp-for="RequestedByUser" />
+            <input type="hidden" asp-for="CreatedDate" />
+            <input type="hidden" asp-for="PickedByUser" />
+            <input type="hidden" asp-for="PickedDate" />
+            <input type="hidden" asp-for="FromLocation" />
+            <input type="hidden" asp-for="ReceivedDate" />
+            @if (User.IsInRole(RoleList.Administrator) ||
+            User.IsInRole(RoleList.ProductionBasic) ||
+            User.IsInRole(RoleList.InventoryBasic) ||
+            User.IsInRole(RoleList.Manager))
+            {
+                <h3>To be filled out by Production:</h3>
+                <div id="production-form">
+                    @if (Model.OrderNumber != null)
+                    {
+                        <div class="form-group p-1">
+                            <label asp-for="OrderNumber" class="control-label"></label>
+                            <input asp-for="OrderNumber" class="form-control" readonly />
+                            <span asp-validation-for="OrderNumber" class="text-danger"></span>
+                        </div>
+                    }
+                    <div class="form-group p-1">
+                        <label asp-for="ProductId" class="control-label"></label>
+                        <select asp-for="ProductId" class="form-control" asp-items="ViewBag.Products">
+                        </select>
+                    </div>
+                    <div class="form-group p-1">
+                        <label asp-for="QuantityNeeded" class="control-label"></label>
+                        <input asp-for="QuantityNeeded" class="form-control" />
+                        <span asp-validation-for="QuantityNeeded" class="text-danger"></span>
+                    </div>
+                    <div class="form-group p-1">
+                        <label asp-for="RequestedByEmployeeId" class="control-label"></label>
+                        <select asp-for="RequestedByEmployeeId" class="form-control select2" data-toggle="select2"
+                                asp-items="ViewBag.RequestedEmployeeId">
+                        </select>
+
+                    </div>
+                    <div class="form-group p-1">
+                        <label asp-for="PickReason" class="control-label"></label>
+                        <select asp-for="PickReason" class="form-control select2" data-toggle="select2" id="pickReason-select">
+                            <option value="Choose Pick Reason" disabled="disabled" selected="true">Choose Pick Reason</option>
+                            <option value="Operator Error">Operator Error</option>
+                            <option value="Picker Error">Picker Error</option>
+                            <option value="Machine Error">Machine Error</option>
+                            <option value="Defective Item">Defective Item</option>
+                            <option value="Consumables">Consumables</option>
+                            <option value="Unbatched Item">Unbatched Item</option>
+                            <option value="Manager Miscount">Manager Miscount</option>
+                            <option value="Mismatched Personalization">Mismatched Personalization</option>
+                            <option value="Test Product Request">Test Product Request</option>
+
+                        </select>
+                    </div>
+                    <div class="form-group p-1" id="reasonExplanation-container" style="@(Model.PickReason != "Operator Error" ? "display: none;" : "")">
+                        <label asp-for="ReasonExplanation" class="control-label">Reason</label>
+                        <textarea asp-for="ReasonExplanation" id="ReasonExplanation" class="form-control"></textarea>
+                        <span asp-validation-for="ReasonExplanation" class="text-danger"></span>
+                    </div>
+                    <div class="form-group p-1">
+                        <label asp-for="ToLocationId" class="control-label"></label>
+                        <select asp-for="ToLocationId" class="form-control select2" data-toggle="select2"
+                                asp-items="ViewBag.ToLocations">
+                        </select>
+                    </div>
+                </div>
+            }
+            <hr>
+            @*/////////////////////////////////////////////////////////////////////////////////////////////////
+            Membrane Only*@
+            <h3>To be filled out by Membrane:</h3>
+            <div id="membrane-form">
+
+
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="IsPicked" id="is-picked" />
+                        @Html.DisplayNameFor(model => model.IsPicked)
+                    </label>
+                </div>
+                <div style="display:none" id="pick-employee" class="form-group p-1">
+                    <label asp-for="PickedByEmployeeId" class="control-label"></label>
+                    <select asp-for="PickedByEmployeeId" class="form-control select2" id="pick-employee-dropdown"
+                            data-toggle="select2" asp-items="ViewBag.PickedEmployeeId">
+                        <option></option>
+                    </select>
+                </div>
+                <div class="row row-cols-3">
+                    <div class="col-md-6">
+                        <div style="display:none" id="stock" class="form-group p-1">
+                            <label asp-for="StockId" class="control-label"></label>
+                            <select asp-for="StockId" class="form-control select2" id="stock-dropdown"
+                                    data-toggle="select2" asp-items="ViewBag.StockId"></select>
+                        </div>
+                    </div>
+                    <div class="col-auto p-3">
+                        <p id="or" style="text-align: center; display: none; col-xs-8">OR</p>
+                    </div>
+                    <div class="col-md-3 p-3 ">
+                        <div style="display:none" id="extra-locations" class="form-group form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" id="extra-locations-check-box"
+                                       asp-for="IsFromExtrasLocation" />
+                                @Html.DisplayNameFor(model => model.IsFromExtrasLocation)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group p-2" id="submit-form">
+                <input id="submit-button" type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a class="p-2" asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/js/pages/InventoryRequestForms/edit.min.js"></script>
+}

@@ -1,0 +1,178 @@
+﻿@model IEnumerable<ERPWebApp.Models.Inventory.Site>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+    <link rel="stylesheet" type="text/css" href="~/css/sliderbutton.css">
+</head>
+<!-- end row-->
+<div class="row">
+
+    <div id="myModalError" class="modal fade text-width:80%;" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div style="display: none" class="modal-header modal-colored-header bg-danger" id="modalHeadeError">
+                    <center> <i class="dripicons-wrong h1"></i>&nbsp;&nbsp;Error Deleting!</center>
+                </div>
+                <div id="myModalErrorAlertBody" class="Modal-body" style="text-align:center; color: white; font-size: 20px;">
+                    Message will appear here
+                </div>
+                <div class="modal-footer">
+                    &nbsp;
+                    <button type="button" id="myModalBtn" class="btn btn-secondary" onclick="$('#myModalError').modal('hide');">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+
+        <div class="card">
+
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-9 col-sm-7 col-xs-12">
+                        <h3 class="card-title">Sites</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.InventoryManager) || User.IsInRole(RoleList.ShippingManager))
+                {
+                    <div class="row custom-bb">
+                        <div class="col-md-3 col-sm-5 col-xs-12">
+                            <a class="btn btn-dark" asp-action="Create">Create New</a>
+                        </div>
+                    </div>
+                }
+
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                {
+                    <div class="row mb-3">
+
+                        <div class="col-md-4 col-sm-6 col-xs-12 d-flex flex-column justify-content-center">
+
+                            <div class="form-check form-switch">
+                                <label class="form-check-label" for="custom-switch-2" id="custom-switch-2-label">Is Active</label>
+                                <input type="checkbox" class="form-check-input" id="custom-switch-2" />
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+                <div class="row">
+                    <div class="col-12">
+                        <div id="filtered-orders-partial">
+                            @{
+                                await Html.RenderPartialAsync("PartialIndex", Model);
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="dialog-container" id="dialogContainer"></div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+@*     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> *@
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var msg = "@TempData["ErrorMessage"]"
+            if (msg) {
+                getErrorM(msg);
+            }
+            function getErrorM(myMessage) {
+                var msg = myMessage;
+                if (msg) {
+                    openErrorModal(msg);
+                    console.log("ERROR MESSAGE!: " + msg);
+                }
+            }
+            function openErrorModal(strMessage) {
+                $('#myModalBtn').show();
+                var myDiv = document.getElementById("myModalErrorAlertBody");
+                myDiv.innerHTML = strMessage;
+                $('#myModalError').modal('show');
+                $('#modalHeadeError').show();
+            }
+
+            var siteTable = $("#site-datatable").DataTable({
+                keys: !0, language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                    },
+
+                }, drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                }
+            });
+
+            $("#custom-switch-2").click(function () {
+                var switchStatus = false;
+                if ($(this).is(':checked')) {
+                    switchStatus = $(this).is(':checked');
+                }
+                else {
+                    switchStatus = $(this).is(':checked');
+                }
+                var url = '@Url.Action("ToggleActive")';
+
+                $.getJSON(url, { id: switchStatus }).done(function () {
+                    console.log("PartialViewTable Loading");
+                    //Recalled DataTable in Load to wait for data is allocated in the table before reloading it
+                    //otherwise DataTable does not work
+                    $('#filtered-orders-partial').load('/Sites/PartialViewTableShow', function (response) {
+                        //$("#filter-button-2").show();
+
+                        var siteTable = $("#site-datatable").DataTable({
+                            keys: !0, language: {
+                                paginate: {
+                                    previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                                },
+
+                            }, drawCallback: function () {
+                                $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                            }
+                        });
+                        console.log("PartialViewTable Reloaded");
+                    });
+                });
+            });
+
+
+            $(".open-dialog").click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "/Sites/CreateBarcode",
+                    type: "GET",
+                    success: function (result) {
+                        $('#dialogContainer').html(result);
+                        $('#myModal').modal('show');
+                    }
+                });
+            });
+
+        });
+    </script>
+}

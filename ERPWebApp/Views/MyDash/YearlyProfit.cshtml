@@ -1,0 +1,84 @@
+﻿@using ERPWebApp.Models.Company;
+@model FinancialsViewModel
+
+@{
+    ViewData["Title"] = "Yearly Profits";
+}
+
+<style>
+    #chart-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    #chart {
+        width: 100%;
+    }
+
+    #help-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    #help-info {
+        position: absolute;
+        top: 40px;
+        right: -200px;
+        width: 200px;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        z-index: 10;
+        padding: 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-family: Helvetica, Arial, sans-serif;
+        background: #FFF;
+        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+        color: #373d3f;
+    }
+</style>
+
+<div class="col-12" id="drac-yearlyprofits">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="header-title d-inline-block">
+                        Yearly Profits
+                    </h4>
+                    <button onclick="toggleHelpInfo('yearlyprofits-info')" style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                        <i class="mdi mdi-information"></i>
+                    </button>
+                </div>
+                <div>
+                    <button id="exportYearlyProfitsButton" class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+                </div>
+            </div>
+            <div id="yearlyprofits-info" class="hidden alert alert-info" role="alert">
+                <p>Displays profits for the current year vs the previous year, as well as items sold each day.</p>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-3 col-lg-2">
+                    <input type="text" id="DaysLineChart" name="daysYearlyProfits" class="form-control" value="Year-to-Date" readonly>
+                </div>
+            </div>
+            <div id="yearlyProfitsChart" class="apex-charts" data-colors="#536de6,#e3eaef,#10c469,#35b8e0"></div>
+            <div id="yearlyProfitsTotals" style="margin-top: 10px; text-align: center; font-weight: bold;"></div>
+            <div id="yearlyProfitsLoadingMessage" style="display: none;">Loading...</div>
+        </div>
+    </div>
+</div>

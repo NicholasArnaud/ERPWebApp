@@ -1,0 +1,63 @@
+﻿@model ERPWebApp.Models.Inventory.BundleItem
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>BundleItem</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="BundleId" class="control-label"></label>
+                <select asp-for="BundleId" class="form-control select2" data-toggle="select2" asp-items="ViewBag.BundleId" id="bundleId-select2">
+                    <option value='0'></option>
+                </select>
+                <span asp-validation-for="BundleId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductId" class="control-label"></label>
+                <select asp-for="ProductId" class="form-control select2" data-toggle="select2" asp-items="ViewBag.ProductId" id="productId-select2">
+                    <option value='0'></option>
+                </select>
+                <span asp-validation-for="ProductId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Quantity" class="control-label"></label>
+                <input asp-for="Quantity" class="form-control" min="1" max="9999" value="1" type="number" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" style="margin-top:10px; margin-bottom : 10px;" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#bundleId-select2").select2({
+                placeholder: {
+                    id: '0',
+                    text: 'Select a Bundle'
+                }
+            });
+            $("#productId-select2").select2({
+                placeholder: {
+                    id: '0',
+                    text: 'Select a Product'
+                }
+            });
+        });
+    </script>
+}

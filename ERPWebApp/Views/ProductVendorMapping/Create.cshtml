@@ -1,0 +1,132 @@
+﻿@model ERPWebApp.Models.Mappings.ProductVendorMapping
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+<hr />
+<div class="container-fluid text-white">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Product Vendor Mapping</a></li>
+            <li class="breadcrumb-item active" aria-current="page">New</li>
+        </ol>
+    </nav>
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title">Product Vendor Mapping</h2>
+                <div>
+                    <button type="submit" name="submit" class="action-button btn btn-primary"><span class="mdi mdi-18px mdi-content-save">&nbsp;Submit</span></button>
+                    <a asp-action="Index">
+                        <button type="button" class="btn btn-info"><span class="mdi mdi-18px mdi-arrow-top-left-thick">&nbsp;Back to List</span></button>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label class="control-label"> Select a Product</label>
+                            @Html.DropDownListFor(model => model.ProductId, ViewBag.ProductList as SelectList, "Select an option", new { id="selector-pid", @class = "select2 form-control select2-multiple wizard-require", onchange="productChanged()", data_toggle="select2" })
+                            @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group mt-2">
+                            <label class="control-label">Select a Vendor</label> &nbsp &nbsp <i class="dripicons-warning" id="infoIcon" style="color: yellow"></i>
+                            @Html.DropDownListFor(model => model.VendorId, ViewBag.VendorList as SelectList, "Select an option", new { id="selector-vid", @class = "select2 form-control select2-multiple wizard-require", data_toggle="select2" })
+                            @Html.ValidationMessageFor(model => model.VendorId, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group mt-2">
+                            <label class="control-label"> Select a Unit of Measure</label>
+                            @Html.DropDownListFor(model => model.UnitofMeasure, ViewBag.UnitofMeasureList as SelectList, "Select an option", new { id = "selector-unit", @class = "select2 form-control select2-multiple wizard-require", data_toggle = "select2" })
+                            @Html.ValidationMessageFor(model => model.UnitofMeasure, "", new { @class = "text-danger" })
+                        </div>
+
+                           <div class="form-group mt-2">
+                            <label class="control-label"> Select a Term</label>
+                            @Html.DropDownListFor(model => model.Term, ViewBag.TermsList != null ? ViewBag.TermsList as SelectList : new SelectList(Enumerable.Empty<SelectListItem>()), "Select an option", new { id = "selector-term", @class = "select2 form-control select2-multiple wizard-require", data_toggle = "select2" })
+                            @Html.ValidationMessageFor(model => model.Term, "", new { @class = "text-danger" })
+                           </div>
+
+                        <div class="form-group mt-2">
+                            <label asp-for="VendorSku" class="control-label"></label>
+                            <input asp-for="VendorSku" class="form-control" />
+                            <span asp-validation-for="VendorSku" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label asp-for="Cost" class="control-label"></label>
+                            <input asp-for="Cost" class="form-control" type="number" min="0.0000" placeholder="0.0000" step=".0001" />
+                            <span asp-validation-for="Cost" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label asp-for="MOQ" class="control-label"></label>
+                            <input asp-for="MOQ" class="form-control" type="number" value="1" min="1" placeholder="0" />
+                            <span asp-validation-for="MOQ" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label asp-for="OrderMultiples" class="control-label"></label>
+                            <input asp-for="OrderMultiples" class="form-control" type="number" min="1" placeholder="0" />
+                            <span asp-validation-for="OrderMultiples" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label asp-for="LeadTime" class="control-label"></label>
+                            <input asp-for="LeadTime" class="form-control" type="number" min="1" placeholder="0" />
+                            <span asp-validation-for="LeadTime" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label asp-for="Notes">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" type="text" rows="5" value=""></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label class="control-label">Primary Vendor</label>
+                            <label class="switch">
+                                <input type="checkbox" id="custom-switch-2" asp-for="isPrimaryVendor">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="form-group form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" asp-for="IsActive" /> 
+                                <label asp-for="IsActive" class="control-label"></label>
+                            </label>
+                        </div>
+                        <div class="form-group form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" asp-for="IsRawMaterial" />
+                                <label asp-for="IsRawMaterial" class="control-label"></label>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            $('.select2').select2();
+        });
+        function productChanged() {
+            const url = '../ProductVendorMapping/VendorsByProductId/'
+            $.getJSON(url, { Id: +$('#selector-pid').val() }).done(function (response) {
+                $('#selector-vid').empty();
+                var s = "";
+                for (var i = 0; i < response.length; i++) {
+                    s += '<option value="' + response[i].vendorId + '">' + response[i].vendorName + '</option>';
+                }
+                $('#selector-vid').html(s);
+            });
+        }
+    </script>
+}
+

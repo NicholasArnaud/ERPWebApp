@@ -1,0 +1,194 @@
+﻿@model ERPWebApp.Models.PurchaseOrders.ShippingMethodProviderView
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-12 col-md-12 col-lg-12 col-xl-6">
+        <div class="card">
+
+            <div class="card-header">
+                <div style="float:left">
+                    <h3 class="card-title">
+                        Shipping Providers
+                    </h3>
+                </div>
+
+
+            </div>
+            <div style="float:right">
+                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager) || this.User.IsInRole(RoleList.ShippingManager))
+                {
+                    <form asp-action="CreateProvider" method="post">
+                        <div class="input-group mb-3">
+                            <input asp-for="Provider.ShippingProviderName" type="text" class="form-control m-2" placeholder="Provider Name" aria-label="Provider Name" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button id="manage-provider-btn" type="submit" class="btn btn-secondary btn-rounded m-2">Create Provider</button>
+                            </div>
+                        </div>
+                    </form>
+                }
+            </div>
+            <table class="table dt-responsive webkit-nowrap w-100" id="provider-table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(Model => Model.Providers.First().ShippingProviderName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Providers.First().IsActive)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Providers)
+                    {
+                        <tr>
+
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ShippingProviderName)
+                            </td>
+                            <td>
+                                @if (Html.ValueFor(modelItem => item.IsActive) == "True")
+                                {
+                                    <a>Yes</a>
+                                }
+                                else
+                                {
+                                    <a>No</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-12 col-md-12 col-lg-12 col-xl-6">
+        <div class="card">
+
+            <div class="card-header">
+                <div style="float:left">
+                    <h3 class="card-title">
+                        Shipping Methods
+                    </h3>
+                </div>
+
+
+            </div>
+            <div style="float:right">
+                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager) || this.User.IsInRole(RoleList.ShippingManager))
+                {
+                    <form asp-action="CreateMethoder" method="post">
+                        <div class="input-group mb-3">
+                            <input asp-for="Method.ShippingMethodName" type="text" class="form-control m-2" placeholder="Method Name" aria-label="Method Name" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button id="manage-provider-btn" type="submit" class="btn btn-secondary btn-rounded m-2">Create Provider</button>
+                            </div>
+                        </div>
+                    </form>
+                }
+            </div>
+            <table class="table dt-responsive webkit-nowrap w-100" id="method-table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(Model => Model.Methods.First().ShippingMethodName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Methods.First().IsActive)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Methods)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ShippingMethodName)
+                            </td>
+                            <td>
+                                @if (Html.ValueFor(modelItem => item.IsActive) == "True")
+                                {
+                                    <a>Yes</a>
+                                }
+                                else
+                                {
+                                    <a>No</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+<div class="m-10">
+    <a class="p-2" asp-action="Index">Back to List</a>
+</div>
+ 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#provider-table").DataTable({
+                    "dom": "<'row'<'col-sm-12 col-md-8 col-lg-5'l><'col-sm-12 col-md-4 col-lg-7'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    keys: !0, language: {
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                        },
+
+                    }, drawCallback: function() {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                    },
+                    select: {
+                        style: 'multi'
+                    },
+                    "oLanguage": {
+                        "sLengthMenu": '<select class="btn btn-light">' +
+                            '<option value="10">10</option>' +
+                            '<option value="20">20</option>' +
+                            '<option value="30">30</option>' +
+                            '<option value="40">40</option>' +
+                            '<option value="50">50</option>' +
+                            '</select>'
+                    }
+                });
+                $("#method-table").DataTable({
+                    keys: !0, language: {
+                        "dom": "<'row'<'col-sm-12 col-md-8 col-lg-5'l><'col-sm-12 col-md-4 col-lg-7'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                        },
+
+                    }, drawCallback: function() {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                    },
+                     select: {
+                        style: 'multi'
+                    },
+                    "oLanguage": {
+                        "sLengthMenu": '<select class="btn btn-light">' +
+                            '<option value="10">10</option>' +
+                            '<option value="20">20</option>' +
+                            '<option value="30">30</option>' +
+                            '<option value="40">40</option>' +
+                            '<option value="50">50</option>' +
+                            '</select>'
+                    }
+                });
+            });
+
+        </script>
+    }
+    }

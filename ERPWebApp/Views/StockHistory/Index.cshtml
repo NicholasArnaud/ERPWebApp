@@ -1,0 +1,54 @@
+﻿@model List<ERPWebApp.Models.Inventory.StockHistory>
+
+@{
+    ViewData["Title"] = "GetStockHistory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Stock History Report</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-3">
+                        <!--Filters-->
+                        <label style="white-space:nowrap" for="product-select">Sku</label>
+                        <select id="product-select" class="form-control select2" data-toggle="select2" asp-items="@ViewBag.SkuData">
+                            <option value="-10">All</option>
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <label style="white-space:nowrap" for="location-select">Location</label>
+                        <select id="location-select" class="form-control select2" data-toggle="select2" asp-items="@ViewBag.LocationData">
+                            <option value="-10">All</option>
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <label style="white-space:nowrap">Date Range</label>
+                        <div id="datesearch" class="form-control" data-toggle="date-picker-range" data-target-display="#selectedValue" data-cancel-class="btn-light">
+                            <i class="mdi mdi-calendar"></i>&nbsp;
+                            <span id="selectedValue"></span>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="tab-content"><!--Table-->
+                    <div class="tab-pane show active" id="filtered-orders-partial">
+                        @{
+                            await Html.RenderPartialAsync("PartialIndex");
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <link rel="stylesheet" type="text/css" href="~/css/datatablecoloring.css">
+    <script src="~/js/pages/stockhistory-datatable.min.js?"></script>
+}

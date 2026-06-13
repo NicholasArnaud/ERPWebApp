@@ -1,0 +1,56 @@
+﻿@page
+@model PersonalDataModel
+@{
+    ViewData["Title"] = "Personal Data";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+
+
+@*<div class="row">
+    <div class="col-md-6">
+        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
+        <p>
+            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+        </p>
+        <form id="download-data" asp-page="DownloadPersonalData" method="post" class="form-group">
+            <button class="btn btn-primary" type="submit">Download</button>
+        </form>
+        <p>
+            <a id="delete" asp-page="DeletePersonalData" class="btn btn-secondary">Delete</a>
+        </p>
+    </div>
+</div>*@
+<div class="container-fluid text-white">
+    <form asp-page="DownloadPersonalData" method="post">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title">@ViewData["Title"]</h2>
+                <div>
+                    <button type="submit" name="submit" class="action-button btn btn-primary"><span class="mdi mdi-18px mdi-download">&nbsp;Download</span></button>
+                    <a asp-page="DeletePersonalData">
+                        <button type="submit" name="submit" class="action-button btn btn-danger"><span class="mdi mdi-18px mdi-delete">&nbsp;Delete</span></button>
+                    </a>
+                </div>
+            </div>
+            <div class="justify-content-center">
+                <div class="card mb-4">
+                    <div class="card-body justify-content-center">
+                        <div class="row">
+                            <div class="form-group">
+                                <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
+                                <p>
+                                    <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

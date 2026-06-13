@@ -1,0 +1,170 @@
+﻿@model Home;
+<!--CAN BE SAFELY REMOVED-->
+<style>
+    .apexcharts-pie-series path {
+        stroke: white!important;
+    }
+</style>
+<h4 class="header-title" style="margin:1rem">Speed-O-Meter</h4>
+
+<ul class="nav nav-tabs" role="tablist" id="speedOMeterTabs">
+    <!--NAV ITEMS ON TOP OF SPEED O METER-->
+    <li class="nav-item">
+
+        <a class="nav-link active" id="allPie-tab" data-bs-toggle="tab" href="#allPie" role="tab" aria-controls="allPie" aria-selected="true">All</a>
+    </li>
+    
+    <li class="nav-item">
+
+        <a class="nav-link" id="eletroplatingPie-tab" data-bs-toggle="tab" href="#electroplatingPie" role="tab" aria-controls="electroplatingPie" aria-selected="false">Electroplating</a>
+
+
+    </li>
+
+    <li class="nav-item">
+
+        <a class="nav-link" id="embroideryPie-tab" data-bs-toggle="tab" href="#embroideryPie" role="tab" aria-controls="embroideryPie" aria-selected="false">Embroidery</a>
+    </li>
+    
+
+    <li class="nav-item">
+
+        <a class="nav-link" id="engravingPie-tab" data-bs-toggle="tab" href="#engravingPie" role="tab" aria-controls="engravingPie" aria-selected="false">Engraving</a>
+
+    </li>
+
+    <li class="nav-item">
+
+        <a class="nav-link" id="metalPie-tab" data-bs-toggle="tab" href="#metalPie" role="tab" aria-controls="metalPie" aria-selected="false">Metal</a>
+
+    </li>
+
+    <li class="nav-item">
+
+        <a class="nav-link" id="uvpPie-tab" data-bs-toggle="tab" href="#uvpPie" role="tab" aria-controls="uvpPie" aria-selected="false">UVP</a>
+
+    </li>
+
+    <li class="nav-item">
+
+        <a class="nav-link" id="unknwonPie-tab" data-bs-toggle="tab" href="#unknownPie" role="tab" aria-controls="unknownPie" aria-selected="false">Unknown</a>
+
+    </li>
+    
+</ul>
+
+    <!--NAV ITEMS FOR EACH TAB UNDER SPEED O METER-->
+
+<div class="tab-content" id="speedometerContent">
+
+    <div class="tab-pane fade show active" id="allPie" role="tabpanel" aria-labelledby="allPie-tab">
+
+        <div id="speed-o-meter" class="apex-charts" data-colors="#c0c0c0,#536de6,#e3eaef,#10c469,#35b8e0" style="margin-right:0rem"></div>
+
+        <div class="row text-center">
+            <div class="col-md-3">
+                <h3 class="font-weight-normal mt-3">
+                    <span id="ElectroplatingTallyVsTarget"></span>
+                </h3>
+                <label>Production Cost:</label>
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                {
+                    <span id="ElectroplatingProductionCost"></span>
+                }
+                <p class="text-muted mb-0 mb-2"><i class="mdi mdi-checkbox-blank-circle" style="color: silver"></i> Electroplating</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="font-weight-normal mt-3">
+                    <span id="EmbroideryTallyVsTarget"></span>
+                </h3>
+                <label>Production Cost:</label>
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                {
+                    <span id="EmbroideryProductionCost"></span>
+                }
+                <p class="text-muted mb-0 mb-2"><i class="mdi mdi-checkbox-blank-circle text-warning"></i> Embroidery</p>
+            </div>
+
+            <div class="col-md-3">
+                <h3 class="font-weight-normal mt-3">
+                    <span id="EngravingTallyVsTarget"></span>
+                </h3>
+                <label>Production Cost:</label>
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                {
+                    <span id="EngravingProductionCost"></span>
+                }
+                <p class="text-muted mb-0 mb-2"><i class="mdi mdi-checkbox-blank-circle text-primary"></i> Engraving</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="font-weight-normal mt-3">
+                    <span id="MetalTallyVsTarget"></span>
+                </h3>
+                <label>Production Cost:</label>
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                {
+                    <span id="MetalProductionCost"></span>
+                }
+                <p class="text-muted mb-0 mb-2"><i class="mdi mdi-checkbox-blank-circle text-success"></i> Metal</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="font-weight-normal mt-3">
+                    <span id="UvpTallyVsTarget"></span>
+                </h3>
+                @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.Manager))
+                {
+                    <label>Production Cost:</label>
+                }
+                <span id="UvpProductionCost"></span>
+                <p>
+                    <span id="PlankTally"></span>
+                </p>
+                <p class="text-muted mb-0 mb-2"><i class="mdi mdi-checkbox-blank-circle text-danger"></i> UVP</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="font-weight-normal mt-3">
+                    <span id="UnknownTallyVsTarget"></span>
+                </h3>
+                <p class="text-muted mb-0 mb-2"><i class="mdi mdi-checkbox-blank-circle"></i> Unknown</p>
+            </div>
+        </div>
+
+    </div>
+    
+    <div class="tab-pane fade" id="electroplatingPie" role="tabpanel" aria-labelledby="electroplatingPie-tab">
+
+        <div id="pie-electroplating" class="apex-charts" style="margin-right:0rem"></div>
+
+    </div>
+
+    <div class="tab-pane fade" id="embroideryPie" role="tabpanel" aria-labelledby="embroideryPie-tab">
+
+        <div id="pie-Embroidery" class="apex-charts" style="margin-right:0rem"></div>
+
+    </div>
+    
+    
+
+    <div class="tab-pane fade" id="engravingPie" role="tabpanel" aria-labelledby="engravingPie-tab">
+
+        <div id="pie-engraving" class="apex-charts" style="margin-right:0rem"></div>
+
+    </div>
+
+    <div class="tab-pane fade" id="metalPie" role="tabpanel" aria-labelledby="metalPie-tab">
+
+        <div id="pie-metal" class="apex-charts" style="margin-right:0rem"></div>
+
+    </div>
+
+    <div class="tab-pane fade" id="uvpPie" role="tabpanel" aria-labelledby="uvpPie-tab">
+
+        <div id="pie-uvp" class="apex-charts" style="margin-right:0rem"></div>
+
+    </div>
+    <div class="tab-pane fade" id="unknownPie" role="tabpanel" aria-labelledby="unknownPie-tab">
+
+        <div id="pie-unknown" class="apex-charts" style="margin-right:0rem"></div>
+
+    </div>
+</div> <!--end tab content-->

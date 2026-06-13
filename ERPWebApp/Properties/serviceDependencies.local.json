@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "secrets1": {
+      "secretStore": null,
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.KeyVault/vaults/ERPWebAppvault",
+      "type": "secrets.keyVault",
+      "connectionId": "VaultUri"
+    },
+    "mssql1": {
+      "secretStore": "AzureKeyVault",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/completefulserver/databases/BetaMainDatabase",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:StagingConnection"
+    },
+    "mssql2": {
+      "secretStore": "AzureKeyVault",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/completefulserver/databases/MainDatabase",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:ProductionConnection"
+    },
+    "mssql3": {
+      "secretStore": "LocalSecretsFile",
+      "type": "mssql.onprem",
+      "connectionId": "ConnectionStrings:LocalConnection"
+    }
+  }
+}

@@ -1,0 +1,144 @@
+﻿@using ERPWebApp.Models.Company;
+@model InventoryViewModel
+
+@{
+    ViewData["Title"] = "Top Reason Request";
+
+    var productRequestItems = new Dictionary<string, string>
+{
+{ "Product", "Product" },
+{ "Requests", "Requests" },
+{ "Percentage", "Percentage" }
+};
+
+    var inventoryReasonsRequested = new Dictionary<string, string>
+{
+{ "Reasons", "Reasons" },
+{ "Frequency", "Frequency" },
+{ "Percantage", "Percentage" }
+};
+
+    var movedProductItems = new Dictionary<string, string>
+{
+{ "Product", "Product" },
+{ "Quantity", "Quantity" }
+};
+}
+
+<style>
+    #chart-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    #chart {
+        width: 100%;
+    }
+
+    #help-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    #help-info {
+        position: absolute;
+        top: 40px;
+        right: -200px;
+        width: 200px;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        pointer-events: none;
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        border-radius: 4px;
+        font-size: 13px;
+        z-index: 9999;
+        visibility: hidden;
+    }
+
+    .inventory-select2-container {
+        width: 25%;
+        /* Adjust this value to control the width of the select box */
+    }
+
+    .inventory-select2-container .inventory-select2-selection {
+        width: 25%;
+        height: 38px;
+        /* You can adjust this value to control the height of the select box */
+        border-radius: 0.25rem;
+    }
+</style>
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="header-container">
+                <h4 class="header-title d-inline-block">
+                    Top 5 Reasons Requested
+                </h4>
+                <button onclick="toggleHelpInfo('inventory-reasons-info')"
+                    style="color: white; border: none; background: none; font-size: 20px; cursor: pointer;">
+                    <i class="mdi mdi-information"></i>
+                </button>
+            </div>
+            <div>
+                <button id="reasonsExport" class="btn btn-secondary buttons-csv buttons-html5">CSV</button>
+            </div>
+        </div>
+        <div id="inventory-reasons-info" class="hidden alert alert-info" role="alert">
+            <p>Displays the count & percentage of requests that have been made for the most requested reasons.</p>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4" style="margin-bottom: 20px;">
+            <input type="text" id="reasons-chart" name="reasons" class="form-control" value="Last 30 Days" readonly>
+        </div>
+    </div>
+    <div class="row">
+        <div class="reasons-fetching-container"
+            style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10; display:none">
+            <div id="reasons-fetching" class="hidden"
+                style="background-color: #37404A; padding: 1rem; border-radius: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+                <p>Fetching...</p>
+                <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+            </div>
+        </div>
+        <table class="table dt-responsive webkit-nowrap w-100" id="reasonsTable">
+            <thead>
+                <tr>
+                    @foreach (var header in inventoryReasonsRequested)
+                    {
+                        <th>@header.Value</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.RequestedReasonInfo)
+                {
+                    <tr>
+                        <td>@item.PickReason</td>
+                        <td>@item.ReasonCount</td>
+                        <td>
+                            <span style="margin-right: 5px;">@item.Percentage.ToString("0.##")%</span>
+                            <div style="background-color: grey; width: 100%; height: 10px; position: relative;">
+                                <div style="background-color: hotpink; width: @item.Percentage%; height: 10px;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

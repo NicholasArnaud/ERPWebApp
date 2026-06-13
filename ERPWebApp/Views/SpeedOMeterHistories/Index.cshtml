@@ -1,0 +1,147 @@
+﻿@model IEnumerable<ERPWebApp.Data.DTOModels.DepartmentShippedTotalByDateDTO>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SpeedOMeter Daily History</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Index" id="dateForm">
+                    <div class="form-row">
+                        <!-- Date Range -->
+                        <div class="mb-3">
+                            <label class="form-label">Date Range</label>
+                            <div class="col-3">
+                                <input type="text" class="form-control date" id="singledaterange" data-toggle="date-picker-range" data-cancel-class="btn-warning">
+                                <input type="hidden" id="startDate" name="startDate" />
+                                <input type="hidden" id="endDate" name="endDate" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <!--Table-->
+                <div class="tab-content">
+                    <div class="tab-pane show active">
+                        <table class="table dt-responsive webkit-nowrap w-100" id="production-count-datatable">
+                            <thead>
+                                <tr>
+                                    <th data-sort="">
+                                        @Html.DisplayNameFor(model => model.Date)
+                                    </th>
+                                    @foreach (var item in Model.First().DepartmentTotals)
+                                    {
+                                        <th>
+                                            @item.Key Total
+                                        </th>
+                                    }
+                                    <th>
+                                        Full Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td data-sort="">
+                                            @item.Date.ToShortDateString()
+                                        </td>
+                                        @foreach (var departmentTotal in item.DepartmentTotals)
+                                        {
+                                            <td>
+                                                @departmentTotal.Value
+                                            </td>
+                                        }
+                                        <td>
+                                            @item.DepartmentTotals.Sum(x=>x.Value)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <link rel="stylesheet" href="assets/vendor/daterangepicker/daterangepicker.css" type="text/css" />
+        <!-- Daterangepicker js -->
+        <script src="~/lib/hyper/dist/modern/assets/js/vendor/moment.min.js"></script>
+        <script src="~/lib/hyper/dist/modern/assets/js/vendor/daterangepicker.js"></script>
+        }
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // Initialize daterangepicker
+                $('#singledaterange').daterangepicker({
+                    autoUpdateInput: false,
+                    opens: 'left',
+                    ranges: {
+                        'Today': [moment(), moment()],
+                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                        'This Month': [moment().startOf('month'), moment().endOf('month')],
+                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                });
+
+                // Update the display input when the date range changes
+                $('#singledaterange').on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+                    // Set the values of the hidden input fields
+                    $('#startDate').val(picker.startDate.format('MM/DD/YYYY'));
+                    $('#endDate').val(picker.endDate.format('MM/DD/YYYY'));
+
+                    // Submit the form
+                    $('#dateForm').submit();
+                });
+
+                // Clear the display input when the cancel button is clicked
+                $('#singledaterange').on('cancel.daterangepicker', function (ev, picker) {
+                    $(this).val('');
+                });
+
+                $("#production-count-datatable").DataTable({
+                    "dom": "<'row'<'col-sm-12 col-md-7'l><'col-sm-12 col-md-4'f><'col-sm-12 col-md-1'B>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    "createdRow": function (row, data, dataIndex, cells) {
+                        //Conditional Highlighting
+
+                    },
+                    keys: !0, language: {
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                        },
+                    }, drawCallback: function () {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                    },
+                    buttons: [
+                        {
+                            extend: 'collection',
+                            text: 'Export',
+                            buttons: [
+                                'copy',
+                                'excel',
+                                'csv',
+                                'pdf',
+                                'print'
+                            ]
+                        }
+                    ]
+                });
+            });
+        </script>
+
+}

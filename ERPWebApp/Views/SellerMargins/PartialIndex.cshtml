@@ -1,0 +1,82 @@
+﻿@model IEnumerable<ERPWebApp.Models.Sellers.SellerMargins>
+<div class="table-responsive">
+    <table class="table dt-responsive w-100" id="seller-margins-datatable">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.OrderNumber)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ShipDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.StoreName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ServiceCode)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TrackingNumber)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.StoreItemsCost)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CustomerItemsCost)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ShippingCost)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ShipmentCost)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.StoreCostWithEtsy)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.StoreCostDiffSubfulfillmentAndShipping)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.OrderNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ShipDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StoreName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ServiceCode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TrackingNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StoreItemsCost)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CustomerItemsCost)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ShippingCost)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ShipmentCost)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StoreCostWithEtsy)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StoreCostDiffSubfulfillmentAndShipping)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

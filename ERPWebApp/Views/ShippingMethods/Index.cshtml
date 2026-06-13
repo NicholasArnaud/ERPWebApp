@@ -1,0 +1,120 @@
+﻿@model IEnumerable<ERPWebApp.Models.PurchaseOrders.ShippingMethod>
+@{
+    ViewData["Title"] = "Index";
+}
+<div class="row">
+    <div class="col-12 col-md-12 col-lg-12 col-xl-12">
+        <div class="card">
+            <div class="card-header">
+                <div style="float:left">
+                    <h3 class="card-title">
+                        Shipping Methods
+                    </h3>
+                </div>
+            </div>
+            @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.FinancialManager) || User.IsInRole(RoleList.ShippingManager))
+            {
+                <ul class="nav nav-tabs nav-bordered mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-action="Create">
+                            <div typeof="button" class="btn btn-dark">Create</div>
+                        </a>
+                    </li>
+                </ul>
+            }
+            <div class="card-body">
+            <table class="table dt-responsive webkit-nowrap w-100" id="method-table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ShippingProvider.ShippingProviderName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ShippingMethodName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.IsActive)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ModifyDate)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ModifyByUser)
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ShippingProvider.ShippingProviderName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ShippingMethodName)
+                            </td>
+                            <td>
+                                @if (Html.ValueFor(modelItem => item.IsActive) == "True")
+                                {
+                                    <a>Yes</a>
+                                }
+                                else
+                                {
+                                    <a>No</a>
+                                }
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ModifyDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ModifyByUser)
+                            </td>
+                            <td>
+                                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.FinancialManager) || this.User.IsInRole(RoleList.ShippingManager))
+                                {
+                                    <a class="action-icon" asp-action="Delete" asp-route-id="@item.ShippingMethodId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#method-table").DataTable({
+                    "dom": "<'row'<'col-sm-12 col-md-8 col-lg-5'l><'col-sm-12 col-md-4 col-lg-7'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    keys: !0, language: {
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                        },
+
+                    }, drawCallback: function() {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                    },
+                    select: {
+                        style: 'multi'
+                    },
+                    "oLanguage": {
+                        "sLengthMenu": '<select class="btn btn-light">' +
+                            '<option value="10">10</option>' +
+                            '<option value="20">20</option>' +
+                            '<option value="30">30</option>' +
+                            '<option value="40">40</option>' +
+                            '<option value="50">50</option>' +
+                            '</select>'
+                    }
+                });
+            });
+        </script>
+    }
+    }

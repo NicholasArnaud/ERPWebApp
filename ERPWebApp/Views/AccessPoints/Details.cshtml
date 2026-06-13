@@ -1,0 +1,70 @@
+﻿@model ERPWebApp.Models.Company.Security.AccessPoint
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>AccessPoint</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AccessPointLocation)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AccessPointLocation)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IpAddress)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IpAddress)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.MacAddress)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.MacAddress)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.SerialNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.SerialNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsActive)
+        </dt>
+        <dd class="col-sm-10">
+            @if (@Html.ValueFor(model => model.IsActive) == "True")
+            {<a>Yes</a>}
+            else
+            {<a>No</a>}
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CreationDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CreationDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CreatedBy)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CreatedBy)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.AccessPointId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

@@ -1,0 +1,28 @@
+﻿@model IEnumerable<ERPWebApp.Models.BarcodeScanCount>
+<div class="table-responsive">
+    <table class="table dt-responsive webkit-nowrap w-100" id="barcode-count-datatable">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.ScanDateTimeHour)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Count)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ScanDateTimeHour)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Count)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

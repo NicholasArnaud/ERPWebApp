@@ -1,0 +1,947 @@
+﻿@using ERPWebApp.Models.Company
+@using ERPWebApp.Models.Orders
+  
+@model OrderBatch
+@{
+    var orderBatches = ViewData["OrderBatches"] as List<OrderBatch>;
+    var departmentList = ViewData["Departments"] as List<Department>;
+    ViewData["Title"] = "Index";
+}
+
+<style>
+    .btn-danger-confirmation {
+        background-color: red !important;
+        border-color: red !important;
+    }
+</style>
+
+<div class="modal fade" id="requiresPoModal" tabindex="-1" role="dialog" aria-labelledby="requiresPoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requiresPoModalLabel">Requires PO</h5>
+
+            </div>
+            <div class="modal-body">
+                Warning: This is only applicable to batches with the same vendor, such as plants, metal, and wood.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="requiresPoConfirmButton">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="display: none;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="successMessage">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="successModalOkButton" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="transferConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="transferConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transferConfirmationModalLabel">Transfer Confirmation</h5>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to transfer?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="transferCancelButton" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="transferConfirmButton">Transfer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="transferSuccessModal" tabindex="-1" role="dialog" aria-labelledby="transferSuccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transferSuccessModalLabel">Transfer Success</h5>
+            </div>
+            <div class="modal-body">
+                The stock transfer was successful.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="transferSuccessModalOkButton" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Removed button, so this isn't necessary. Keeping it here for potential reimplementation later.' *@
+<div class="modal fade" id="removeConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="removeOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removeOrderModalLabel">Remove Orders</h5>
+            </div>
+            <div id="transferWarning" style="display:none; color: red;">
+                Warning: The order has already begun being transferred.
+            </div>
+            <div class="modal-body" id="removeOrderMessage">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                @using (Html.BeginForm("RemoveOrders", "OrderBatch", FormMethod.Post, new { id = "removalForm" }))
+                {
+                    <input type="hidden" name="cwaOrderId" id="cwaOrderId" value="" />
+                    <input type="hidden" name="orderBatchId" id="orderBatchId" value="" />
+                    <input type="hidden" name="isUnknown" id="isUnknown" value="false" />
+                    <input type="hidden" name="unknownProducts" id="unknownProducts" value="" />
+                    <button type="submit" class="btn btn-danger" id="confirmRemoveButton">Remove</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="removeBatchModal" tabindex="-1" role="dialog" aria-labelledby="removeBatchModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removeBatchModalLabel">Remove Batch</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to remove this batch?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="removeBatchConfirmButton">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="failureModal" tabindex="-1" role="dialog" aria-labelledby="failureModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="failureModalLabel">Stock Transfer Failed</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="display: none;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="failureMessage">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="failureModalOkButton" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-3 col-xs-12">
+    <input type="text" class="form-control" id="scanned-batchId" autofocus style="opacity: 0;">
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Order Batches</h3>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs nav-bordered d-print-none mb-3">
+                    <li class="nav-item active">
+                        <a href="#design-batches" class="nav-link active" data-bs-toggle="tab" aria-expanded="true">
+                            <span>Open Batches</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#inventory-batches" class="nav-link" data-bs-toggle="tab" aria-expanded="false">
+                            <span>Inventory Batches</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#completed-batches" class="nav-link" data-bs-toggle="tab" aria-expanded="false">
+                            <span>Completed Batches</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane show active" id="design-batches">  
+                        <div class="col-md-3 col-xs-12">
+                            <label for="design-batch-dropdown" class="form-label">Batches</label>
+                            <select id="design-batch-dropdown" class="form-control select2" data-toggle="select2">
+                                <option>--Select a Batch--</option>
+                                    @foreach (var batch in orderBatches)
+                                    {
+                                        // Removed type inclusion.
+                                        if (batch.Status != OrderBatchStatus.Completed)
+                                        {
+                                            <option value="@batch.OrderBatchId">@batch.BatchNumber</option>
+                                        }
+                                    }
+                            </select>
+                            <hr>                           
+                        </div>
+                            <div id="design-batches-loading-spinner" style=" display: none; text-align: center;">
+                                <p>Fetching products...</p>
+                                <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                            </div>
+                        <div id="design-batches-container">
+                            <!-- The table will be rendered here using AJAX and PartialView -->
+                        </div>
+                        <div class="card-footer justify-content-end" id="design-batch-buttons" style="display: none;">
+                            <label>
+                                <input type="checkbox" id="includeImagesCheckbox"> Include Images
+                            </label>
+                            <button type="button" id="simplePickListButton" class="btn btn-primary">Simple Pick List</button>
+                            <button type="button" id="expandedPickListButton" class="btn btn-primary">Expanded Pick List</button>
+                        </div>
+                    </div>  
+                    <div class="tab-pane" id="completed-batches">
+                        <div class="col-md-3 col-xs-12">
+                            <label for="completed-batch-dropdown" class="form-label">Completed Batches</label>
+                            <select id="completed-batch-dropdown" class="form-control select2" data-toggle="select2">
+                                <option>--Select a Batch--</option>        
+                                @foreach (var batch in orderBatches.Where(b => b.Status == OrderBatchStatus.Completed).OrderByDescending(b => b.CreateDate))
+                                {
+                                    <option value="@batch.OrderBatchId">@batch.BatchNumber</option>
+                                }
+                            </select>
+                        </div>
+                            <div id="completed-batches-loading-spinner" style=" display: none; text-align: center;">
+                                <p>Fetching products...</p>
+                                <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                            </div>
+                        <div id="completed-batches-table-container">
+                            <!-- The table for completed batches will be rendered here using AJAX and PartialView -->
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="inventory-batches">
+                        <div class="col-md-3 col-xs-12">
+                            <label for="inventory-batch-dropdown" class="form-label">Inventory Batches</label>
+                            <select id="inventory-batch-dropdown" class="form-control select2" data-toggle="select2">
+                                <option>--Select a Batch--</option>
+                                @foreach (var batch in ViewData["FilteredOrderBatches"] as List<OrderBatch>)
+                                {
+                                    if (batch.Status != OrderBatchStatus.Completed)
+                                    {
+                                        <option value="@batch.OrderBatchId">@batch.BatchNumber</option>
+                                    }
+                                }
+                            </select>
+                            <hr>
+                        </div>
+                        <div id="inventory-batches-loading-spinner" style="display: none; text-align: center;">
+                            <p>Fetching products...</p>
+                            <div class="loading-circle spinner-border spinner-border-sm mr-2"></div>
+                        </div>
+                        <div id="inventory-batches-container">
+                            <!-- The table will be rendered here using AJAX and PartialView -->
+                        </div>
+                        <div class="card-footer justify-content-end" id="inventory-batch-buttons" style="display: none;">
+                            <label>
+                                <input type="checkbox" id="includeImagesCheckbox"> Include Images
+                            </label>
+                            <button type="button" id="simplePickListButton" class="btn btn-primary">Simple Pick List</button>
+                            <button type="button" id="expandedPickListButton" class="btn btn-primary">Expanded Pick List</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/pages/order-batch.min.js"></script>
+    <script>
+        let currentBatchType = "design"; // Default batch type
+
+        $(document).ready(function () {
+        var orderBatchId;
+
+        $(document).on('click', '.requiresPoButton', function () {
+            orderBatchId = $(this).data('order-batch-id');
+            console.log('Requires PO button clicked. OrderBatchId:', orderBatchId);
+            $('#requiresPoModal').modal('show');
+        });
+
+        $(document).on('click', '#requiresPoConfirmButton', function () {
+            console.log('Confirm button clicked. OrderBatchId:', orderBatchId);
+            $.ajax({
+                url: "@Url.Action("SetRequiresPo", "OrderBatch")",
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(orderBatchId),
+                success: function (response) {
+                    console.log('AJAX success response:', response);
+                    if (response.success) {
+                        alert('Requires PO updated successfully.');
+                        var button = $('.requiresPoButton[data-order-batch-id="' + orderBatchId + '"]');
+                        button.removeClass('btn-warning').addClass('btn-success').prop('disabled', true);
+                    } else {
+                        alert('Failed to update Requires PO: ' + response.message);
+                    }
+                    $('#requiresPoModal').modal('hide');
+                },
+                error: function (xhr, status, error) {
+                    console.log('AJAX error response:', error);
+                    alert('An error occurred: ' + error);
+                    $('#requiresPoModal').modal('hide');
+                }
+            });
+        });
+
+            $("#scanned-batchId").on("change", function () {
+                const scannedBatchId = $(this).val();
+                searchAndSelectBatch(scannedBatchId);
+            });
+            async function searchAndSelectBatch(scannedBatchId) {
+                const openBatchesDropdown = $("#design-batch-dropdown");
+                const completedBatchesDropdown = $("#completed-batch-dropdown");
+
+                // Find the option with the scanned batchId in both open and completed batch dropdowns
+                const openBatchOption = openBatchesDropdown.find(`option[value="${scannedBatchId}"]`);
+                const completedBatchOption = completedBatchesDropdown.find(`option[value="${scannedBatchId}"]`);
+
+                // If the scanned batchId is found in open batches
+                if (openBatchOption.length > 0) {
+                    // Switch to the open batches tab
+                    $('a[href="#design-batches"]').tab("show");
+
+                    // Select the matching option in the open batches dropdown
+                    openBatchesDropdown.val(scannedBatchId).trigger("change");
+                }
+                // Else, if the scanned batchId is found in completed batches
+                else if (completedBatchOption.length > 0) {
+                    // Switch to the completed batches tab
+                    $('a[href="#completed-batches"]').tab("show");
+
+                    // Select the matching option in the completed batches dropdown
+                    completedBatchesDropdown.val(scannedBatchId).trigger("change");
+                }
+                // Else, display an error message
+                else {
+                    alert("Batch ID not found.");
+                }
+            }
+
+            $(document).on("click", ".progress-btn", function() {  
+                const row = $(this).closest("tr");  
+                const isCompleted = row.data("iscompleted");  
+  
+                if (isCompleted) {  
+                    $(this).prop("disabled", true);  
+                    return;  
+                }  
+                const orderBatchId = row.data("orderbatchid");  
+                const orderBatchItemId = row.data("orderbatchitemid");
+                const batchItemStatusId = 1;
+  
+                $.ajax({  
+                    url: "@Url.Action("UpdateOrderBatchProgress", "OrderBatch")",  
+                    type: "POST",  
+                    data: {  
+                        orderBatchId: orderBatchId,  
+                        orderBatchItemId: orderBatchItemId, 
+                        batchItemStatusId: batchItemStatusId  
+                    },  
+                    success: function() {  
+                        location.reload();
+                    },  
+                    error: function() {  
+                        alert("Error updating progress. Please try again.");  
+                    }  
+                });  
+            });  
+            $(".progress-btn").each(function() {  
+                const row = $(this).closest("tr");  
+                const isCompleted = row.data("iscompleted");  
+                if (isCompleted) {  
+                    $(this).prop("disabled", true);  
+                }  
+            });  
+            $("#batch-dropdown").select2();
+            $('#completed-batch-dropdown').select2();
+            $("body").on("click", "#transferModalCancelButton", function () {
+                $("#transferModal").modal("hide");
+            });
+            $('#deleteConfirmButton').on('click', function () {
+                $('#deleteForm').submit();
+            });
+            // Changes batch type when swapping tabs. Commenting out for now while we handle the inventory batch type removal.
+            // $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (event) {  
+            //     const tabId = event.target.getAttribute('href');  
+            //     if (tabId === "#open-batches") {  
+            //         currentBatchType = "inventory";  
+            //     } else if (tabId === "#design-batches") {  
+            //         currentBatchType = "design";  
+            //     } else if (tabId === "#completed-batches") {  
+            //         currentBatchType = "completed";  
+            //     }  
+            // });  
+
+            $("#department-dropdown").on("change", function () {
+                const selectedDepartment = $(this).val().toLowerCase();
+                const rows = $("#design-batches-table tbody tr");
+                let allEntriesContainSelectedDepartment = true;
+
+                rows.each(function () {
+                    const departmentCell = $(this).find("td:nth-child(3)");
+                    const rowDepartment = departmentCell.text().toLowerCase();
+
+                    if (rowDepartment === selectedDepartment) {
+                        $(this).css("background-color", "rgba(0, 255, 0, 0.1)"); // Light green
+                    } else {
+                        $(this).css("background-color", "rgba(255, 0, 0, 0.1)"); // Light red
+                        allEntriesContainSelectedDepartment = false;
+                    }
+                });
+
+                const verifySendBtn = $("#verify-send");
+                if (allEntriesContainSelectedDepartment) {
+                    verifySendBtn.removeClass("btn-secondary").addClass("btn-primary");
+                    verifySendBtn.prop("disabled", false);
+                } else {
+                    verifySendBtn.removeClass("btn-primary").addClass("btn-secondary");
+                    verifySendBtn.prop("disabled", true);
+                }
+            });
+
+            $(document).on("click", ".transfer-btn", async function () {
+                const row = $(this).closest("tr");
+                const orderBatchItemId = row.data("orderbatchitemid");
+                const productId = row.find("td:first").text();
+                const sku = row.find("td:nth-child(1)").text();
+
+                // Fetch alt item info.
+                const altItemFetch = await fetch(`/OrderBatch/GetAltItemNumber?orderBatchItemId=${orderBatchItemId}`);
+                const altItemResponse = await altItemFetch.json();
+                const altItemNumber = altItemResponse.altItemNumber;
+
+                // Fetch location information using AJAX
+                const response = await fetch(`/OrderBatch/GetLocationInfo?sku=${sku}`);
+                const locationInfo = await response.json();
+                const pickOnlyLocations = locationInfo.filter(location => location.type === 1);
+                const receiveOnlyLocations = locationInfo.filter(location => location.type === 2);
+
+                // Populate the 'From' dropdown
+                const fromDropdown = $("#transfer-from");
+                fromDropdown.empty();
+                fromDropdown.append('<option value="" disabled selected>Select a location</option>');
+                pickOnlyLocations.forEach(location => {
+                    fromDropdown.append(`<option value="${location.locationId}">${location.locationName} (${location.totalAvailable})</option>`);
+                });
+
+                // Populate the 'To' dropdown
+                const toDropdown = $("#transfer-to");
+                toDropdown.empty();
+                receiveOnlyLocations.forEach(location => {
+                    const selected = location.locationName === "PRODUCTION" ? " selected" : "";
+                    toDropdown.append(`<option value="${location.locationId}"${selected}>${location.locationName}</option>`);
+                });
+
+                // Initialize the Select2 dropdowns
+                fromDropdown.select2();
+                toDropdown.select2();
+
+                const productStatusFetch = await fetch(`/OrderBatch/GetProductStatus?orderbatchitemid=${orderBatchItemId}`);
+                const productStatusResponse = await productStatusFetch.json();
+                const productStatus = productStatusResponse.ProductStatus;
+                const batchItem = productStatusResponse.batchItem;
+
+                // Handle alt item stuff.
+                if (altItemNumber && altItemNumber !== "NULL") {
+                    // If the product has an AltItemNumber and it's not "NULL", show the AltItemNumber dropdown
+                    fetchProductsWithAltItemNumbers(sku);
+                    $('#alt-item-group').show();
+                } else {
+                    // If the product does not have an AltItemNumber or it's "NULL", hide the AltItemNumber dropdown
+                    $('#alt-item-group').hide();
+                }
+
+                // Check if the ProductStatus is set to Open
+                if (!batchItem.IsPicked) 
+                {  
+                    $("#transfer-modal-message").text("").hide();  
+                    $("#transferModalConfirmButton").prop("disabled", false);  
+                    updateDesignBatchTransferButtonStatus(pickOnlyLocations, row);  
+                } else {  
+                    $("#transfer-modal-message").text("This product has already been picked! Please reload the page.").show();  
+                    $("#transferModalConfirmButton").prop("disabled", true);  
+                }  
+                $("#transferModalConfirmButton").data("row", row);
+
+                // Show the transfer modal
+                $("#transferModal").modal("show");
+
+                $(document).on("change", "#transfer-from", function() {
+                    updateDesignBatchTransferButtonStatus(pickOnlyLocations, row);
+                });
+            });
+            function updateDesignBatchTransferButtonStatus(pickOnlyLocations, row) { 
+                const fromDropdown = $("#transfer-from");  
+                const toDropdown = $("#transfer-to");  
+                const requiredQuantity = parseInt(row.find("td:nth-child(2)").text());
+  
+                const selectedLocation = pickOnlyLocations.find(location => location.locationId.toString() === fromDropdown.val());  
+                const totalAvailable = selectedLocation ? selectedLocation.totalAvailable : 0;  
+  
+                if (totalAvailable < requiredQuantity || fromDropdown.val() === null || fromDropdown.val() === "") {  
+                    $("#transfer-modal-message").text("Not enough stock for transfer!").show();  
+                    $("#transferModalConfirmButton").prop("disabled", true);  
+                } else {  
+                    $("#transfer-modal-message").text("").hide();  
+                    $("#transferModalConfirmButton").prop("disabled", false);  
+                }  
+            }          
+
+            async function fetchProductsWithAltItemNumbers(currentSku) {
+                const productsFetch = await fetch(`/OrderBatch/GetAllProductsWithAltItemNumbers`);
+                const products = await productsFetch.json();
+                const dropdown = $('#alt-item-select');
+                dropdown.empty();
+
+                products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.productId;
+                    option.textContent = `Sku: ${product.sku} : ProductId: ${product.productId}`;
+
+                    // Set the default option to the current product
+                    if (product.sku === currentSku) {
+                        option.selected = true;
+                    }
+
+                    dropdown.append(option);
+                });
+            }
+
+            $(document).on('change', '#alt-item-select', async function () {
+                $("#transferModalConfirmButton").prop("disabled", true);
+                const selectedProductId = $(this).val();
+
+                // Fetch the sku of the selected product
+                const selectedProductSkuResponse = await fetch(`/OrderBatch/GetSkuByProductId?productId=${selectedProductId}`);
+                const selectedProductSkuData = await selectedProductSkuResponse.json();
+                const selectedProductSku = selectedProductSkuData.sku;
+
+                // Fetch location information using AJAX for the newly selected product
+                const response = await fetch(`/OrderBatch/GetLocationInfo?sku=${selectedProductSku}`);
+                const locationInfo = await response.json();
+                const pickOnlyLocations = locationInfo.filter(location => location.type === 1);
+                const receiveOnlyLocations = locationInfo.filter(location => location.type === 2);
+
+                // Populate the 'From' dropdown
+                const fromDropdown = $("#transfer-from");
+                fromDropdown.empty();
+                fromDropdown.append('<option value="" disabled selected>Select a location</option>');
+                pickOnlyLocations.forEach(location => {
+                    fromDropdown.append(`<option value="${location.locationId}">${location.locationName} (${location.totalAvailable})</option>`);
+                });
+
+                // Populate the 'To' dropdown
+                const toDropdown = $("#transfer-to");
+                toDropdown.empty();
+                receiveOnlyLocations.forEach(location => {
+                    const selected = location.locationName === "PRODUCTION" ? " selected" : "";
+                    toDropdown.append(`<option value="${location.locationId}"${selected}>${location.locationName}</option>`);
+                });
+
+                // Initialize the Select2 dropdowns
+                fromDropdown.select2();
+                toDropdown.select2();
+
+                // Update the row data with the new product information
+                const row = $("#transferModalConfirmButton").data("row");
+                row.find("td:first").text(selectedProductSku);
+                row.data("productid", selectedProductId);
+
+                updateDesignBatchTransferButtonStatus(pickOnlyLocations, row);
+            });
+
+        $("body").on("click", "#simplePickListButton", function() {
+            var activeTab = $(".tab-pane.active").attr("id");
+            var batchNumber, orderBatchId;
+            var includeImages = $("#includeImagesCheckbox").is(":checked");
+
+            if (activeTab === "design-batches") {
+                batchNumber = $("#design-batch-dropdown option:selected").text();
+                orderBatchId = $("#design-batch-dropdown").val();
+            } else if (activeTab === "inventory-batches") {
+                batchNumber = $("#inventory-batch-dropdown option:selected").text();
+                orderBatchId = $("#inventory-batch-dropdown").val();
+            }
+
+            if (batchNumber && orderBatchId) {
+                window.open(`/OrderBatch/PrintSimplifiedPickList?batchNumber=${batchNumber}&orderBatchId=${orderBatchId}&includeImages=${includeImages}`, '_blank');
+            } else {
+                alert("Please select a design batch number.");
+            }
+        });
+
+                    // Attach event handlers for Expanded Pick List buttons
+            $("body").on("click", "#expandedPickListButton", function() {
+                var activeTab = $(".tab-pane.active").attr("id");
+                var batchNumber, orderBatchId;
+
+                if (activeTab === "design-batches") {
+                    batchNumber = $("#design-batch-dropdown option:selected").text();
+                    orderBatchId = $("#design-batch-dropdown").val();
+                } else if (activeTab === "inventory-batches") {
+                    batchNumber = $("#inventory-batch-dropdown option:selected").text();
+                    orderBatchId = $("#inventory-batch-dropdown").val();
+                }
+
+                if (orderBatchId) {
+                    window.open(`/OrderBatch/PrintExpandedPickList?orderBatchId=${orderBatchId}&batchNumber=${batchNumber}`, '_blank');
+                } else {
+                    alert("Please select a design batch.");
+                }
+            });
+
+            let isTransferConfirmationClicked = false;
+            $("body").on("click", "#transferModalConfirmButton", async function () {
+                if (!isTransferConfirmationClicked) {
+                    isTransferConfirmationClicked = true;
+
+                    $(this).text("Are you sure?");
+                    $(this).addClass("btn-danger-confirmation");
+
+                    $(this).prop("disabled", true);
+                    setTimeout(() => {
+                        $(this).prop("disabled", false);
+                    }, 500);
+
+                    return;
+                }
+
+                $(this).text("Transfer");
+                isTransferConfirmationClicked = false;
+                $(this).removeClass("btn-danger-confirmation");
+
+                const fromLocationId = $("#transfer-from").val();
+                const toLocationId = $("#transfer-to").val();
+                const row = $(this).data("row");
+                const sku = row.find("td:first").text();
+                const orderBatchId = row.data("orderbatchid");
+                const orderBatchItemId = row.data("orderbatchitemid");
+                const orderBatchItemIdListJson = row.data("orderbatchitemidlist");
+                const quantity = parseInt(row.find("td:nth-child(2)").text());
+
+                const productIdResponse = await fetch(`/OrderBatch/GetProductIdBySku?sku=${sku}`);
+                const productId = await productIdResponse.json();
+                console.log("ENTRY OBIID: " + orderBatchItemId);
+
+                // Create a stock transfer object for the selected product
+                const stockTransfer = {
+                    FromLocationId: fromLocationId,
+                    ToLocationId: toLocationId,
+                    ProductId: productId,
+                    OrderBatchId: orderBatchId,
+                    OrderBatchItemId: orderBatchItemId,
+                    OrderBatchItemIdList: orderBatchItemIdListJson,
+                    Quantity: quantity
+                };
+
+                // Call the TransferStock action using AJAX
+                $.ajax({
+                    url: '/OrderBatch/TransferStock',
+                    type: 'POST',
+                    data: { stockTransfers: [stockTransfer] },
+                    success: function (response) {
+                        if (response.success) {
+                            // Close the transfer modal
+                            $("#transferModal").modal("hide");
+
+                            // Find the transferred row
+                            const transferredRow = $(`tr[data-orderbatchitemid="${stockTransfer.OrderBatchItemId}"]`);
+
+                            // Update the status column with the new status, if it exists
+                            const newStatusName = response.nextStatusName; // Get the new status name from the response
+                            if (newStatusName === "Picked") {
+                                const statusColumn = transferredRow.find("td:nth-child(5)");
+                                if (statusColumn.length) {
+                                    statusColumn.text(newStatusName);
+                                }
+                            }
+
+                            // Grey out the Transfer button for the transferred entry and disable it (for design batches)
+                            if (currentBatchType === "design") {
+                                const transferButton = transferredRow.find(".transfer-btn");
+                                transferButton.prop("disabled", true);
+                                transferButton.removeClass("btn-primary").addClass("btn-secondary");
+                            }
+
+                            // Show the transfer success modal
+                            $("#transferSuccessModal").modal("show");
+                        } else {
+                            // Close the transfer modal
+                            $("#transferModal").modal("hide");
+
+                            // Show the failure modal
+                            $("#failureMessage").text(response.errorMessage);
+                            $("#failureModal").modal("show");
+                        }
+                    },
+
+                    error: function (xhr, status, error) {  
+                        // Close the transfer modal  
+                        $("#transferModal").modal("hide");  
+  
+                        // Show an error message  
+                        $("#failureMessage").text("Stock transfer failed: " + error);  
+                        $("#failureModal").modal("show");  
+                    },  
+                });
+
+                // Close the modal
+                $("#transferModal").modal("hide");
+            });
+
+            $("body").on("click", "#transferModalCancelButton", async function () {
+                $("#transferModalConfirmButton").text("Transfer");
+                isTransferConfirmationClicked = false;
+                $("#transferModalConfirmButton").removeClass("btn-danger-confirmation");
+            });
+
+            $(".modal .btn-secondary").on("click", function () {
+                // Close the modal
+                $(this).closest(".modal").modal("hide");
+            });
+
+            $(document).on("click", "#verify-btn", function () {
+                var orderBatchId = $("#batch-dropdown").val();
+
+                // Call the GetStatus function using AJAX
+                $.ajax({
+                    url: '/OrderBatch/GetStatus?orderBatchId=' + orderBatchId,
+                    type: 'GET',
+                    success: function (status) {
+                        // Check if the status is 'Completed'
+                        if (status === 2) {
+                            // Disable the Transfer button
+                            $("#transferConfirmButton").prop("disabled", true);
+                        } else {
+                            // Enable the Transfer button
+                            $("#transferConfirmButton").prop("disabled", false);
+                        }
+
+                        // Show the transfer confirmation modal
+                        $("#transferConfirmationModal").modal("show");
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching OrderBatch status:", error);
+                    }
+                });
+            });
+        });
+
+        $("#transferConfirmButton").on("click", function () {
+            $(this).prop("disabled", true);
+            $(this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Transferring...');
+
+            // Serialize the form data
+            var formData = $("#transferStockForm").serialize();
+            var formDataObject = Object.fromEntries(new URLSearchParams(formData));
+
+            // We don't want to include the nested table when grabbing all of the rows.
+            const numberOfRows = $("#testdatatable > tbody > tr").not(".nestedTableRow").length;
+
+            const stockTransferIndices = Object.keys(formDataObject)
+                .filter(key => key.startsWith("stockTransfers"))
+                .map(key => parseInt(key.match(/\d+/)[0])); // Extract the index number from the key
+
+            // Create a Set to store unique stockTransfer indices
+            const uniqueStockTransferIndices = new Set(stockTransferIndices);
+
+            // Get the number of unique stockTransfer objects
+            const numberOfStockTransfers = uniqueStockTransferIndices.size;
+
+            // Compare the number of stockTransfers with the number of rows in the table
+            if (numberOfStockTransfers !== numberOfRows) {
+                // Display an error message
+                alert("The number of stock transfers does not match the number of rows in the table.");
+
+                // Reset the transfer button
+                $("#transferConfirmButton").prop("disabled", false);
+                $("#transferConfirmButton").text("Transfer");
+
+                // Abort the transfer process
+                return;
+            }
+            // Call the TransferStock action using AJAX
+            $.ajax({
+                url: '/OrderBatch/TransferStock',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        // Close the transfer confirmation modal
+                        $("#transferConfirmationModal").modal("hide");
+
+                        // Show the transfer success modal
+                        $("#transferSuccessModal").modal("show");
+                    } else {
+                        $("#transferConfirmationModal").modal("hide");
+                        // Show the failure modal
+                        $("#failureMessage").text(response.errorMessage);
+                        $("#failureModal").modal("show");
+                    }
+                    $("#transferConfirmButton").prop("disabled", false);
+                    $("#transferConfirmButton").text("Transfer");
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error transferring stock:", error);
+
+                    $("#transferConfirmButton").prop("disabled", false);
+                    $("#transferConfirmButton").text("Transfer");
+                }
+            });
+        });
+
+                $("#transferSuccessModalOkButton").on("click", function () {  
+                    // Close the success modal  
+                    $("#transferSuccessModal").modal("hide");  
+  
+                    // Commenting this out for now, as it looks like we don't really assign batch types anymore?
+                    // Removing this doesn't seem to have impacted anything, but keeping it commented here in case something unknown breaks later, or if this needs to be re-implemented.
+
+                    // if (currentBatchType === "inventory") {  
+                    //     // Reload the page when the OK button is clicked and the current batch type is 'inventory'  
+                    //     location.reload();  
+                    // } else if (currentBatchType === "design") {  
+                    //     // Grey out the Transfer button for the transferred entry and disable it
+                    //     const transferredRow = $("#design-batches-table tbody tr[data-orderbatchitemid=" + stockTransfer.OrderBatchItemId + "]");
+                    //     const transferButton = transferredRow.find(".transfer-btn");  
+                    //             transferButton.prop("disabled", true);  
+                    //             transferButton.removeClass("btn-primary").addClass("btn-secondary");  
+                    // }  
+                });  
+
+
+        function getLocationOptions(pickOnlyLocations, receiveOnlyLocations, totalAvailable, quantity, received, index) {
+            if (received) {
+                return ["", ""];
+            }
+
+            let fromContent = "";
+            let toContent = "";
+
+            if (totalAvailable >= quantity) {
+                fromContent = `<select class='form-control select2' data-toggle='select2' name='stockTransfers[${index}].FromLocationId'>`;
+                toContent = `<select class='form-control select2' data-toggle='select2' name='stockTransfers[${index}].ToLocationId'>`;
+
+                pickOnlyLocations.forEach(location => {
+                    fromContent += `<option value='${location.locationId}'>${location.locationName} (${location.totalAvailable})</option>`;
+                });
+
+                receiveOnlyLocations.forEach(location => {
+                    // Check if the current location is "PRODUCTION" and set it as the default option
+                    const selected = location.locationName === "PRODUCTION" ? " selected" : "";
+                    toContent += `<option value='${location.locationId}'${selected}>${location.locationName}</option>`;
+                });
+
+                fromContent += "</select>";
+                toContent += "</select>";
+            } else {
+                fromContent = "Insufficient stock";
+                toContent = "";
+            }
+
+            return [fromContent, toContent];
+        }
+
+        async function updateLocationInfoInventory(dropdown) {
+            const newSku = dropdown.value;
+            const row = dropdown.closest('tr');
+            const orderBatchId = row.getAttribute('data-orderbatchid');
+            const productIdInput = row.querySelector('input[name$=".ProductId"]');
+            const index = row.getAttribute('data-index');
+
+            // Fetch the productId for the new SKU using AJAX
+            const productIdResponse = await fetch(`/OrderBatch/GetProductIdBySku?sku=${newSku}`);
+            const newProductId = await productIdResponse.json();
+            productIdInput.value = newProductId;
+
+            const response = await fetch(`/OrderBatch/GetLocationInfo?sku=${newSku}`);
+            const locationInfo = await response.json();
+
+            const toColumn = row.cells[5];
+
+            const pickOnlyLocations = locationInfo.filter(location => location.type === 1);
+            const receiveOnlyLocations = locationInfo.filter(location => location.type === 2);
+
+            // Calculate totalAvailable for the location with the most available stock
+            const maxLocation = pickOnlyLocations.reduce((max, location) => location.totalAvailable > max.totalAvailable ? location : max, { totalAvailable: 0 });
+            const totalAvailable = maxLocation.totalAvailable;
+            const quantity = parseInt(row.cells[3].textContent);
+
+            // Use the getLocationOptions function to generate the 'From' and 'To' select elements
+            const [fromContent, toContent] = getLocationOptions(pickOnlyLocations, receiveOnlyLocations, totalAvailable, quantity, false, index);
+
+            const fromContentDiv = row.querySelector(`#from-content-${index}`);
+            fromContentDiv.innerHTML = fromContent;
+            toColumn.innerHTML = toContent;
+
+            if (totalAvailable >= quantity) {
+                row.style.backgroundColor = "";
+                row.style.color = "";
+            } else {
+                row.style.backgroundColor = "#55444D";
+                row.style.color = "#FF9D9D";
+            }
+
+            checkSufficientStock();
+        }
+
+        function checkSufficientStock() {
+            const rows = document.querySelectorAll('#testdatatable tbody tr[data-orderbatchid]');
+            const verifyBtn = document.getElementById('verify-btn');
+            const stockAlert = document.getElementById('stock-alert');
+
+            let hasSufficientStock = true;
+
+            rows.forEach(row => {
+                const fromColumn = row.cells[4];
+                const fromColumnSelect = fromColumn.querySelector('select');
+                if (fromColumnSelect) {
+                    const selectedOptionText = fromColumnSelect.options[fromColumnSelect.selectedIndex].text;
+                    const totalAvailable = parseInt(selectedOptionText.split('(').pop().split(')')[0]);
+                    const quantity = parseInt(row.cells[3].textContent);
+
+                    if (totalAvailable < quantity) {
+                        hasSufficientStock = false;
+                    }
+                } else if (fromColumn.textContent === "Insufficient stock" || fromColumn.textContent === "") {
+                    hasSufficientStock = false;
+                } else {
+                    hasSufficientStock = false;
+                }
+            });
+
+            if (hasSufficientStock) {
+                verifyBtn.classList.replace('btn-secondary', 'btn-primary');
+                verifyBtn.disabled = false;
+                stockAlert.classList.remove('alert', 'alert-danger');
+                stockAlert.textContent = '';
+            } else {
+                verifyBtn.classList.replace('btn-primary', 'btn-secondary');
+                verifyBtn.disabled = true;
+                stockAlert.classList.add('alert', 'alert-danger');
+                stockAlert.textContent = 'One or more products do not have enough stock for transfer.';
+            }
+        }
+    </script>
+    }

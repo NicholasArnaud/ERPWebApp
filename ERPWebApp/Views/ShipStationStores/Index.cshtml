@@ -1,0 +1,179 @@
+﻿@model IEnumerable<ERPWebApp.Models.ShipStationStore>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Stores</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div>
+                        <ul class="nav nav-tabs nav-bordered mb-3 d-flex justify-content-between">
+                            <li class="nav-item">
+                                @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.CustomerSupportManager))
+                                {
+                                    <a class="nav-link" asp-action="Create">
+                                        <span class="btn btn-dark mb-2">Create</span>
+                                    </a>
+                                }
+                            </li>
+                            <li class="nav-item">
+                                <div class="form-group p-2">
+                                    <input type="button" value="Verify" class="btn btn-primary" id="verifyButton" />
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                </div>
+
+                <table class="table dt-responsive webkit-nowrap w-100" id="store-datatable">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.StoreId)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.StoreName)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.ContactName)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.PhoneNumber)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.FaxNumber)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Email)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.PublicEmail)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Address)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.HasIncreasedPricing)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.IsActive)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.StoreId)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.StoreName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.ContactName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.FaxNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Email)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.PublicEmail)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Address)
+                                </td>
+                                <td>
+                                    @if (item.HasIncreasedPricing)
+                                    {
+                                        <a>Yes</a>
+                                    }
+                                    else
+                                    {
+                                        <a>No</a>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <a>Yes</a>
+                                    }
+                                    else
+                                    {
+                                        <a>No</a>
+                                    }
+                                </td>
+                                <td>
+                                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.CustomerSupportManager))
+                                    {
+                                        <a class="action-icon" asp-action="Edit" asp-route-id="@item.ShipStationStoreId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                                    }
+                                    <a class="action-icon" asp-action="Details" asp-route-id="@item.ShipStationStoreId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                                    @if (this.User.IsInRole(RoleList.Administrator) || this.User.IsInRole(RoleList.CustomerSupportManager))
+                                    {
+                                        <a class="action-icon" asp-action="Delete" asp-route-id="@item.ShipStationStoreId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#store-datatable").DataTable({
+                    keys: !0,
+                    language: {
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>",
+                            next: "<i class='mdi mdi-chevron-right'>"
+                        },
+                    },
+                    drawCallback: function () {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded");
+                    }
+                });
+
+                // Add click event for the "Verify" button
+                $("#verifyButton").click(function () {
+                    var button = $(this);
+                    button.prop("disabled", true).text("Verifying...");
+
+                    $.ajax({
+                        url: 'Verify',
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (response) {
+                            window.location.reload();
+                        },
+                        error: function (xhr, status, error) {
+                            alert('An error occurred: ' + error);
+                        },                     
+                    });
+                });
+            });
+        </script>
+    }
+}

@@ -1,0 +1,45 @@
+﻿@model IEnumerable<ERPWebApp.Models.Company.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid text-white">
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Users</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-md-10 col-lg-10 mt-1">
+                        @if (User.IsInRole(RoleList.Administrator) || User.IsInRole(RoleList.HRManager))
+                        {
+                            <a asp-action="Create">
+                                <div typeof="button" class="btn btn-dark">Create</div>
+                            </a>
+                        }
+                    </div> 
+                </div>
+                <div class="row">
+                     <div id="filtered-orders-partial">
+                        @{
+                            await Html.RenderPartialAsync("PartialIndex", Model);
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

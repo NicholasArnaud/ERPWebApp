@@ -1,0 +1,461 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+}
+
+/*Background color*/
+
+
+/*form styles*/
+    #msform {
+        text-align: center;
+        position: relative;
+        margin-top: 20px;
+    }
+
+    #msform fieldset .form-card {
+        background: #37404a;
+        border: 0 none;
+        border-radius: 0px;
+        box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.2);
+        padding: 20px 40px 30px 40px;
+        box-sizing: border-box;
+        width: 94%;
+        margin: 0 3% 20px 3%;
+        /*stacking fieldsets above each other*/
+        position: relative;
+    }
+
+    #msform fieldset {
+        background: #37404a;
+        border: 0 none;
+        border-radius: 0.5rem;
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0;
+        padding-bottom: 20px;
+        /*stacking fieldsets above each other*/
+        position: relative;
+    }
+
+        /*Hide all except first fieldset*/
+        #msform fieldset:not(:first-of-type) {
+            display: none;
+        }
+
+        #msform fieldset .form-card {
+            text-align: left;
+            color: #aab8c5;
+        }
+
+    #msform input, #msform textarea {
+        padding: 0px 8px 4px 8px;
+        border: none;
+        border-bottom: 1px solid #616161;
+        border-radius: 0px;
+        width: 100%;
+        box-sizing: border-box;
+        color: white;
+        letter-spacing: 1px;
+    }
+
+        #msform input:focus, #msform textarea:focus {
+            -moz-box-shadow: none !important;
+            -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+            border: none;
+            outline-width: 0;
+        }
+
+    /*Blue Buttons*/
+    #msform .action-button {
+        width: 100px;
+        background: white;
+        color: Black;
+        border: 0 none;
+        border-radius: 0px;
+        cursor: pointer;
+        padding: 10px 5px;
+        margin: 10px 5px;
+        border-radius: 5px;
+    }
+
+    #msform .product-button {
+        width: 100px;
+        background: white;
+        color: Black;
+        border: 0 none;
+        border-radius: 0px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    #msform .action-button:hover, #msform .action-button:focus {
+        box-shadow: 0 0 0 2px grey, 0 0 0 3px #616161;
+    }
+
+    /*Previous Buttons*/
+    #msform .action-button-previous {
+        width: 100px;
+        background: white;
+        color: black;
+        border: 0 none;
+        border-radius: 0px;
+        cursor: pointer;
+        padding: 10px 5px;
+        margin: 10px 5px;
+        border-radius: 5px;
+    }
+
+        #msform .action-button-previous:hover, #msform .action-button-previous:focus {
+            box-shadow: 0 0 0 2px grey, 0 0 0 3px #616161;
+        }
+
+/*Dropdown List Exp Date*/
+select.list-dt {
+    border: none;
+    outline: 0;
+    border-bottom: 1px solid #ccc;
+    padding: 2px 5px 3px 5px;
+    margin: 2px;
+}
+
+/*The background card*/
+.card {
+    z-index: 0;
+    border: none;
+    border-radius: 0.5rem;
+    position: relative;
+}
+
+/*FieldSet headings*/
+.fs-title {
+    font-size: 25px;
+    color: #aab8c5;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: left;
+}
+
+/*progressbar*/
+#progressbar {
+    margin-bottom: 30px;
+    overflow: hidden;
+    color: lightgrey;
+}
+
+    #progressbar .active {
+        color: hotpink;
+    }
+
+    #progressbar li {
+        list-style-type: none;
+        font-size: 12px;
+        width: 19%;
+        float: left;
+        position: relative;
+    }
+
+    /*Icons in the ProgressBar*/
+    #progressbar #vendor:before {
+        font-family: 'unicons';
+        content: '\eb54';
+    }
+
+    #progressbar #Site-Ship:before {
+        font-family: 'unicons';
+        content: '\ea90';
+    }
+
+    #progressbar #product-add:before {
+        font-family: 'unicons';
+        content: '\e8b9';
+    }
+
+    #progressbar #pay-info:before {
+        font-family: 'unicons';
+        content: '\e983';
+    }
+
+    #progressbar #confirm:before {
+        font-family: 'unicons';
+        content: '\e9d2';
+    }
+    /*ProgressBar before any progress*/
+    #progressbar li:before {
+        width: 50px;
+        height: 50px;
+        line-height: 45px;
+        display: block;
+        font-size: 18px;
+        color: #ffffff;
+        background: lightgray;
+        border-radius: 50%;
+        margin: 0 auto 10px auto;
+        padding: 2px;
+    }
+
+    /*ProgressBar connectors*/
+    #progressbar li:after {
+        content: '';
+        width: 100%;
+        height: 2px;
+        background: lightgray;
+        position: absolute;
+        left: 0;
+        top: 25px;
+        z-index: -1;
+    }
+
+    /*Color number of the step and the connector before it*/
+    #progressbar li.active:before, #progressbar li.active:after {
+        background: hotpink;
+    }
+
+/*Imaged Radio Buttons*/
+.radio-group {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.radio {
+    display: inline-block;
+    width: 204px;
+    height: 104px;
+    border-radius: 0;
+    background: lightblue;
+    box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    cursor: pointer;
+    margin: 8px 2px;
+}
+
+    .radio:hover {
+        box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .radio.selected {
+        box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.1);
+    }
+
+/*Fit image in bootstrap div*/
+.fit-image {
+    width: 100%;
+    object-fit: cover;
+}
+
+.hamburger {
+    text-align: right;
+}
+
+.wrapper .sidebar {
+    background: #313a46;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    right: -350px;
+    width: 350px;
+    height: 100%;
+    padding: 20px 0;
+    transition: all 0.5s ease; /* 0.5 second transition effect to slide in the sidebar */
+    /*overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 80px;
+    border: 4px solid #464f5b;
+}
+
+
+.wrapper .section {
+    width: calc(100% + 350px);
+    margin-right: -350px;
+    transition: all 0.5s ease;
+}
+
+    .wrapper .section .top_navbar .hamburger a {
+        font-size: 50px;
+        color: #f4fbff;
+        top: 0px;
+        left: 0px;
+    }
+
+        .wrapper .section .top_navbar .hamburger a:hover {
+            color: #a2ecff;
+        }
+
+body.active .wrapper .sidebar {
+    right: +0px;
+    overflow-y: auto;
+}
+
+body.active .wrapper .section {
+    margin-left: 0;
+    width: 100%;
+}
+
+.card-header .hamburger {
+    position: absolute;
+    top: 0px;
+    left: -50px;
+    font-size: 50px;
+    margin-left: 50px;
+    color: white;
+    cursor: pointer;
+}
+
+.sidebar .hamburgerclose {
+    position: absolute;
+    border: 1px solid grey;
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    box-shadow: 0px 1px 4px 1px rgba(0,0, 0, .3);
+    left: -50px;
+    top: 50px;
+    cursor: pointer;
+}
+
+.sidebar .summary {
+    text-align: center;
+    font-size: 24px;
+    border-bottom: 2px solid grey;
+    border-top: 2px solid grey;
+    background: #464f5b;
+}
+
+.sidebar .vendorsidebar {
+    float: right;
+    text-align: right;
+}
+
+.sidebar .vendorcenterbar {
+    text-align: center;
+}
+
+.form-wizard .wizard-form-error {
+    display: none;
+    background-color: #9C27B0;
+    background-image: linear-gradient(120deg, #FF4081, #81D4FA);
+    height: 2px;
+    width: 100%;
+}
+
+/* Style the button that is used to open and close the collapsible content */
+.collapsible {
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: center;
+    outline: none;
+    background: #464f5b;
+    font-size: 24px;
+}
+
+    .sidebar .active, .collapsible:hover {
+        background-color: hotpink;
+    }
+/* Style the collapsible content. Note: hidden by default */
+.popdown {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+}
+
+.circleBase {
+    border-radius: 50%;
+}
+
+.circle1 {
+    width: 100px;
+    height: 100px;
+    background: green;
+    border: 1px solid grey;
+    line-height: 0;
+    position: relative;
+}
+
+.circle::after {
+    content: "";
+    display: block;
+    padding-bottom: 100%;
+}
+
+.circle-txt {
+    position: absolute;
+    bottom: 30%;
+    width: 75%;
+    text-align: center;
+    font-size: 40px;
+}
+
+.mdi-delete:hover {
+    color: hotpink;
+    cursor: pointer;
+}
+
+table {
+    border: 1px solid Black;
+    width: 100%;
+}
+
+@Html.Raw("@")media only screen and (max-width: 760px), (min-device-width: 768px) and (max-device-width: 1024px) {
+    /* Force table to not be like tables anymore */
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    /* Hide table headers (but not display: none;, for accessibility) */
+    .add-product thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .add-product tr {
+        border: 1px solid #ccc;
+    }
+
+    .add-product td {
+        /* Behave  like a "row" */
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+    }
+
+        .add-product td:before {
+            /* Now like a table header */
+            position: absolute;
+            /* Top/left values mimic padding */
+            top: 6px;
+            left: 6px;
+            width: 45%;
+            padding-right: 10px;
+            white-space: nowrap;
+        }
+    /*
+	Label the data
+	*/
+    td:nth-of-type(1):before {
+        content: "Product";
+    }
+
+    td:nth-of-type(2):before {
+        content: "Average Cost";
+    }
+
+    td:nth-of-type(3):before {
+        content: "Product Cost";
+    }
+
+    td:nth-of-type(4):before {
+        content: "Custom Cost";
+    }
+
+    td:nth-of-type(5):before {
+        content: "Quantity";
+    }
+
+    td:nth-of-type(6):before {
+        content: "Action";
+    }
+}

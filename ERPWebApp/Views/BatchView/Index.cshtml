@@ -1,0 +1,270 @@
+﻿@using ERPWebApp.Models.Orders
+@model OrderBatch
+@{
+    var orderBatches = ViewData["OrderBatches"] as List<OrderBatch>;
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Order Batches</h3>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="productFilter">Product Filter</label>
+                        <select id="productFilter" class="form-control">
+                            <option value="">Any</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label for="departmentFilter">Department Filter</label>
+                        <select id="departmentFilter" class="form-control">
+                            <option value="">Any</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="container-fluid">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-centered dt-responsive" id="batchTable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th></th>
+                                                <th>Batch Number</th>
+                                                <th>Total Quantity</th>
+                                                <th>Status</th>
+                                                <th>Create Date</th>
+                                                <th>Export</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+
+            $('#productFilter').select2({
+                ajax: {
+                    url: '/BatchView/GetAllActiveSkus',
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            searchTerm: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        var results = data.map(function (product) {
+                            return { id: product.sku, text: product.sku + "; " + product.description };
+                        });
+                        results.unshift({ id: "", text: "Any" });
+
+                        return {
+                            results: results
+                        };
+                    },
+                },
+            });
+            function loadBatches(sku, departmentId) {
+                table.ajax.url('/BatchView/GetBatchData?sku=' + (sku || '') + '&departmentId=' + (departmentId || '')).load();
+            }
+
+            $('#productFilter').on('select2:select', function (e) {
+                var sku = e.params.data.id;
+                if (sku === "") {
+                    loadBatches('');
+                } else {
+                    loadBatches(sku);
+                }
+            });
+
+            $('#productFilter').on('select2:unselect', function (e) {
+                loadBatches('');
+            });
+
+            $('#departmentFilter').select2({
+                ajax: {
+                    url: '/BatchView/GetAllActiveDepartments',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        var results = data.map(function (department) {
+                            return { id: department.departmentId, text: department.departmentName };
+                        });
+                        results.unshift({ id: "", text: "Any" });
+
+                        return {
+                            results: results
+                        };
+                    },
+                },
+            });
+
+            $('#departmentFilter').on('select2:select', function (e) {
+                var departmentId = e.params.data.id;
+                if (departmentId === "") {
+                    loadBatches($('#productFilter').val(), '');
+                } else {
+                    loadBatches($('#productFilter').val(), departmentId);
+                }
+            });
+
+            $('#departmentFilter').on('select2:unselect', function (e) {
+                loadBatches($('#productFilter').val(), '');
+            });
+
+        $('#batchTable tbody').on('click', 'a.export-link', function (e) {
+            e.preventDefault();
+            var data = table.row($(this).parents('tr')).data();
+            var orderBatchId = data.batchNumber.match(/\d+$/)[0];
+            window.location.href = '/BatchView/ExportBatchToCsv?orderBatchId=' + orderBatchId;
+        });
+                            function formatProductDetails(productDetails) {
+                var tableContent = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;" class="table">' +
+                    '<thead class="thead-light"><tr><th style="font-weight: bold !important; background-color: #464F5B !important;">Product SKU</th><th style="font-weight: bold !important; background-color: #464F5B !important;">Quantity</th></tr></thead><tbody>';
+                //Was having conflicts with the formatting, so I applied !important to override it.
+
+                productDetails.forEach(function (productDetail) {
+                    tableContent += '<tr><td>' + productDetail.productSku + '</td><td>' + productDetail.quantity + '</td></tr>';
+                });
+
+                tableContent += '</tbody></table>';
+
+                return tableContent;
+            }
+            function formatOrderDetails(orderDetails) {
+                var tableContent = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;" class="table">' +
+                    '<thead class="thead-light"><tr><th style="font-weight: bold !important; background-color: #464F5B !important;">Order Number</th></tr></thead><tbody>';
+
+                orderDetails.forEach(function (orderDetail) {
+                    tableContent += '<tr><td>' +
+                               '<a href="/Orders/Details/' + orderDetail.cwaOrderId + '" style="text-decoration: none; color: #007bff;">' +
+                                orderDetail.orderNumber +
+                                '</a>' +
+                                '</td></tr>';
+                });
+
+                tableContent += '</tbody></table>';
+
+                return tableContent;
+            }
+
+            function format(productDetails, orderDetails) {
+                var productTable = formatProductDetails(productDetails);
+                var orderTable = formatOrderDetails(orderDetails);
+
+                return '<div class="row">' +
+                    '<div class="col-md-6">' + productTable + '</div>' +
+                    '<div class="col-md-6">' + orderTable + '</div>' +
+                    '</div>';
+            }
+
+            function getBatchNumberFromUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('batchNumber');
+            }
+
+        var table = $('#batchTable').DataTable({
+            ajax: {
+                url: '/BatchView/GetBatchData',
+                dataSrc: '',
+            },
+            columns: [
+                {
+                    className: 'details-control',
+                    orderable: false,
+                    data: null,
+                    defaultContent: '<button type="button" class="btn btn-sm btn-primary nested-table-toggle" style="border: none; background-color: transparent; width: 30px; height: 30px; text-align: center; padding: 0; line-height: 30px; font-size: 14px;"><i class="mdi mdi-24px mdi-plus-circle"></i></button>',
+                },
+                { data: 'batchNumber' },
+                { data: 'totalQuantity' },
+                { data: 'status' },
+                { data: 'createDate' },
+                {
+                    data: null,
+                    orderable: false,
+                    defaultContent: '<a href="#" class="export-link">Export</a>',
+                },
+            ],
+            order: [[4, 'desc']],
+            pageLength: 10,
+            initComplete: function () {
+                const batchNumberFromUrl = getBatchNumberFromUrl();
+                if (!batchNumberFromUrl) 
+                {
+                    return;
+                }
+                let foundIndex = -1;
+                table.page.len(-1).draw();
+                setTimeout(() => {
+                    table.rows().every(function (index) {
+                        const rowData = this.data();
+                        if (rowData && rowData.batchNumber === batchNumberFromUrl) {
+                            foundIndex = index;
+                            const tr = $(this.node());
+                            const button = tr.find('.nested-table-toggle');
+                            if (!tr.hasClass('shown')) {
+                                button.trigger('click');
+                            }
+                        }
+                    });
+                    if (foundIndex !== -1) {
+                        const pageSize = 10;
+                        const targetPage = Math.floor(foundIndex / pageSize);
+                        table.page.len(10).draw();
+                        setTimeout(() => {
+                            table.page(targetPage).draw(false);
+                        }, 200);
+                    } else {
+                        table.page.len(10).draw();
+                    }
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
+                }, 500);
+            }
+        });
+
+                    $('#batchTable tbody').on('click', 'td.details-control button', async function () {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                    $(this).find('i').removeClass('mdi-minus-circle').addClass('mdi-plus-circle');
+                } else {
+                    const batchNumber = row.data().batchNumber;
+                    const regex = /\d+$/;
+                    const match = batchNumber.match(regex);
+                    const orderBatchId = match ? parseInt(match[0]) : 0;
+
+                    if (orderBatchId !== 0) {
+                        const productDetails = await fetch('/BatchView/GetProductDetailsForBatch?orderBatchId=' + orderBatchId).then(response => response.json());
+                        const orderDetails = await fetch('/BatchView/GetOrderDetailsForBatch?orderBatchId=' + orderBatchId).then(response => response.json());
+                        row.child(format(productDetails, orderDetails)).show();
+                        tr.addClass('shown');
+                        $(this).find('i').removeClass('mdi-plus-circle').addClass('mdi-minus-circle');
+                    }
+                }
+            });
+        });
+    </script>
+}

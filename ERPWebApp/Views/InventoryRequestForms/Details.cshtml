@@ -1,0 +1,114 @@
+﻿@model ERPWebApp.Models.Inventory.InventoryRequestForm
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Inventory Request Form</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Products.Sku)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Products.Sku)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.QuantityNeeded)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.QuantityNeeded)
+        </dd>
+        <dt class="col-sm-2">
+            Requested By User/Station
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.RequestedByUser)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.RequestedEmployee)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.RequestedEmployee.FullName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PickReason)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PickReason)
+        </dd>
+        <dt class="col-sm-2">
+            Picked By User/Station
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PickedByUser)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PickedEmployee)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PickedEmployee.FullName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.FromLocation)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.FromLocation)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsFromExtrasLocation)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Html.ValueFor(model => model.IsFromExtrasLocation) == "True")
+            {<a>Yes</a> }
+            else
+            {<a>No</a>}
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsPicked)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Html.ValueFor(model => model.IsPicked) == "True")
+            {<a>Yes</a> }
+            else
+            {<a>No</a>}
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsReceived)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Html.ValueFor(model => model.IsReceived) == "True")
+            {<a>Yes</a> }
+            else
+            {<a>No</a>}
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CreatedDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CreatedDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PickedDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PickedDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ReceivedDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ReceivedDate)
+        </dd>
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.InventoryRequestFormId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

@@ -1,0 +1,142 @@
+﻿@model IEnumerable<ERPWebApp.Models.HelpRequestForm>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Help Requests</h3>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs nav-bordered mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-action="Create">
+                            <span>Create</span>
+                        </a>
+                    </li>
+                </ul>
+                <table class="table dt-responsive webkit-nowrap w-100" style="width:100%" id="help-request-datatable">
+                    <thead>
+                        <tr>
+                            
+                            <th>
+                                @Html.DisplayNameFor(model => model.HelperEmployee)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Priority)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.RequestedByUser)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.RequestingEmployee)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Urgency)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Subject)
+                            </th>
+                            <th class="none">
+                                @Html.DisplayNameFor(model => model.Description)
+                            </th>
+                            <th hidden>
+                                @Html.DisplayNameFor(model => model.CreatedDate)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.IsDenied)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.IsComplete)
+                            </th>
+                            <th hidden>
+                                @Html.DisplayNameFor(model => model.CompletedDate)
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                        <tr>
+                            
+                            <td>
+                                @Html.DisplayFor(modelItem => item.HelperEmployee.FullName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Priority)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.RequestedByUser)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.RequestingEmployee.FullName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Urgency)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Subject)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td hidden>
+                                @Html.DisplayFor(modelItem => item.CreatedDate)
+                            </td>
+                            <td>
+                                @if (Html.ValueFor(modelItem => item.IsDenied) == "True")
+                                {<a>Yes</a> }
+                                else
+                                {<a>No</a>}
+                            </td>
+                            <td>
+                                @if (Html.ValueFor(modelItem => item.IsComplete) == "True")
+                                {<a>Yes</a> }
+                                else
+                                {<a>No</a>}
+                            </td>
+                            <td hidden>
+                                @Html.DisplayFor(modelItem => item.CompletedDate)
+                            </td>
+                            <td class="table-action">
+                                @if (Html.ValueFor(modelItem => item.IsComplete) == "False")
+                                {
+                                    <a class="action-icon" asp-action="Edit" asp-route-id="@item.HelpRequestFormId"><i class="mdi mdi-24px mdi-pencil"></i></a>
+                                }
+                                <a class="action-icon" asp-action="Details" asp-route-id="@item.HelpRequestFormId"><i class="mdi mdi-24px mdi-book-information-variant"></i></a>
+                                <a class="action-icon" asp-action="Delete" asp-route-id="@item.HelpRequestFormId"><i class="mdi mdi-24px mdi-delete"></i></a>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#help-request-datatable").DataTable({
+                    keys: !0, language: {
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                        },
+
+                    }, drawCallback: function () {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                    }
+                });
+            });
+        </script>
+}

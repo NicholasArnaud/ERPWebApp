@@ -1,0 +1,322 @@
+﻿@using ERPWebApp.Models
+@model ERPWebApp.Controllers.UserRolesController.UserViewModel
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="card">
+        <div id="my-Modal-Create-Role" class="modal fade text-width:80%;" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content modal-filled bg-light">
+                    <div class="modal-header" id="modalHeadeWarning">
+                        Create a New Role
+                    </div>
+                    <div id="my-Modal-Role-Body" class="Modal-body" style="text-align:left">
+                        <form asp-action="Create" method="post">
+                            <div></div>
+                            <div>
+                                &nbsp;&nbsp;&nbsp;&nbsp;Role Name:
+                                <input type="text" name="myRoleName" id="createRoleName" placeholder="Enter a Name..." onkeyup="clickPress()" />
+                                <input id="submit-role-data" style="display:none" class="btn btn-primary btn-rounded" type="submit" value="Submit Name" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        &nbsp;
+                        <button type="button" id="myModalBtn" class="btn btn-danger btn-rounded" onclick="$('#my-Modal-Create-Role').modal('hide');">Cancel </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div id="my-Modal-Alter-User-Role" class="modal fade text-width:80%;" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content modal-filled bg-light">
+                    <div class="modal-header" id="modalHeadeWarning">
+                        Manage User Roles
+                    </div>
+                    <div id="my-Modal-Manage-User-Role" class="Modal-body" style="text-align:left">
+                        <div style="text-align:left" class="filter" id="filterList">
+                            <label class="control-label">&nbsp;&nbsp;&nbsp;&nbsp;Click to Select</label>
+                            <select class="select2 form-control select2-multiple" data-toggle="select2" data-placeholder="Choose ..." id="selector" name="selector" asp-items="ViewBag.Department" multiple="Multiple"></select>
+
+                        </div>
+                        <div class="movethefooter">
+                            <div class="row">&nbsp;</div>
+                            <div class="row">&nbsp;</div>
+                            <div class="row">&nbsp;</div>
+                            <div class="row">&nbsp;</div>
+                            <div class="row">&nbsp;</div>
+                            <div class="row">&nbsp;</div>
+                            <div class="row">&nbsp;</div>
+                            <div class="row">&nbsp;</div>
+                            <div class="row">&nbsp;</div>
+                            <div class="row">&nbsp;</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        &nbsp;
+                        <button type="button" id="myModalBtn" class="btn btn-danger btn-rounded" onclick="$('#my-Modal-Alter-User-Role').modal('hide');">Cancel </button>
+                        <form asp-action="ManageUserRoles" method="post">
+                            <input id="submit-role-data" type="submit" style="margin-left:3%" class="btn btn-primary btn-rounded" value="Save" />
+                            <span class="text-danger"></span>
+                            <input hidden style="display:none" type="text" name="filterStringHelper" id="filterTextHelper" />
+                            <input hidden style="display:none" id="getuserid" name="getuserid" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">User Roles</h3>
+            </div>
+        </div>
+        <div id="content-desktop" class="row">
+            <div style="min-width:320px" class="col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-1">
+                            </div>
+                            <div style="min-width:200px" class="col-11">
+                                <button style="visibility:hidden;float:right" id="manage-user-role-btn" type="button" class="btn btn-secondary btn-rounded" onclick="updateModal()">Manage Roles</button>
+                                <input hidden style="display:none" type="text" name="filterString" id="filterText" />
+                                <input hidden style="display:none" id="getuseremail" value=@ViewData["currentUser"] />
+                            </div>
+                            <hr hr size="4" width="100%" />
+                        </div>
+
+                        <div class="row">
+                            <div style="min-width:300px" class="col-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <table class="table dt-responsive webkit-nowrap w-100" id="user-roles-datatable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Email</th>
+                                                    <th hidden>Role</th>
+                                                    <th hidden>User</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var user in Model.User)
+                                                {
+
+                                                    <tr>
+                                                        <td>@user.Email</td>
+                                                        <td hidden>@user.Role</td>
+                                                        <td hidden>@user.UserName</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="min-width:300px" class="col-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <table class="table dt-responsive webkit-nowrap w-100" id="user-roles-selected-datatable">
+                                            <thead>
+                                                <tr><th><b>Roles</b></th></tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var userRoles in Model.Role)
+                                                {
+                                                    <tr class="switchMe" style="display:none">
+                                                        <td class="switchMeInner">
+                                                            @Html.DisplayFor(Model=>userRoles.Name)
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="min-width:375px" class="col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-1">
+                            </div>
+                            <div style="min-width:200px" class="col-11">
+                                <button type="button" style="float:right" class="btn btn-secondary btn-rounded" onclick="$('#my-Modal-Create-Role').modal('show');">Create Role</button>
+                            </div>
+                            <hr hr size="4" width="100%" />
+                        </div>
+                        <div style="min-width:200px" class="row">
+                            <div class="tab-content">
+                                <div class="tab-pane show active">
+                                    <table class="table dt-responsive webkit-nowrap w-100" id="role-datatable">
+                                        <thead>
+                                            <tr>
+                                                <td><b>Id</b></td>
+                                                <td><b>Name</b></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var role in Model.Role)
+                                            {
+                                                <tr>
+                                                    <td>@role.Name</td>
+                                                    <td>@role.Id</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#manage-user-role-btn").css('visibility', 'visible');
+                var table = $("#user-roles-datatable").DataTable({
+                    "dom": '<"pull-left"f><"pull-right"l>tip',
+                    "scrollY": "400px",
+                    "scrollCollapse": true,
+                    "paging": false,
+                    select: {
+                        style: 'single'
+                    }
+                });
+                const rows = Array.from(document.getElementsByClassName('switchMe'));
+                table.on('select', function(e, dt, type, indexes) {
+                    if (type === 'row') {
+                        var testdata = table.cell(indexes, 1).data();
+                        var testdataId = table.cell(indexes, 2).data();
+                        var testdataEmail = table.cell(indexes, 0).data();
+                        if (testdataEmail.includes(document.getElementById("getuseremail").value)) {
+                            $("#manage-user-role-btn").css('visibility', 'hidden');
+                        }
+                        else {
+                            $("#manage-user-role-btn").css('visibility', 'visible');
+                        }
+                        document.getElementById("getuserid").value = testdataId;
+                        document.getElementById("filterText").value = testdata;
+                        rows.forEach(row => {
+                            var rowdata = row.getElementsByClassName("switchMeInner")[0].innerHTML.toString().trim();//.getElementsByTagName('td');
+                            var arrayrowdata = testdata.toString().split(',');
+                            if (testdata.includes(rowdata)) {
+                                var count = 0;
+                                for (var i = 0; i < arrayrowdata.length; i++) {
+                                    if (arrayrowdata[i] == rowdata) {
+                                        console.log(arrayrowdata[i]);
+                                        console.log(rowdata);
+                                        row.style.display = 'block'
+                                        count++;
+                                    }
+                                }
+                                if (count == 0) {
+                                    row.style.display = 'none'
+                                }
+                            }
+
+                            else {
+                                row.style.display = 'none'
+                            }
+
+                        });
+                    }
+
+                });
+
+                $("#role-datatable").DataTable({
+                    keys: !0, language: {
+                        paginate: {
+                            previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                        },
+
+                    }, drawCallback: function() {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+                    }
+                });
+                $("#user-roles-selected-datatable").DataTable({
+
+                    paging: false,
+                    searching: false,
+                    info: false,
+                    keys: !0, language:
+                    {
+                        paginate:
+                        {
+                            previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>"
+                        },
+                    },
+                    drawCallback: function() {
+                        $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+
+                    }
+                });
+                table.row().select();
+                $("#selector").select2({
+                    dropdownParent: $("#my-Modal-Manage-User-Role")
+                })
+                    .on("select2:select", function(e) {
+                        var selected_element = $(e.currentTarget);
+                        var select_val = selected_element.select2('data');
+                        var select_Helper = select_val[0].text;
+                        for (var i = 1; i <= select_val.length - 1; i++) {
+                            select_Helper = select_Helper + "," + select_val[i].text;
+                        }
+                        document.getElementById("filterTextHelper").value = select_Helper;
+                    }).on("select2:unselect", function(e) {
+                        var selected_element = $(e.currentTarget);
+                        var select_val = selected_element.select2('data');
+                        var select_Helper = select_val[0].text;
+                        for (var i = 1; i <= select_val.length - 1; i++) {
+                            select_Helper = select_Helper + "," + select_val[i].text;
+                        }
+                        document.getElementById("filterTextHelper").value = select_Helper;
+                    }).on("select2:", function(e) {
+                        var selected_element = $(e.currentTarget);
+                        var select_val = selected_element.select2('data');
+                        if (!select_val.length > 0) {
+                            document.getElementById("filterTextHelper").value = "";
+                        }
+                    });
+
+            });
+            function clickPress() {
+                var tempStringRoleName = document.getElementById("createRoleName").value;
+                console.log(tempStringRoleName);
+                if (tempStringRoleName != "") {
+                    $('#submit-role-data').show();
+                }
+                else {
+                    $('#submit-role-data').hide();
+                }
+            }
+            function updateModal() {
+
+                var splitStringg = document.getElementById("filterText").value;
+                document.getElementById("filterTextHelper").value = document.getElementById("filterText").value;
+                var strsplitterr = splitStringg.split(",");
+                $('#selector').val(strsplitterr).trigger('change');
+                $('#my-Modal-Alter-User-Role').modal('show');
+            }
+
+        </script>
+    }
